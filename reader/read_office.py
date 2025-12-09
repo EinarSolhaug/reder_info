@@ -3,15 +3,8 @@ import os
 
 def extensions_type_extract():
     """Return set of supported office document extensions"""
-    return {
-        '.docx',
-        '.doc',
-        '.xlsx',
-        '.xls',
-        '.csv',
-        '.pptx',
-        '.ppt'
-    }
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('office')
 
 
 def specify_office_method_of_reading_the_file(file_info, logger=None):

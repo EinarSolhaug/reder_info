@@ -15,7 +15,8 @@ if str(parent_dir) not in sys.path:
 # NEW: Import threaded reader
 from pipeline.integrated_reader import IntegratedFileReader  
 
-
+# Add this import with other core imports
+from core.storage_utils import recursively_store_extracted
 
 from core.time_utils import (
     print_execution_time,
@@ -317,82 +318,7 @@ def main_read_folder_sequential(folder_path, storage_source=None, storage_side=N
         duplicate_count = 0
         extracted_count = 0  # Counter for extracted files
         
-        def _store_extracted_files_sequential(result, parent_path_id=None):
-            """Store extracted files from archives/emails in sequential mode"""
-            nonlocal extracted_count  # Allow modification of outer variable
-            
-            if not result or not isinstance(result, dict):
-                return
-            
-            content = result.get("Content", {})
-            if not isinstance(content, dict):
-                return
-            
-            # Check for archive extracted files
-            if "extracted_files" in content and isinstance(content["extracted_files"], list):
-                for extracted_result in content["extracted_files"]:
-                    if isinstance(extracted_result, dict) and extracted_result.get("Metadata"):
-                        extracted_file_info = extracted_result.get("Metadata", {})
-                        extracted_content = extracted_result.get("Content", {})
-                        
-                        is_failure = bool(isinstance(extracted_content, dict) and extracted_content.get("error"))
-                        if is_failure:
-                            continue
-                        
-                        try:
-                            # Build hierarchy path
-                            parent_path = result.get("Metadata", {}).get("path", "")
-                            extracted_path = extracted_file_info.get("path", "")
-                            hierarchy_path = f"{parent_path}::{extracted_path}" if parent_path else extracted_path
-                            
-                            # Store extracted file individually
-                            extracted_path_id = storage_pipeline.store_file_complete(
-                                extracted_file_info,
-                                extracted_result,
-                                parent_path_id=parent_path_id,
-                                hierarchy_path=hierarchy_path,
-                                use_async=False
-                            )
-                            
-                            if extracted_path_id:
-                                extracted_count += 1
-                                # Recursively store nested extracted files
-                                _store_extracted_files_sequential(extracted_result, extracted_path_id)
-                        except Exception as e:
-                            logger.error(f"Error storing extracted file: {e}")
-            
-            # Check for email attachments
-            if "attachments" in content and isinstance(content["attachments"], dict):
-                attachments_data = content["attachments"]
-                if "extracted_files" in attachments_data and isinstance(attachments_data["extracted_files"], list):
-                    for attachment_result in attachments_data["extracted_files"]:
-                        if isinstance(attachment_result, dict) and attachment_result.get("Metadata"):
-                            attachment_file_info = attachment_result.get("Metadata", {})
-                            attachment_content = attachment_result.get("Content", {})
-                            
-                            is_failure = bool(isinstance(attachment_content, dict) and attachment_content.get("error"))
-                            if is_failure:
-                                continue
-                            
-                            try:
-                                parent_path = result.get("Metadata", {}).get("path", "")
-                                attachment_path = attachment_file_info.get("path", "")
-                                hierarchy_path = f"{parent_path}::attachment::{attachment_path}" if parent_path else attachment_path
-                                
-                                attachment_path_id = storage_pipeline.store_file_complete(
-                                    attachment_file_info,
-                                    attachment_result,
-                                    parent_path_id=parent_path_id,
-                                    hierarchy_path=hierarchy_path,
-                                    use_async=False
-                                )
-                                
-                                if attachment_path_id:
-                                    extracted_count += 1
-                                    _store_extracted_files_sequential(attachment_result, attachment_path_id)
-                            except Exception as e:
-                                logger.error(f"Error storing attachment: {e}")
-        
+      
         for idx, result in enumerate(results, 1):
             if not result:
                 continue
@@ -411,8 +337,20 @@ def main_read_folder_sequential(folder_path, storage_source=None, storage_side=N
                     
                     if path_id:
                         stored_count += 1
-                        # Store extracted files from archives/emails
-                        _store_extracted_files_sequential(result, path_id)
+                        
+                        # Store extracted files from archives/emails using shared utility
+                        counts = recursively_store_extracted(
+                            storage_pipeline,
+                            result,
+                            parent_path_id=path_id,
+                            add_result_fn=lambda r: results.append(r),
+                            logger=logger
+                        )
+                        
+                        stored_count += counts.get('stored', 0)
+                        duplicate_count += counts.get('duplicates', 0)
+                        failed_count += counts.get('errors', 0)
+                        extracted_count += counts.get('processed', 0)
                         
                         if idx % 100 == 0:
                             print(f"  Stored {idx}/{len(results)} files (extracted: {extracted_count})...", end='\r')
@@ -423,6 +361,7 @@ def main_read_folder_sequential(folder_path, storage_source=None, storage_side=N
             except Exception as e:
                 failed_count += 1
                 logger.error(f"Storage error for file {idx}: {e}")
+                
         
         print(f"\n💾 Storage complete:")
         print(f"   Stored: {stored_count}")

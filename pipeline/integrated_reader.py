@@ -19,6 +19,9 @@ from queue import Queue, Empty
 import sys
 from tqdm import tqdm
 from concurrent.futures import Future, ThreadPoolExecutor
+
+# Add this import with other core imports
+from core.storage_utils import recursively_store_extracted
 # Add parent directory to path
 parent_dir = Path(__file__).parent.parent
 if str(parent_dir) not in sys.path:
@@ -256,24 +259,7 @@ class IntegratedFileReader:
         
 
     def _calculate_file_priority(self, file_info: Dict) -> int:
-        """
-        Calculate priority for a file based on various factors
-        Lower number = higher priority (processed first)
-        
-        Priority Rules:
-        1. Small text files (fast to process) = Priority 1
-        2. Office documents = Priority 3
-        3. PDFs = Priority 5
-        4. Images (slow OCR) = Priority 7
-        5. Archives/emails = Priority 9
-        6. Large files = +2 priority penalty
-        
-        Args:
-            file_info: File metadata dictionary
-            
-        Returns:
-            Priority level (1-10, lower = higher priority)
-        """
+
         extension = file_info.get('extension', '').lower()
         size_bytes = file_info.get('size_bytes', 0)
         
@@ -784,7 +770,31 @@ class IntegratedFileReader:
                                             # Store extracted files from archives/emails individually
                                             # Note: Even if main file failed, extracted files should still be stored
                                             if path_id:
-                                                self._store_extracted_files(r, path_id)
+                                                                                         # Store extracted files using shared utility
+                                                def _add_result(r):
+                                                    try:
+                                                        with self.results_lock:
+                                                            self.results.append(r)
+                                                    except Exception:
+                                                        pass
+
+                                                counts = recursively_store_extracted(
+                                                    self.storage_pipeline,
+                                                    result,
+                                                    parent_path_id=path_id,
+                                                    add_result_fn=_add_result,
+                                                    logger=logger
+                                                )
+
+                                                # Update counters
+                                                with self.stats_lock:
+                                                    processed_count = counts.get('processed', 0)
+                                                    self.stats['extracted_files'] += processed_count
+                                                    self.stats['total'] += processed_count
+
+                                                if counts.get('stored'):
+                                                    logger.info(f"✓ Stored {counts['stored']} extracted files (duplicates: {counts.get('duplicates', 0)}, errors: {counts.get('errors', 0)})")
+                                                    
                                             elif not bool(r and r.get("Content", {}).get("error")):
                                                 # If main file succeeded but path_id is None (duplicate),
                                                 # still try to store extracted files with parent_path_id=None
@@ -834,15 +844,37 @@ class IntegratedFileReader:
                                     # Store extracted files from archives/emails individually
                                     # Note: Even if main file failed, extracted files should still be stored
                                     if path_id:
-                                        self._store_extracted_files(result, path_id)
-                                    elif not is_failure:
-                                        # If main file succeeded but path_id is None (duplicate),
-                                        # still try to store extracted files with parent_path_id=None
-                                        logger.debug(f"Main file returned None (duplicate), storing extracted files without parent")
-                                        self._store_extracted_files(result, None)
+                                         # Store extracted files using shared utility
+                                        def _add_result(r):
+                                            try:
+                                                with self.results_lock:
+                                                    self.results.append(r)
+                                            except Exception:
+                                                pass
+
+                                        counts = recursively_store_extracted(
+                                            self.storage_pipeline,
+                                            result,
+                                            parent_path_id=path_id,
+                                            add_result_fn=_add_result,
+                                            logger=logger
+                                        )
+
+                                        # Update counters
+                                        with self.stats_lock:
+                                            processed_count = counts.get('processed', 0)
+                                            self.stats['extracted_files'] += processed_count
+                                            self.stats['total'] += processed_count
+
+                                        if counts.get('stored'):
+                                            logger.info(f"✓ Stored {counts['stored']} extracted files (duplicates: {counts.get('duplicates', 0)}, errors: {counts.get('errors', 0)})")
+    
+                                    else:
+                                        logger.warning(f"⚠️ Storage returned None or failed for {file_name} (may be duplicate or error)")
+                                        
                             except Exception as storage_error:
                                 logger.error(f"✗ Storage error for {file_name}: {storage_error}", exc_info=True)
-                        
+                                
                         with self.stats_lock:
                             if not is_failure:
                                 self.stats['completed'] += 1
@@ -872,16 +904,16 @@ class IntegratedFileReader:
                     # Store to database if enabled (even if failed, to track all files)
                     if self.enable_storage:
                         try:
-                            path_id = self.storage_pipeline.store_file_complete(
+                            storage_response = self.storage_pipeline.store_file_complete(
                                 file_info,
                                 error_result,
                                 use_async=False
                             )
-                            if path_id:
-                                logger.debug(f"⚠ Stored timeout file {file_name} to database (path_id: {path_id})")
+                            if storage_response and storage_response.is_success:
+                                logger.debug(f"⚠️ Stored timeout file {file_name} to database (path_id: {storage_response.path_id})")
                         except Exception as storage_error:
                             logger.error(f"✗ Storage error for timeout file {file_name}: {storage_error}", exc_info=True)
-                    
+                            
                     with self.stats_lock:
                         self.stats['failed'] += 1
                     self.recent_failures.append(True)
@@ -976,7 +1008,30 @@ class IntegratedFileReader:
                                                     file_info_meta, result, use_async=False
                                                 )
                                                 if path_id:
-                                                    self._store_extracted_files(result, path_id)
+                                                    # Store extracted files using shared utility
+                                                        def _add_result(r):
+                                                            try:
+                                                                with self.results_lock:
+                                                                    self.results.append(r)
+                                                            except Exception:
+                                                                pass
+
+                                                        counts = recursively_store_extracted(
+                                                            self.storage_pipeline,
+                                                            result,
+                                                            parent_path_id=path_id,
+                                                            add_result_fn=_add_result,
+                                                            logger=logger
+                                                        )
+
+                                                        # Update counters
+                                                        with self.stats_lock:
+                                                            processed_count = counts.get('processed', 0)
+                                                            self.stats['extracted_files'] += processed_count
+                                                            self.stats['total'] += processed_count
+
+                                                        if counts.get('stored'):
+                                                            logger.info(f"✓ Stored {counts['stored']} extracted files (duplicates: {counts.get('duplicates', 0)}, errors: {counts.get('errors', 0)})")
                                         except Exception as e:
                                             logger.error(f"Storage error: {e}")
                                     
@@ -1026,13 +1081,14 @@ class IntegratedFileReader:
                                     self.results.append(error_result)
                                 
                                 # Store to database if enabled
+            # Store to database if enabled
                                 if self.enable_storage:
                                     try:
-                                        path_id = self.storage_pipeline.store_file_complete(
+                                        storage_response = self.storage_pipeline.store_file_complete(
                                             file_info, error_result, use_async=False
-                                        )
-                                        if path_id:
-                                            logger.debug(f"⚠ Stored inaccessible future file to database (path_id: {path_id})")
+                                                    )
+                                        if storage_response and storage_response.is_success:
+                                            logger.debug(f"⚠️ Stored inaccessible future file to database (path_id: {storage_response.path_id})")
                                     except Exception as storage_error:
                                         logger.error(f"✗ Storage error for inaccessible future: {storage_error}")
                                 
@@ -1099,36 +1155,41 @@ class IntegratedFileReader:
                     is_failure = bool(result and result.get("Content", {}).get("error"))
                     
                     # Store to database if enabled (even if failed, to track all files)
+# Store to database if enabled (even if failed, to track all files)
                     if self.enable_storage and result:
                         try:
-                            file_info_meta = result.get("Metadata", {})
+                            file_info_meta = result.get("Metadata", {}) if not isinstance(result, list) else None
                             if file_info_meta:
-                                # Use synchronous storage to ensure it completes
-                                path_id = self.storage_pipeline.store_file_complete(
-                                    file_info_meta,
-                                    result,
-                                    use_async=False
+                                storage_response = self.storage_pipeline.store_file_complete(
+                                    file_info_meta, result, use_async=False
                                 )
-                                if path_id:
-                                    if is_failure:
-                                        logger.debug(f"⚠ Stored failed file {file_name} to database (path_id: {path_id})")
-                                    else:
-                                        logger.debug(f"✓ Stored {file_name} to database (path_id: {path_id})")
-                                else:
-                                    logger.warning(f"⚠ Storage returned None for {file_name} (may be duplicate or error)")
-                                
-                                # Store extracted files from archives/emails individually (only if path_id exists)
-                                # Note: Even if main file failed, extracted files should still be stored
-                                if path_id:
-                                    self._store_extracted_files(result, path_id)
-                                elif not is_failure:
-                                    # If main file succeeded but path_id is None (duplicate), 
-                                    # still try to store extracted files with parent_path_id=None
-                                    # This ensures extracted files are not lost
-                                    logger.debug(f"Main file returned None (duplicate), storing extracted files without parent")
-                                    self._store_extracted_files(result, None)
-                        except Exception as storage_error:
-                            logger.error(f"✗ Storage error for {file_name}: {storage_error}", exc_info=True)
+                                if storage_response and storage_response.is_success:
+                                    # Store extracted files using shared utility
+                                    def _add_result(r):
+                                        try:
+                                            with self.results_lock:
+                                                self.results.append(r)
+                                        except Exception:
+                                            pass
+                                        
+                                    counts = recursively_store_extracted(
+                                        self.storage_pipeline,
+                                        result,
+                                        parent_path_id=storage_response.path_id,
+                                        add_result_fn=_add_result,
+                                        logger=logger
+                                    )
+
+                                    # Update counters
+                                    with self.stats_lock:
+                                        processed_count = counts.get('processed', 0)
+                                        self.stats['extracted_files'] += processed_count
+                                        self.stats['total'] += processed_count
+
+                                    if counts.get('stored'):
+                                        logger.info(f"✓ Stored {counts['stored']} extracted files (duplicates: {counts.get('duplicates', 0)}, errors: {counts.get('errors', 0)})")
+                        except Exception as e:
+                            logger.error(f"Storage error: {e}")
                     
                     with self.stats_lock:
                         if not is_failure:
@@ -1158,13 +1219,13 @@ class IntegratedFileReader:
                     # Store to database if enabled (even if failed, to track all files)
                     if self.enable_storage:
                         try:
-                            path_id = self.storage_pipeline.store_file_complete(
+                            storage_response = self.storage_pipeline.store_file_complete(
                                 file_info,
                                 error_result,
                                 use_async=False
                             )
-                            if path_id:
-                                logger.debug(f"⚠ Stored error pool task file {file_info.get('name', 'unknown')} to database (path_id: {path_id})")
+                            if storage_response and storage_response.is_success:
+                                logger.debug(f"⚠️ Stored error pool task file {file_info.get('name', 'unknown')} to database (path_id: {storage_response.path_id})")
                         except Exception as storage_error:
                             logger.error(f"✗ Storage error for error pool task file: {storage_error}", exc_info=True)
                     
@@ -1182,8 +1243,10 @@ class IntegratedFileReader:
                     
         finally:
             pbar.close()
-        
-        # Count all processed files (including those that returned results with errors)
+            
+            
+            
+  # Count all processed files (including those that returned results with errors)
         total_processed = len(self.results)
         total_submitted_final = len(processed_futures) + len(processed_pool_tasks) if 'processed_futures' in locals() and 'processed_pool_tasks' in locals() else total_submitted
         
@@ -1194,30 +1257,33 @@ class IntegratedFileReader:
         pool_tasks_completed = len(processed_pool_tasks) if 'processed_pool_tasks' in locals() else 0
         total_tasks_completed = futures_completed + pool_tasks_completed
         
-        # Count extracted files separately
-        extracted_files_count = sum(1 for r in self.results if r and isinstance(r, dict) and r.get("Metadata", {}).get("path", "").count("::") > 0)
-        original_results = [r for r in self.results if r and isinstance(r, dict) and r.get("Metadata", {}).get("path", "").count("::") == 0]
-        original_files_processed = len(original_results)
+        # Get accurate counts from stats (not from path markers)
+        with self.stats_lock:
+            original_files_count = self.stats.get('original_files', 0)
+            extracted_files_count = self.stats.get('extracted_files', 0)
+            total_files_processed = original_files_count + extracted_files_count
         
         logger.info(f"Completed processing:")
         logger.info(f"  - Total results in list: {total_processed}")
-        logger.info(f"  - Original files processed: {original_files_processed}")
-        logger.info(f"  - Extracted files: {extracted_files_count}")
+        logger.info(f"  - Original files processed: {original_files_count}")
+        logger.info(f"  - Extracted files processed: {extracted_files_count}")
+        logger.info(f"  - Total files processed: {total_files_processed}")
         logger.info(f"Tasks completed: {total_tasks_completed}/{total_submitted} (futures: {futures_completed}/{len(future_to_file)}, pool: {pool_tasks_completed}/{len(task_id_to_file)})")
-        
         # Log detailed statistics - compare against ORIGINAL files only
-        if original_files_processed < len(files) or total_tasks_completed < total_submitted:
-            missing_files_count = len(files) - original_files_processed
+  
+        # Log detailed statistics - compare against ORIGINAL files only
+        if total_files_processed < len(files) or total_tasks_completed < total_submitted:
+            missing_files_count = len(files) - total_files_processed
             missing_tasks_count = total_submitted - total_tasks_completed
             
             logger.error(f"❌ INCOMPLETE PROCESSING DETECTED!")
-            logger.error(f"   Original files: {missing_files_count} files not processed ({original_files_processed}/{len(files)})")
+            logger.error(f"   Original files: {missing_files_count} files not processed ({total_files_processed}/{len(files)})")
             logger.error(f"   Tasks: {missing_tasks_count} tasks not completed ({total_tasks_completed}/{total_submitted})")
             logger.error(f"   Futures: {len(future_to_file) - futures_completed} not completed")
             logger.error(f"   Pool tasks: {len(task_id_to_file) - pool_tasks_completed} not completed")
             
             # Try to identify which files were not processed
-            processed_file_names = {r.get("Metadata", {}).get("name") for r in original_results if r and r.get("Metadata")}
+            processed_file_names = {r.get("Metadata", {}).get("name") for r in final_original_results if r and r.get("Metadata")}
             all_file_names = {f.get("name") for f in files}
             missing_files = all_file_names - processed_file_names
             if missing_files:
@@ -1231,6 +1297,7 @@ class IntegratedFileReader:
                         ext = file_info.get('extension', 'no_ext').lower()
                         missing_file_types[ext] = missing_file_types.get(ext, 0) + 1
                 logger.error(f"   Missing file types: {dict(sorted(missing_file_types.items(), key=lambda x: x[1], reverse=True)[:10])}")
+        
         
         # FINAL CHECK: Ensure all files are in results (even if failed)
         final_original_results = [r for r in self.results if r and isinstance(r, dict) and r.get("Metadata", {}).get("path", "").count("::") == 0]
@@ -1263,6 +1330,8 @@ class IntegratedFileReader:
         )
         
         return self.results
+    
+    
     
     def _check_circuit_breaker(self) -> bool:
         """
@@ -1323,153 +1392,7 @@ class IntegratedFileReader:
 
     # Replace the storage section in _store_extracted_files() method
 
-    def _store_extracted_files(self, result: Dict, parent_path_id: Optional[int] = None):
-        """
-        Recursively store extracted files with proper error handling
-        """
-        if not result or not isinstance(result, dict):
-            return
-        
-        content = result.get("Content", {})
-        if not isinstance(content, dict):
-            return
-        
-        # Process archive extracted files
-        if "extracted_files" in content and isinstance(content["extracted_files"], list):
-            extracted_count = 0
-            duplicate_count = 0
-            error_count = 0
-            
-            for extracted_result in content["extracted_files"]:
-                if isinstance(extracted_result, dict) and extracted_result.get("Metadata"):
-                    extracted_file_info = extracted_result.get("Metadata", {})
-                    extracted_content = extracted_result.get("Content", {})
-                    
-                    # Add to results list for tracking
-                    with self.results_lock:
-                        self.results.append(extracted_result)
-                    
-                    # Check if extraction itself failed
-                    is_extraction_failure = bool(isinstance(extracted_content, dict) and extracted_content.get("error"))
-                    
-                    # Update statistics
-                    with self.stats_lock:
-                        if not is_extraction_failure:
-                            self.stats['completed'] += 1
-                        else:
-                            self.stats['failed'] += 1
-                        self.stats['extracted_files'] = self.stats.get('extracted_files', 0) + 1
-                        self.stats['total'] += 1
-                    
-                    # Store to database (even if extraction failed, to track it)
-                    if self.enable_storage:
-                        try:
-                            parent_path = result.get("Metadata", {}).get("path", "")
-                            extracted_path = extracted_file_info.get("path", "")
-                            hierarchy_path = f"{parent_path}::{extracted_path}" if parent_path else extracted_path
-                            
-                            # Call storage with new StorageResponse return type
-                            storage_response = self.storage_pipeline.store_file_complete(
-                                extracted_file_info,
-                                extracted_result,
-                                parent_path_id=parent_path_id,
-                                hierarchy_path=hierarchy_path,
-                                use_async=False
-                            )
-                            
-                            # Handle different storage outcomes
-                            if storage_response.is_success:
-                                extracted_count += 1
-                                logger.debug(f"✓ Stored extracted file: {extracted_file_info.get('name', 'unknown')} (path_id: {storage_response.path_id})")
-                                
-                                # Recursively store nested extracted files
-                                self._store_extracted_files(extracted_result, storage_response.path_id)
-                                
-                            elif storage_response.is_duplicate:
-                                duplicate_count += 1
-                                logger.debug(f"⭐️ Extracted file is duplicate: {extracted_file_info.get('name', 'unknown')} (existing: {storage_response.duplicate_path_id})")
-                                
-                            elif storage_response.is_error:
-                                error_count += 1
-                                logger.error(f"✗ Storage error for extracted file {extracted_file_info.get('name', 'unknown')}: {storage_response.error_message}")
-                            
-                            else:
-                                error_count += 1
-                                logger.warning(f"⚠ Unknown storage result for extracted file: {extracted_file_info.get('name', 'unknown')}")
-                                
-                        except Exception as e:
-                            error_count += 1
-                            logger.error(f"✗ Exception storing extracted file: {e}", exc_info=True)
-            
-            if extracted_count > 0:
-                logger.info(f"✓ Stored {extracted_count} extracted files from archive (duplicates: {duplicate_count}, errors: {error_count})")
-        
-        # Similar handling for email attachments...
-        if "attachments" in content and isinstance(content["attachments"], dict):
-            attachments_data = content["attachments"]
-            if "extracted_files" in attachments_data and isinstance(attachments_data["extracted_files"], list):
-                attachment_count = 0
-                duplicate_count = 0
-                error_count = 0
-                
-                for attachment_result in attachments_data["extracted_files"]:
-                    if isinstance(attachment_result, dict) and attachment_result.get("Metadata"):
-                        attachment_file_info = attachment_result.get("Metadata", {})
-                        attachment_content = attachment_result.get("Content", {})
-                        
-                        # Add to results
-                        with self.results_lock:
-                            self.results.append(attachment_result)
-                        
-                        # Check if attachment extraction failed
-                        is_extraction_failure = bool(isinstance(attachment_content, dict) and attachment_content.get("error"))
-                        
-                        # Update statistics
-                        with self.stats_lock:
-                            if not is_extraction_failure:
-                                self.stats['completed'] += 1
-                            else:
-                                self.stats['failed'] += 1
-                            self.stats['extracted_files'] = self.stats.get('extracted_files', 0) + 1
-                            self.stats['total'] += 1
-                        
-                        # Store to database
-                        if self.enable_storage:
-                            try:
-                                parent_path = result.get("Metadata", {}).get("path", "")
-                                attachment_path = attachment_file_info.get("path", "")
-                                hierarchy_path = f"{parent_path}::attachment::{attachment_path}" if parent_path else attachment_path
-                                
-                                storage_response = self.storage_pipeline.store_file_complete(
-                                    attachment_file_info,
-                                    attachment_result,
-                                    parent_path_id=parent_path_id,
-                                    hierarchy_path=hierarchy_path,
-                                    use_async=False
-                                )
-                                
-                                if storage_response.is_success:
-                                    attachment_count += 1
-                                    logger.debug(f"✓ Stored attachment: {attachment_file_info.get('name', 'unknown')} (path_id: {storage_response.path_id})")
-                                    self._store_extracted_files(attachment_result, storage_response.path_id)
-                                    
-                                elif storage_response.is_duplicate:
-                                    duplicate_count += 1
-                                    logger.debug(f"⭐️ Attachment is duplicate: {attachment_file_info.get('name', 'unknown')}")
-                                    
-                                elif storage_response.is_error:
-                                    error_count += 1
-                                    logger.error(f"✗ Storage error for attachment: {storage_response.error_message}")
-                                    
-                            except Exception as e:
-                                error_count += 1
-                                logger.error(f"✗ Exception storing attachment: {e}", exc_info=True)
-                
-                if attachment_count > 0:
-                    logger.info(f"✓ Stored {attachment_count} email attachments (duplicates: {duplicate_count}, errors: {error_count})") 
-                        
-                        
-    
+     
     def _process_file_worker(self, file_info: Dict, depth: int = 0) -> Optional[Dict]:
         """
         Worker function that processes a single file

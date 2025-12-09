@@ -287,9 +287,18 @@ class StoragePipeline:
             try:
                 title = self._extract_title(result, file_info)
                 if title:
-                    self._store_title_pipeline(title, path_id, parent_path_id)
+                    # Extract actual parent path ID if it's a StorageResponse
+                    actual_parent_id = None
+                    if parent_path_id is not None:
+                        if hasattr(parent_path_id, 'path_id'):  # StorageResponse object
+                            actual_parent_id = parent_path_id.path_id
+                        elif isinstance(parent_path_id, int):
+                            actual_parent_id = parent_path_id
+                    
+                    self._store_title_pipeline(title, path_id, actual_parent_id)
             except Exception as title_error:
                 logger.warning(f"Title storage failed for {file_name}: {title_error}")
+                # Don't fail the entire operation for title storage failure
                 # Don't fail the entire operation for title storage failure
             
             # 7. Update file status
@@ -481,10 +490,20 @@ class StoragePipeline:
                         else:
                             self._store_content_pipeline(text, path_id)
             
-            # 6. Store title
-            title = self._extract_title(result, file_info)
-            if title:
-                self._store_title_pipeline(title, path_id, parent_path_id)
+            try:
+                title = self._extract_title(result, file_info)
+                if title:
+                    # Extract actual parent path ID if it's a StorageResponse
+                    actual_parent_id = None
+                    if parent_path_id is not None:
+                        if hasattr(parent_path_id, 'path_id'):  # StorageResponse object
+                            actual_parent_id = parent_path_id.path_id
+                        elif isinstance(parent_path_id, int):
+                            actual_parent_id = parent_path_id
+                    
+                    self._store_title_pipeline(title, path_id, actual_parent_id)
+            except Exception as title_error:
+                logger.warning(f"Title storage failed for {file_name}: {title_error}")
             
             # 7. Update file status based on content availability
             file_status = 'Read' if has_readable_content else 'Unread'
@@ -545,7 +564,15 @@ class StoragePipeline:
         for word in words:
             word_ids.append(self.hub.word_operations.get_or_create_word_id(word))
         
-        self.hub.title_operations.store_title(word_ids, path_id, parent_path_id)
+        # Handle parent_path_id which might be a StorageResponse object
+        actual_parent_id = None
+        if parent_path_id is not None:
+            if isinstance(parent_path_id, StorageResponse):
+                actual_parent_id = parent_path_id.path_id
+            elif isinstance(parent_path_id, int):
+                actual_parent_id = parent_path_id
+        
+        self.hub.title_operations.store_title(word_ids, path_id, actual_parent_id)
     
     def _extract_text_from_content(self, content: Dict[str, Any]) -> str:
         """

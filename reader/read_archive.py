@@ -10,14 +10,8 @@ from core.path_utils import get_extraction_name_file
 
 def extensions_type_extract():
     """Return set of supported archive extensions"""
-    return {
-        '.zip',
-        '.tar',
-        '.gz',
-        '.bz2',
-        '.rar',
-        '.7z'
-    }
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('archive')
 
 
 def specify_archive_method_of_reading_the_file(file_info, logger=None):

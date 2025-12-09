@@ -18,12 +18,8 @@ from core.path_utils import get_extraction_name_file
 
 def extensions_type_extract():
     """Return set of supported email extensions"""
-    return {
-        '.eml',
-        '.msg',
-        '.mbox',
-        '.pst'
-    }
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('email')
 
 
 def specify_email_method_of_reading_the_file(file_info, logger=None):

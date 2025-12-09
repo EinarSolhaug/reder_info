@@ -3,35 +3,8 @@ import os
 
 def extensions_type_extract():
     """Return set of supported remaining file extensions - supports ALL text-based files"""
-    return {
-        '.json', '.xml', '.txt', '.yaml', '.yml', '.html', '.htm', '.bin',
-        '.rtf', '.md', '.csv', '.log', '.ini', '.cfg', '.conf', '.properties',
-        '.sql', '.sh', '.bat', '.ps1', '.js', '.css', '.php', '.py', '.java',
-        '.cpp', '.c', '.h', '.hpp', '.cs', '.rb', '.go', '.rs', '.swift',
-        '.kt', '.scala', '.r', '.m', '.pl', '.lua', '.vb', '.asm', '.s',
-        '.srt', '.vtt', '.smi', '.sub', '.idx', '.nfo', '.readme', '.license',
-        '.gitignore', '.gitattributes', '.editorconfig', '.dockerfile', '.makefile',
-        '.cmake', '.gradle', '.maven', '.pom', '.lock', '.toml', '.env',
-        '.dockerignore', '.npmignore', '.babelrc', '.eslintrc', '.prettierrc',
-        '.tsconfig', '.jsx', '.tsx', '.vue', '.svelte', '.elm', '.clj', '.cljs',
-        '.ex', '.exs', '.erl', '.hrl', '.fs', '.fsx', '.ml', '.mli', '.hs',
-        '.lhs', '.purs', '.dart', '.jl', '.nim', '.cr', '.heex', '.eex',
-        '.leex', '.slim', '.haml', '.jade', '.pug', '.styl', '.less', '.sass',
-        '.scss', '.coffee', '.iced', '.ls', '.ts', '.d.ts', '.map', '.graphql',
-        '.gql', '.prisma', '.proto', '.thrift', '.avsc', '.avdl', '.avpr',
-        '.fbs', '.capnp', '.bson', '.msgpack', '.cbor', '.ubj', '.ion', '.edn',
-        '.cljc', '.transit', '.hocon', '.config', '.settings', '.prefs', '.plist',
-        '.strings', '.stringsdict', '.xcconfig', '.pbxproj', '.xcscheme',
-        '.xcworkspace', '.xcodeproj', '.storyboard', '.xib', '.nib', '.lproj',
-        '.xclangspec', '.xcmappingmodel', '.xcdatamodel', '.xcdatamodeld',
-        '.mom', '.momd', '.omo', '.hmap', '.modulemap', '.pch', '.pcm',
-        '.swiftmodule', '.swiftdoc', '.swiftsourceinfo', '.tbd', '.dylib',
-        '.a', '.framework', '.bundle', '.app', '.appex', '.ipa', '.apk',
-        '.aab', '.dex', '.so', '.dll', '.lib', '.obj', '.o', '.elf', '.exe',
-        '.com', '.scr', '.cmd', '.psm1', '.psd1', '.ps1xml', '.bash', '.zsh',
-        '.fish', '.csh', '.tcsh', '.ksh', '.dash', '.ash', '.yash', '.mksh',
-        '.pdksh', '.ole'  # OLE files
-    }
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('remaining')
 
 
 def specify_remaining_method_of_reading_the_file(file_info, logger=None):

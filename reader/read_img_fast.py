@@ -9,90 +9,21 @@ from functools import lru_cache
 import time
 from pathlib import Path
 import threading
-
+# Add these imports at the top with other imports
+from core.library_utils import get_shared_libs
+from core.ocr_utils import get_tesseract_config, preprocess_for_ocr
 logger = logging.getLogger(__name__)
 
 # Global cache for library imports (avoid repeated imports)
-_LIBS_CACHE = {}
-_LIBS_LOCK = threading.Lock()
-languages = ["eng", "ara", "heb"] 
 
-def _get_libraries():
-    """Get image processing libraries (cached)"""
-    with _LIBS_LOCK:
-        if _LIBS_CACHE:
-            return _LIBS_CACHE
-        
-        try:
-            from PIL import Image
-            _LIBS_CACHE['Image'] = Image
-        except ImportError:
-            _LIBS_CACHE['Image'] = None
-            logger.warning("Pillow not installed")
-        
-        try:
-            import pytesseract
-            _LIBS_CACHE['pytesseract'] = pytesseract
-        except ImportError:
-            _LIBS_CACHE['pytesseract'] = None
-            logger.warning("pytesseract not installed")
-        
-        try:
-            import cv2
-            import numpy as np
-            _LIBS_CACHE['cv2'] = cv2
-            _LIBS_CACHE['np'] = np
-        except ImportError:
-            _LIBS_CACHE['cv2'] = None
-            _LIBS_CACHE['np'] = None
-            logger.warning("opencv-python not installed")
-        
-        return _LIBS_CACHE
 
 
 def extensions_type_extract():
     """Return set of supported image extensions"""
-    return {
-        '.png', '.jpg', '.jpeg', '.gif', '.bmp', 
-        '.tiff', '.tif', '.webp', '.ico', '.svg'
-    }
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('image')
 
 
-@lru_cache(maxsize=1)
-def _get_optimized_tesseract_config(languages=None):
-    """
-    Get optimized Tesseract configuration (cached)
-    
-    Returns:
-        tuple: (language_string, config_string)
-    """
-    libs = _get_libraries()
-    pytesseract = libs.get('pytesseract')
-    
-    if not pytesseract:
-        return "eng", "--oem 3 --psm 6"
-    
-    
-    available_langs = pytesseract.get_languages(config="")
-    # Use the requested languages if available, or fallback to default English
-    selected_langs = []
-    if languages:
-        for lang in languages:
-            if lang in available_langs:
-                selected_langs.append(lang)
-    
-    # Default to English if no valid language is found
-    if not selected_langs:
-        selected_langs = ["eng"]
-    
-    lang_str = "+".join(selected_langs)  # Combine multiple languages for OCR
-    
-    # Optimized config: 
-    # --oem 3: Use default OCR Engine Mode (balanced)
-    # --psm 6: Assume uniform block of text (fastest for documents)
-    config = "--oem 3 --psm 6"
-    
-    return lang_str, config
 
 
 def _should_skip_ocr(file_info: dict) -> tuple:
@@ -112,37 +43,6 @@ def _should_skip_ocr(file_info: dict) -> tuple:
     return False, ""
 
     
-
-
-
-def _fast_preprocess(img_array, libs):
-    """
-    Ultra-fast image preprocessing
-    
-    Args:
-        img_array: numpy array of image
-        libs: cached libraries dict
-        
-    Returns:
-        Preprocessed image ready for OCR
-    """
-    cv2 = libs.get('cv2')
-    np = libs.get('np')
-    
-    if not cv2 or not np:
-        return img_array
-    
-    # Convert to grayscale if needed
-    if len(img_array.shape) == 3:
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-    else:
-        gray = img_array
-    
-    # Simple threshold (fastest method)
-    # Otsu's method is fast and automatic
-    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    return binary
 
 
 def specify_img_method_of_reading_the_file(file_info, logger_param=None):
@@ -195,7 +95,7 @@ def read_image_file_fast(filepath , languages=None):
         pass
     
     # Get cached libraries
-    libs = _get_libraries()
+    libs = get_shared_libs()
     Image = libs.get('Image')
     pytesseract = libs.get('pytesseract')
     cv2 = libs.get('cv2')
@@ -232,19 +132,21 @@ def read_image_file_fast(filepath , languages=None):
                 return result
             
             # Get optimized Tesseract config
-            lang, config = _get_optimized_tesseract_config(languages)
+            lang, config = get_tesseract_config(languages)
             
             result["ocr_engine"] = "tesseract"
             result["ocr_language"] = lang
             result["ocr_used"] = True
             
             # Preprocess image
+            # Preprocess image
             if CV_AVAILABLE:
                 # Convert to RGB then to numpy array
                 rgb_img = img.convert("RGB")
                 arr = np.array(rgb_img)
-                processed = _fast_preprocess(arr, libs)
+                processed = preprocess_for_ocr(arr, libs)
                 ocr_target = Image.fromarray(processed)
+                
             else:
                 # No OpenCV, use image directly
                 ocr_target = img.convert("RGB")

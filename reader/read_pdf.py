@@ -17,13 +17,17 @@ import multiprocessing
 import logging
 from functools import lru_cache
 import time
-
+# Add these imports at the top with other imports
+from core.library_utils import get_shared_libs
+from core.ocr_utils import get_tesseract_config, preprocess_for_ocr
 logger = logging.getLogger(__name__)
+
 
 
 def extensions_type_extract():
     """Return set of supported PDF extensions"""
-    return {'.pdf'}
+    from core.extension_registry import get_extensions_for
+    return get_extensions_for('pdf')
 
 
 def specify_pdf_method_of_reading_the_file(file_info, logger_param=None):
@@ -48,121 +52,6 @@ def specify_pdf_method_of_reading_the_file(file_info, logger_param=None):
         return None
 
 
-# ============================================================================
-# OPTIMIZATION 1: Check library availability once at module load
-# ============================================================================
-_LIBS_CHECKED = False
-_LIBS_AVAILABLE = {}
-
-def _check_libraries():
-    """Check library availability once at module load"""
-    global _LIBS_CHECKED, _LIBS_AVAILABLE
-    
-    if _LIBS_CHECKED:
-        return _LIBS_AVAILABLE
-    
-    missing_libs = []
-    
-    try:
-        import fitz
-        _LIBS_AVAILABLE['fitz'] = fitz
-    except ImportError:
-        missing_libs.append("pymupdf")
-        _LIBS_AVAILABLE['fitz'] = None
-    
-    try:
-        import pytesseract
-        _LIBS_AVAILABLE['pytesseract'] = pytesseract
-    except ImportError:
-        missing_libs.append("pytesseract")
-        _LIBS_AVAILABLE['pytesseract'] = None
-    
-    try:
-        from PIL import Image
-        _LIBS_AVAILABLE['Image'] = Image
-    except ImportError:
-        missing_libs.append("pillow")
-        _LIBS_AVAILABLE['Image'] = None
-    
-    try:
-        import cv2
-        import numpy as np
-        _LIBS_AVAILABLE['cv2'] = cv2
-        _LIBS_AVAILABLE['np'] = np
-    except ImportError:
-        missing_libs.append("opencv-python")
-        _LIBS_AVAILABLE['cv2'] = None
-        _LIBS_AVAILABLE['np'] = None
-    
-    _LIBS_CHECKED = True
-    _LIBS_AVAILABLE['missing'] = missing_libs
-    
-    return _LIBS_AVAILABLE
-
-
-# ============================================================================
-# OPTIMIZATION 2: Cached Tesseract configuration
-# ============================================================================
-@lru_cache(maxsize=1)
-def _get_tesseract_config():
-    """Get optimized Tesseract config (cached)"""
-    libs = _check_libraries()
-    pytesseract = libs.get('pytesseract')
-    
-    if not pytesseract:
-        return "eng", "--oem 3 --psm 6"
-    
-    try:
-        available_langs = pytesseract.get_languages(config="")
-        # Use English only for maximum speed
-        lang = "eng" if "eng" in available_langs else (available_langs[0] if available_langs else "eng")
-    except Exception:
-        lang = "eng"
-    
-    # Ultra-fast config: PSM 6 (uniform block), OEM 3 (default)
-    config = "--oem 3 --psm 6"
-    
-    return lang, config
-
-
-# ============================================================================
-# OPTIMIZATION 3: Fast preprocessing (cached function)
-# ============================================================================
-@lru_cache(maxsize=32)
-def _get_preprocessing_kernel():
-    """Get preprocessing kernel (cached)"""
-    libs = _check_libraries()
-    np = libs.get('np')
-    if np:
-        return np.ones((2, 2), np.uint8)
-    return None
-
-
-def ultra_fast_preprocess(img_array, libs):
-    """
-    Ultra-fast preprocessing - minimal operations
-    
-    Strategy:
-    1. Grayscale conversion only
-    2. Simple thresholding (fastest method)
-    3. No denoising (too slow)
-    """
-    cv2 = libs.get('cv2')
-    np = libs.get('np')
-    
-    if not cv2 or not np:
-        return img_array
-    
-    # Convert to grayscale
-    if len(img_array.shape) == 3:
-        gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-    else:
-        gray = img_array
-    
-    # Simple binary threshold (Otsu - fast and automatic)
-    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    return binary
 
 
 # ============================================================================
@@ -206,7 +95,7 @@ def process_page_optimized(page_data):
     """
     page_num, page_bytes, tesseract_lang, tesseract_config, needs_ocr = page_data
     
-    libs = _check_libraries()
+    libs = get_shared_libs()
     Image = libs.get('Image')
     pytesseract = libs.get('pytesseract')
     cv2 = libs.get('cv2')
@@ -229,9 +118,10 @@ def process_page_optimized(page_data):
         pil_image = Image.open(io.BytesIO(page_bytes))
         
         # Fast preprocessing
+        # Fast preprocessing
         if cv2 and np:
             img_array = np.array(pil_image.convert("RGB"))
-            processed = ultra_fast_preprocess(img_array, libs)
+            processed = preprocess_for_ocr(img_array, libs=libs)
             pil_processed = Image.fromarray(processed)
         else:
             pil_processed = pil_image.convert("L")  # Simple grayscale
@@ -271,7 +161,8 @@ def read_pdf_file(filepath, max_workers=None):
     """
     
     # Check libraries
-    libs = _check_libraries()
+    # Check libraries
+    libs = get_shared_libs()
     fitz = libs.get('fitz')
     pytesseract = libs.get('pytesseract')
     Image = libs.get('Image')
@@ -340,7 +231,7 @@ def read_pdf_file(filepath, max_workers=None):
             result["ocr_used"] = True
             
             # Get Tesseract config
-            tesseract_lang, tesseract_config = _get_tesseract_config()
+            tesseract_lang, tesseract_config = get_tesseract_config()
             
             # Prepare page data for parallel processing
             page_data_list = []
