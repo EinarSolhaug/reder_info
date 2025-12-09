@@ -3,7 +3,8 @@ Storage Pipeline - Complete file storage workflow with multi-concurrency support
 Uses ThreadManager, MultiprocessingManager, ProcessManager, and AsyncManager
 for parallel storage operations
 """
-from typing import Dict, Any, Optional, Tuple, List
+import os
+from typing import Callable, Dict, Any, Optional, Tuple, List
 from datetime import datetime
 from collections import Counter
 import threading
@@ -26,6 +27,39 @@ from core.concurrency import (
     TaskPriority
 )
 
+# Add this at the top of the file, after imports
+from enum import Enum
+from dataclasses import dataclass
+
+class StorageResult(Enum):
+    """Storage operation result types"""
+    SUCCESS = "success"              # File stored successfully
+    DUPLICATE = "duplicate"          # File is a true duplicate
+    ERROR = "error"                  # Storage operation failed
+    INVALID_HASH = "invalid_hash"    # File has invalid/missing hash
+    INVALID_DATA = "invalid_data"    # File data is invalid/corrupted
+
+@dataclass
+class StorageResponse:
+    """Detailed storage operation response"""
+    result: StorageResult
+    path_id: Optional[int] = None
+    error_message: Optional[str] = None
+    duplicate_path_id: Optional[int] = None
+    
+    @property
+    def is_success(self) -> bool:
+        return self.result == StorageResult.SUCCESS
+    
+    @property
+    def is_duplicate(self) -> bool:
+        return self.result == StorageResult.DUPLICATE
+    
+    @property
+    def is_error(self) -> bool:
+        return self.result == StorageResult.ERROR
+    
+    
 class StoragePipeline:
     def __init__(self, source_name: str = "default", side_name: str = "default",
                  enable_concurrency: bool = True, max_workers: int = 4):
@@ -106,23 +140,249 @@ class StoragePipeline:
         parent_path_id: Optional[int] = None,
         hierarchy_path: Optional[str] = None,
         use_async: bool = False
-    ) -> Optional[int]:
+    ) -> StorageResponse:
         """
-        Complete file storage pipeline with optional async/concurrent execution
+        Complete file storage pipeline with detailed result tracking
+        
+        Returns StorageResponse instead of Optional[int] for better error handling
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        lock = self.stats_lock if self.enable_concurrency else threading.Lock()
+        
+        file_name = file_info.get('name', 'unknown')
+        
+        try:
+            with lock:
+                if self.enable_concurrency:
+                    self.stats["total"] += 1
+            
+            # 1. Validate and get hash
+            file_hash = file_info.get('hash', '')
+            if not file_hash or file_hash in ('N/A', 'SKIPPED_LARGE_FILE', 'ERROR'):
+                # Try to calculate hash if missing
+                try:
+                    from core.file_utils import calculate_file_hash
+                    file_path = file_info.get('path', '')
+                    if file_path and os.path.exists(file_path):
+                        file_hash = calculate_file_hash(file_path)
+                        file_info['hash'] = file_hash
+                    else:
+                        logger.warning(f"Cannot calculate hash for {file_name}: file path invalid or missing")
+                        with lock:
+                            if self.enable_concurrency:
+                                self.stats["failed"] += 1
+                        return StorageResponse(
+                            result=StorageResult.INVALID_HASH,
+                            error_message=f"Invalid hash and cannot recalculate: path={file_path}"
+                        )
+                except Exception as hash_error:
+                    logger.warning(f"Failed to calculate hash for {file_name}: {hash_error}")
+                    with lock:
+                        if self.enable_concurrency:
+                            self.stats["failed"] += 1
+                    return StorageResponse(
+                        result=StorageResult.INVALID_HASH,
+                        error_message=f"Hash calculation failed: {str(hash_error)}"
+                    )
+            
+            if not file_hash:
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["failed"] += 1
+                return StorageResponse(
+                    result=StorageResult.INVALID_HASH,
+                    error_message="Hash is empty after validation"
+                )
+            
+            # 2. Check duplicate with CLEAR distinction
+            is_duplicate, existing_path_id = self.check_duplicate(file_hash)
+            if is_duplicate:
+                logger.debug(f"⭐️ Skipping duplicate: {file_name} (existing path_id: {existing_path_id})")
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["duplicates"] += 1
+                        self.stats["completed"] += 1  # Duplicates count as "processed"
+                return StorageResponse(
+                    result=StorageResult.DUPLICATE,
+                    duplicate_path_id=existing_path_id
+                )
+            
+            # 3. Store hash (will reuse orphaned hash if exists)
+            try:
+                hash_id = self.hub.hash_operations.store_hash(
+                    file_hash, self.source_id, self.side_id
+                )
+            except Exception as hash_store_error:
+                logger.error(f"Failed to store hash for {file_name}: {hash_store_error}")
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["failed"] += 1
+                return StorageResponse(
+                    result=StorageResult.ERROR,
+                    error_message=f"Hash storage failed: {str(hash_store_error)}"
+                )
+            
+            if not hash_id:
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["failed"] += 1
+                return StorageResponse(
+                    result=StorageResult.ERROR,
+                    error_message="Hash storage returned None"
+                )
+            
+            # 4. Store metadata
+            if hierarchy_path:
+                file_info['path'] = hierarchy_path[:500]
+            
+            try:
+                path_id = self.hub.path_operations.store_metadata(
+                    file_info, hash_id, file_status='Unread'
+                )
+            except Exception as path_store_error:
+                logger.error(f"Failed to store metadata for {file_name}: {path_store_error}")
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["failed"] += 1
+                return StorageResponse(
+                    result=StorageResult.ERROR,
+                    error_message=f"Metadata storage failed: {str(path_store_error)}"
+                )
+            
+            if not path_id:
+                with lock:
+                    if self.enable_concurrency:
+                        self.stats["failed"] += 1
+                return StorageResponse(
+                    result=StorageResult.ERROR,
+                    error_message="Metadata storage returned None"
+                )
+            
+            # 5. Extract and store content
+            content = result.get('Content', {})
+            has_readable_content = False
+            
+            if isinstance(content, dict):
+                if 'error' not in content:
+                    text = self._extract_text_from_content(content)
+                    if text and len(text.strip()) > 0:
+                        has_readable_content = True
+                        try:
+                            if self.enable_concurrency and len(text) > 100000:
+                                # Large content - use pool
+                                task_id = self.pool_manager.submit_task(
+                                    self.storage_pool_id,
+                                    self._store_content_pipeline,
+                                    (text, path_id),
+                                    {}
+                                )
+                            else:
+                                self._store_content_pipeline(text, path_id)
+                        except Exception as content_error:
+                            logger.warning(f"Content storage failed for {file_name}: {content_error}")
+                            # Don't fail the entire operation for content storage failure
+            
+            # 6. Store title
+            try:
+                title = self._extract_title(result, file_info)
+                if title:
+                    self._store_title_pipeline(title, path_id, parent_path_id)
+            except Exception as title_error:
+                logger.warning(f"Title storage failed for {file_name}: {title_error}")
+                # Don't fail the entire operation for title storage failure
+            
+            # 7. Update file status
+            file_status = 'Read' if has_readable_content else 'Unread'
+            try:
+                self.hub.path_operations.update_file_status(path_id, file_status)
+            except Exception as status_error:
+                logger.warning(f"Failed to update file status for {file_name}: {status_error}")
+                # Continue anyway - status update is not critical
+            
+            with lock:
+                if self.enable_concurrency:
+                    self.stats["completed"] += 1
+            
+            status_icon = "✓" if has_readable_content else "⚠"
+            logger.debug(f"{status_icon} Stored {file_name} (path_id: {path_id}, status: {file_status})")
+            
+            return StorageResponse(
+                result=StorageResult.SUCCESS,
+                path_id=path_id
+            )
+            
+        except Exception as e:
+            logger.error(f"✗ Storage pipeline error for {file_name}: {e}", exc_info=True)
+            with lock:
+                if self.enable_concurrency:
+                    self.stats["failed"] += 1
+            return StorageResponse(
+                result=StorageResult.ERROR,
+                error_message=f"Unexpected error: {str(e)}"
+            )
+        
+        
+        
+    def _retry_with_backoff(
+        self,
+        operation: Callable,
+        *args,
+        max_retries: int = 3,
+        initial_delay: float = 0.1,
+        **kwargs
+    ) -> Any:
+        """
+        Retry an operation with exponential backoff
         
         Args:
-            file_info: File metadata dictionary
-            result: Processing result dictionary
-            parent_path_id: Optional parent path ID for hierarchy
-            hierarchy_path: Optional hierarchy path string
-            use_async: If True, use async manager for non-blocking storage
+            operation: Function to retry
+            *args: Positional arguments for operation
+            max_retries: Maximum number of retry attempts
+            initial_delay: Initial delay between retries (seconds)
+            **kwargs: Keyword arguments for operation
             
         Returns:
-            Path ID if successful, None otherwise
+            Result from operation
+            
+        Raises:
+            Last exception if all retries fail
         """
-        # Always use synchronous storage to ensure data is saved
-        # Async storage can be added later if needed with proper await handling
-        return self._store_file_sync(file_info, result, parent_path_id, hierarchy_path)
+        import time
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        last_exception = None
+        delay = initial_delay
+        
+        for attempt in range(max_retries + 1):
+            try:
+                return operation(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
+                
+                if attempt < max_retries:
+                    # Check if error is retryable
+                    error_str = str(e).lower()
+                    retryable_errors = [
+                        'connection', 'timeout', 'locked', 'busy',
+                        'deadlock', 'network', 'temporary'
+                    ]
+                    
+                    if any(err in error_str for err in retryable_errors):
+                        logger.warning(f"Retryable error on attempt {attempt + 1}/{max_retries + 1}: {e}")
+                        logger.info(f"Retrying in {delay:.2f}s...")
+                        time.sleep(delay)
+                        delay *= 2  # Exponential backoff
+                    else:
+                        # Non-retryable error, raise immediately
+                        logger.error(f"Non-retryable error: {e}")
+                        raise
+                else:
+                    logger.error(f"All {max_retries + 1} attempts failed")
+                    raise last_exception
+        
+        raise last_exception
     
     def _store_file_sync(
         self,

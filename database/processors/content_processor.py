@@ -7,6 +7,8 @@ import re
 from typing import List, Tuple, Dict, Set
 from collections import Counter
 
+from database.processors.validation_processor import ValidationProcessor
+
 
 class ContentProcessor:
     """
@@ -92,7 +94,7 @@ class ContentProcessor:
             return []
         
         # CRITICAL: Sanitize text to remove NULL bytes and binary data
-        text = self._sanitize_text(text)
+        text = ValidationProcessor.sanitize_text(text)
         
         tokens = []
         
@@ -323,7 +325,7 @@ class ContentProcessor:
         if not text:
             return []
         
-        text = self._sanitize_text(text)
+        text = ValidationProcessor.sanitize_text(text)
         
         # Extract all entities
         entities = []
@@ -446,25 +448,6 @@ class ContentProcessor:
         
         return keyword_counts
     
-    def _sanitize_text(self, text: str) -> str:
-        """Sanitize text for processing"""
-        if not isinstance(text, str):
-            try:
-                text = text.decode('utf-8', errors='replace')
-            except (AttributeError, UnicodeDecodeError):
-                text = str(text)
-        
-        # Remove NULL bytes
-        text = text.replace('\x00', '')
-        
-        # Remove problematic control characters but keep common whitespace
-        sanitized = []
-        for char in text:
-            code = ord(char)
-            if code >= 32 or code in (9, 10, 13):
-                sanitized.append(char)
-        
-        return ''.join(sanitized)
     
     def _remove_overlaps(self, entities: List[Dict]) -> List[Dict]:
         """Remove overlapping entities, keeping the first/longest match"""
@@ -495,7 +478,7 @@ class ContentProcessor:
             'domains': []
         }
         
-        text = self._sanitize_text(text)
+        text = ValidationProcessor.sanitize_text(text)
         
         # Extract emails
         for match in self.patterns['email'].finditer(text):

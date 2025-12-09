@@ -7,6 +7,8 @@ import threading
 from typing import Dict, Optional, List, Tuple
 from psycopg2.extras import execute_batch
 
+from database.processors.validation_processor import ValidationProcessor
+
 
 class PunctuationOperations:
     """Operations for punctuation table"""
@@ -33,25 +35,7 @@ class PunctuationOperations:
         # Preload punctuation cache at startup
         self._preload_punctuation_cache()
     
-    def _sanitize_text(self, text: str) -> str:
-        """Sanitize text for database storage"""
-        if not isinstance(text, str):
-            try:
-                text = text.decode('utf-8', errors='replace')
-            except (AttributeError, UnicodeDecodeError):
-                text = str(text)
-        
-        # Remove NULL bytes - PostgreSQL cannot store these
-        text = text.replace('\x00', '')
-        
-        # Remove other problematic control characters
-        sanitized = []
-        for char in text:
-            code = ord(char)
-            if code >= 32 or code in (9, 10, 13):  # Keep printable and common whitespace
-                sanitized.append(char)
-        
-        return ''.join(sanitized)
+
     
     def _preload_punctuation_cache(self):
         """Preload all punctuation patterns from database at startup"""
@@ -74,7 +58,7 @@ class PunctuationOperations:
     
     def get_or_create_punctuation_id(self, punctuation: str) -> int:
         """Get or create punctuation ID with caching"""
-        punctuation = self._sanitize_text(punctuation)
+        punctuation = ValidationProcessor.sanitize_text(punctuation)
         
         # Check cache
         with self._cache_lock:
@@ -117,7 +101,7 @@ class PunctuationOperations:
     
     def add_punctuation_to_batch(self, punctuation: str):
         """Add punctuation to batch buffer"""
-        punctuation = self._sanitize_text(punctuation)
+        punctuation = ValidationProcessor.sanitize_text(punctuation)
         if not punctuation:
             return
         

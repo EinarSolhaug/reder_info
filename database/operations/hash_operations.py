@@ -1,6 +1,5 @@
 """
-Hash Operations - Operations for hashs table
-Extracted from storage.py
+Hash Operations - Fixed version without ON CONFLICT issues
 """
 
 from typing import Optional, Tuple
@@ -14,58 +13,66 @@ class HashOperations:
     
     def store_hash(self, file_hash: str, source_id: int, side_id: int) -> int:
         """
-        Store file hash and return hash_id.
+        Store file hash with explicit checking (no ON CONFLICT)
         
-        Duplicate checking: Only if hash + source_id + side_id are ALL the same.
-        If any one is different, it's a new entry.
-        
-        Args:
-            file_hash: SHA256 hash of file
-            source_id: Source ID
-            side_id: Side ID
-            
-        Returns:
-            hash_id
+        This approach avoids the PostgreSQL "no unique constraint matching" error
+        by explicitly checking for existence before inserting.
         """
         conn = self.connection_manager.get_connection()
         try:
             cursor = conn.cursor()
-            # Check if hash + source + side combination already exists
-            cursor.execute(
-                "SELECT id FROM hashs WHERE hash = %s AND source_id = %s AND side_id = %s",
-                (file_hash, source_id, side_id)
-            )
-            result = cursor.fetchone()
             
-            if result:
-                # Already exists with same hash + source + side
-                return result[0]
+            # Start transaction
+            conn.autocommit = False
             
-            # Insert new hash with source and side
-            # ON CONFLICT handles the case where hash + source + side already exists
-            cursor.execute(
-                "INSERT INTO hashs (hash, side_id, source_id) VALUES (%s, %s, %s) "
-                "ON CONFLICT (hash, source_id, side_id) DO NOTHING "
-                "RETURNING id",
-                (file_hash, side_id, source_id)
-            )
-            result = cursor.fetchone()
-            
-            if result:
-                # New entry was inserted
-                hash_id = result[0]
-            else:
-                # Conflict occurred, get existing id
+            try:
+                # First, check if hash + source + side combination already exists
                 cursor.execute(
                     "SELECT id FROM hashs WHERE hash = %s AND source_id = %s AND side_id = %s",
                     (file_hash, source_id, side_id)
                 )
-                hash_id = cursor.fetchone()[0]
-            
-            conn.commit()
-            return hash_id
-            
+                result = cursor.fetchone()
+                
+                if result:
+                    # Already exists, return existing ID
+                    conn.commit()
+                    return result[0]
+                
+                # Doesn't exist, insert new hash
+                cursor.execute(
+                    """INSERT INTO hashs (hash, side_id, source_id) 
+                    VALUES (%s, %s, %s) 
+                    RETURNING id""",
+                    (file_hash, side_id, source_id)
+                )
+                result = cursor.fetchone()
+                
+                if result:
+                    hash_id = result[0]
+                    conn.commit()
+                    return hash_id
+                else:
+                    # Should not happen, but handle gracefully
+                    conn.rollback()
+                    raise Exception("Insert returned no ID")
+                    
+            except Exception as e:
+                conn.rollback()
+                # If insert failed due to race condition, try to get existing ID
+                try:
+                    cursor.execute(
+                        "SELECT id FROM hashs WHERE hash = %s AND source_id = %s AND side_id = %s",
+                        (file_hash, source_id, side_id)
+                    )
+                    result = cursor.fetchone()
+                    if result:
+                        return result[0]
+                except:
+                    pass
+                raise
+                
         finally:
+            conn.autocommit = True  # Restore autocommit
             cursor.close()
             self.connection_manager.return_connection(conn)
     
@@ -78,8 +85,12 @@ class HashOperations:
         """
         Check if file is duplicate.
         
-        Logic: File is duplicate ONLY if hash + source_id + side_id are ALL the same.
-        If any one is different, it's NOT a duplicate and should be stored.
+        Logic: File is duplicate ONLY if:
+        1. Hash + source_id + side_id combination exists in hashs table, AND
+        2. At least one path exists for that hash
+        
+        If hash exists but no path exists, it's NOT a duplicate - it's an orphaned hash
+        that should be reused for the new file.
         
         Args:
             file_hash: File hash
@@ -87,9 +98,10 @@ class HashOperations:
             side_id: Side ID
             
         Returns:
-            (is_duplicate, existing_path_id or hash_id)
-            - If duplicate: returns (True, path_id) if path exists, otherwise (True, hash_id)
-            - If not duplicate: returns (False, None)
+            (is_duplicate, existing_path_id or None)
+            - If true duplicate with existing path: (True, path_id)
+            - If not duplicate: (False, None)
+            - If orphaned hash (no path): (False, None)
         """
         if not file_hash or file_hash in ('N/A', 'SKIPPED_LARGE_FILE', 'ERROR'):
             return False, None
@@ -97,11 +109,8 @@ class HashOperations:
         conn = self.connection_manager.get_connection()
         try:
             cursor = conn.cursor()
-            # Check if hash + source + side combination exists
-            # Logic: Duplicate ONLY if hash + source_id + side_id are ALL the same
-            # If any one is different, it's NOT a duplicate
             
-            # First check if hash + source + side exists in hashs table
+            # Step 1: Check if hash + source + side combination exists
             cursor.execute("""
                 SELECT h.id
                 FROM hashs h
@@ -114,8 +123,9 @@ class HashOperations:
                 # Hash + source + side combination doesn't exist - NOT a duplicate
                 return False, None
             
-            # Hash + source + side exists, now find the associated path_id if any
             hash_id = hash_result[0]
+            
+            # Step 2: Check if any path exists for this hash
             cursor.execute("""
                 SELECT p.id
                 FROM paths p
@@ -126,12 +136,14 @@ class HashOperations:
             path_result = cursor.fetchone()
             
             if path_result:
-                # Found existing path - return it as duplicate
-                return True, path_result[0]
+                # Hash exists AND path exists - TRUE DUPLICATE
+                path_id = path_result[0]
+                return True, path_id
             else:
-                # Hash exists but no path yet - still consider it duplicate
-                # Return hash_id as identifier
-                return True, hash_id
+                # Hash exists but NO path exists - ORPHANED HASH
+                # This is NOT a duplicate - the file should be stored
+                # The orphaned hash can be reused
+                return False, None
             
         finally:
             cursor.close()

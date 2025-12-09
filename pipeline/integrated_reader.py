@@ -91,15 +91,15 @@ class IntegratedFileReader:
     """
     
     def __init__(self, 
-                 max_workers: int = 4,
-                 enable_monitoring: bool = True,
-                 monitor_interval: float = 5.0,
-                 failure_threshold: int = 50,  # Increased to prevent premature stopping
-                 failure_window: int = 100,  # Increased window size
-                 use_priority: bool = True,
-                 enable_storage: bool = False,
-                 storage_source: str = "default",
-                 storage_side: str = "default"):
+                max_workers: int = 4,
+                enable_monitoring: bool = True,
+                monitor_interval: float = 5.0,
+                failure_threshold: int = 100,  # Increased from 5
+                failure_window: int = 200,     # Increased from 10
+                use_priority: bool = True,
+                enable_storage: bool = False,
+                storage_source: str = "default",
+                storage_side: str = "default"):
         """
         Initialize the multi-concurrency file reader
         
@@ -300,31 +300,21 @@ class IntegratedFileReader:
         # Cap at 10
         return min(priority, 10)
     
+    # In integrated_reader.py - Change _should_use_pool method
+
     def _should_use_pool(self, file_info: Dict) -> bool:
         """
-        Determine if file should use multiprocessing pool (CPU-intensive) or thread pool (I/O-bound)
+        Determine if file should use multiprocessing pool
+        
+        IMPORTANT: Always return False because reader functions contain 
+        thread-local locks that cannot be pickled for multiprocessing.
+        All files will use thread pool instead.
         
         Returns:
-            True if should use multiprocessing pool, False for thread pool
+            Always False - all files use threading
         """
-        extension = file_info.get('extension', '').lower()
-        size_bytes = file_info.get('size_bytes', 0)
-        
-        # Use multiprocessing pool for:
-        # - Large files (>10MB)
-        # - CPU-intensive formats (PDFs, images, archives)
-        if size_bytes > 10 * 1024 * 1024:  # > 10MB
-            return True
-        
-        if extension in {'.pdf', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff', '.webp'}:
-            return True  # Images and PDFs benefit from multiprocessing
-        
-        if extension in {'.zip', '.rar', '.7z', '.tar', '.gz'}:
-            return True  # Archives are CPU-intensive
-        
-        # Use thread pool for:
-        # - Small files
-        # - I/O-bound formats (text, office documents)
+        # Always use thread pool - multiprocessing causes pickle errors
+        # with thread-local locks in reader functions
         return False
         
     def process_single_file(self, file_path: str) -> Optional[Dict]:
@@ -808,7 +798,11 @@ class IntegratedFileReader:
                                     self.stats['completed'] += 1
                                 else:
                                     self.stats['failed'] += 1
-                            self.recent_failures.append(is_failure)
+                            if is_failure:
+                                failure_type = "processing_error" if result.get("Content", {}).get("error") else "storage_error"
+                                self.recent_failures.append(failure_type)
+                            else:
+                                self.recent_failures.append("success")
                         
                         # Update progress bar and counters for batch files
                         batch_size = len(result)
@@ -856,7 +850,11 @@ class IntegratedFileReader:
                                 self.stats['failed'] += 1
                         
                         # Track for circuit breaker
-                        self.recent_failures.append(is_failure)
+                            if is_failure:
+                                failure_type = "processing_error" if result.get("Content", {}).get("error") else "storage_error"
+                                self.recent_failures.append(failure_type)
+                            else:
+                                self.recent_failures.append("success")
                     
                     if len(self.recent_failures) > self.failure_window * 2:
                         self.recent_failures = self.recent_failures[-self.failure_window * 2:]
@@ -1138,7 +1136,12 @@ class IntegratedFileReader:
                         else:
                             self.stats['failed'] += 1
                     
-                    self.recent_failures.append(is_failure)
+                    if is_failure:
+                        failure_type = "processing_error" if result.get("Content", {}).get("error") else "storage_error"
+                        self.recent_failures.append(failure_type)
+                    else:
+                        self.recent_failures.append("success")
+                        
                     pbar.update(1)
                     pbar.set_postfix({"Priority": priority, "File": file_name[:30]})
                         
@@ -1262,16 +1265,24 @@ class IntegratedFileReader:
         return self.results
     
     def _check_circuit_breaker(self) -> bool:
-        """Check if we should stop processing due to too many failures"""
+        """
+        Check if we should stop processing due to too many PROCESSING failures
+        (Ignores storage-related failures like duplicates)
+        """
         if len(self.recent_failures) < self.failure_window:
             return False
         
         recent = self.recent_failures[-self.failure_window:]
-        failure_count = sum(1 for failed in recent if failed)
         
-        if failure_count >= self.failure_threshold:
+        # Count only TRUE processing failures (not storage duplicates)
+        processing_failure_count = sum(
+            1 for failure_type in recent 
+            if failure_type == "processing_error"
+        )
+        
+        if processing_failure_count >= self.failure_threshold:
             logger.error(
-                f"Circuit breaker triggered: {failure_count}/{self.failure_window} recent failures"
+                f"Circuit breaker triggered: {processing_failure_count}/{self.failure_window} recent processing failures"
             )
             return True
         
@@ -1310,15 +1321,11 @@ class IntegratedFileReader:
 
 
 
-   
+    # Replace the storage section in _store_extracted_files() method
+
     def _store_extracted_files(self, result: Dict, parent_path_id: Optional[int] = None):
         """
-        Recursively store extracted files from archives/emails individually
-        Also adds them to results list for proper tracking
-        
-        Args:
-            result: Processing result that may contain extracted_files
-            parent_path_id: Optional parent path ID for hierarchy
+        Recursively store extracted files with proper error handling
         """
         if not result or not isinstance(result, dict):
             return
@@ -1327,45 +1334,42 @@ class IntegratedFileReader:
         if not isinstance(content, dict):
             return
         
-        # Check for archive extracted files
+        # Process archive extracted files
         if "extracted_files" in content and isinstance(content["extracted_files"], list):
             extracted_count = 0
+            duplicate_count = 0
+            error_count = 0
+            
             for extracted_result in content["extracted_files"]:
                 if isinstance(extracted_result, dict) and extracted_result.get("Metadata"):
                     extracted_file_info = extracted_result.get("Metadata", {})
                     extracted_content = extracted_result.get("Content", {})
                     
-                    # Add to results list for tracking (even if has error)
+                    # Add to results list for tracking
                     with self.results_lock:
                         self.results.append(extracted_result)
                     
-                    # Update statistics AND file counter
-                    is_failure = bool(isinstance(extracted_content, dict) and extracted_content.get("error"))
+                    # Check if extraction itself failed
+                    is_extraction_failure = bool(isinstance(extracted_content, dict) and extracted_content.get("error"))
+                    
+                    # Update statistics
                     with self.stats_lock:
-                        if not is_failure:
+                        if not is_extraction_failure:
                             self.stats['completed'] += 1
                         else:
                             self.stats['failed'] += 1
-                        # Track extracted files separately
                         self.stats['extracted_files'] = self.stats.get('extracted_files', 0) + 1
-                        self.stats['total'] += 1  # Total includes extracted files
+                        self.stats['total'] += 1
                     
-                    # Update files_processed_count if it exists in the scope
-                    if 'files_processed_count' in globals() or 'files_processed_count' in locals():
-                        # We'll update it through a different mechanism
-                        pass
-                    
-                    # Store ALL extracted files (even if failed) to track them in database
-                    # This ensures all processed files are stored, not just successful ones
+                    # Store to database (even if extraction failed, to track it)
                     if self.enable_storage:
                         try:
-                            # Build hierarchy path
                             parent_path = result.get("Metadata", {}).get("path", "")
                             extracted_path = extracted_file_info.get("path", "")
                             hierarchy_path = f"{parent_path}::{extracted_path}" if parent_path else extracted_path
                             
-                            # Store extracted file individually (even if failed)
-                            extracted_path_id = self.storage_pipeline.store_file_complete(
+                            # Call storage with new StorageResponse return type
+                            storage_response = self.storage_pipeline.store_file_complete(
                                 extracted_file_info,
                                 extracted_result,
                                 parent_path_id=parent_path_id,
@@ -1373,59 +1377,70 @@ class IntegratedFileReader:
                                 use_async=False
                             )
                             
-                            if extracted_path_id:
+                            # Handle different storage outcomes
+                            if storage_response.is_success:
                                 extracted_count += 1
-                                if is_failure:
-                                    logger.debug(f"⚠ Stored failed extracted file: {extracted_file_info.get('name', 'unknown')} (path_id: {extracted_path_id})")
-                                else:
-                                    logger.debug(f"✓ Stored extracted file: {extracted_file_info.get('name', 'unknown')} (path_id: {extracted_path_id})")
+                                logger.debug(f"✓ Stored extracted file: {extracted_file_info.get('name', 'unknown')} (path_id: {storage_response.path_id})")
                                 
-                                # Recursively store nested extracted files (for nested archives)
-                                self._store_extracted_files(extracted_result, extracted_path_id)
+                                # Recursively store nested extracted files
+                                self._store_extracted_files(extracted_result, storage_response.path_id)
+                                
+                            elif storage_response.is_duplicate:
+                                duplicate_count += 1
+                                logger.debug(f"⭐️ Extracted file is duplicate: {extracted_file_info.get('name', 'unknown')} (existing: {storage_response.duplicate_path_id})")
+                                
+                            elif storage_response.is_error:
+                                error_count += 1
+                                logger.error(f"✗ Storage error for extracted file {extracted_file_info.get('name', 'unknown')}: {storage_response.error_message}")
+                            
                             else:
-                                logger.warning(f"⚠ Storage returned None for extracted file: {extracted_file_info.get('name', 'unknown')} (may be duplicate)")
+                                error_count += 1
+                                logger.warning(f"⚠ Unknown storage result for extracted file: {extracted_file_info.get('name', 'unknown')}")
+                                
                         except Exception as e:
-                            logger.error(f"✗ Error storing extracted file: {e}", exc_info=True)
+                            error_count += 1
+                            logger.error(f"✗ Exception storing extracted file: {e}", exc_info=True)
             
             if extracted_count > 0:
-                logger.info(f"✓ Stored {extracted_count} extracted files from archive")
+                logger.info(f"✓ Stored {extracted_count} extracted files from archive (duplicates: {duplicate_count}, errors: {error_count})")
         
-        # Check for email attachments
+        # Similar handling for email attachments...
         if "attachments" in content and isinstance(content["attachments"], dict):
             attachments_data = content["attachments"]
             if "extracted_files" in attachments_data and isinstance(attachments_data["extracted_files"], list):
                 attachment_count = 0
+                duplicate_count = 0
+                error_count = 0
+                
                 for attachment_result in attachments_data["extracted_files"]:
                     if isinstance(attachment_result, dict) and attachment_result.get("Metadata"):
                         attachment_file_info = attachment_result.get("Metadata", {})
                         attachment_content = attachment_result.get("Content", {})
                         
-                        # Add to results list for tracking (even if has error)
+                        # Add to results
                         with self.results_lock:
                             self.results.append(attachment_result)
                         
-                        # Update statistics AND file counter
-                        is_failure = bool(isinstance(attachment_content, dict) and attachment_content.get("error"))
+                        # Check if attachment extraction failed
+                        is_extraction_failure = bool(isinstance(attachment_content, dict) and attachment_content.get("error"))
+                        
+                        # Update statistics
                         with self.stats_lock:
-                            if not is_failure:
+                            if not is_extraction_failure:
                                 self.stats['completed'] += 1
                             else:
                                 self.stats['failed'] += 1
-                            # Track extracted files separately
                             self.stats['extracted_files'] = self.stats.get('extracted_files', 0) + 1
-                            self.stats['total'] += 1  # Total includes extracted files
+                            self.stats['total'] += 1
                         
-                        # Store ALL attachments (even if failed) to track them in database
-                        # This ensures all processed files are stored, not just successful ones
+                        # Store to database
                         if self.enable_storage:
                             try:
-                                # Build hierarchy path
                                 parent_path = result.get("Metadata", {}).get("path", "")
                                 attachment_path = attachment_file_info.get("path", "")
                                 hierarchy_path = f"{parent_path}::attachment::{attachment_path}" if parent_path else attachment_path
                                 
-                                # Store attachment individually (even if failed)
-                                attachment_path_id = self.storage_pipeline.store_file_complete(
+                                storage_response = self.storage_pipeline.store_file_complete(
                                     attachment_file_info,
                                     attachment_result,
                                     parent_path_id=parent_path_id,
@@ -1433,22 +1448,27 @@ class IntegratedFileReader:
                                     use_async=False
                                 )
                                 
-                                if attachment_path_id:
+                                if storage_response.is_success:
                                     attachment_count += 1
-                                    if is_failure:
-                                        logger.debug(f"⚠ Stored failed email attachment: {attachment_file_info.get('name', 'unknown')} (path_id: {attachment_path_id})")
-                                    else:
-                                        logger.debug(f"✓ Stored email attachment: {attachment_file_info.get('name', 'unknown')} (path_id: {attachment_path_id})")
+                                    logger.debug(f"✓ Stored attachment: {attachment_file_info.get('name', 'unknown')} (path_id: {storage_response.path_id})")
+                                    self._store_extracted_files(attachment_result, storage_response.path_id)
                                     
-                                    # Recursively store nested extracted files
-                                    self._store_extracted_files(attachment_result, attachment_path_id)
-                                else:
-                                    logger.warning(f"⚠ Storage returned None for email attachment: {attachment_file_info.get('name', 'unknown')} (may be duplicate)")
+                                elif storage_response.is_duplicate:
+                                    duplicate_count += 1
+                                    logger.debug(f"⭐️ Attachment is duplicate: {attachment_file_info.get('name', 'unknown')}")
+                                    
+                                elif storage_response.is_error:
+                                    error_count += 1
+                                    logger.error(f"✗ Storage error for attachment: {storage_response.error_message}")
+                                    
                             except Exception as e:
-                                logger.error(f"✗ Error storing email attachment: {e}", exc_info=True)
+                                error_count += 1
+                                logger.error(f"✗ Exception storing attachment: {e}", exc_info=True)
                 
                 if attachment_count > 0:
-                    logger.info(f"✓ Stored {attachment_count} email attachments")
+                    logger.info(f"✓ Stored {attachment_count} email attachments (duplicates: {duplicate_count}, errors: {error_count})") 
+                        
+                        
     
     def _process_file_worker(self, file_info: Dict, depth: int = 0) -> Optional[Dict]:
         """

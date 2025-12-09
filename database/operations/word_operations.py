@@ -8,7 +8,9 @@ from collections import Counter
 import threading
 from psycopg2.extras import execute_batch
 
+from database.processors.validation_processor import ValidationProcessor
 
+ 
 class WordOperations:
     """Operations for words and words_paths tables"""
     
@@ -24,26 +26,7 @@ class WordOperations:
         # Batch buffer for batch operations
         self._word_batch: List[Tuple[str]] = []
         self._batch_lock = threading.RLock()
-    
-    def _sanitize_text(self, text: str) -> str:
-        """Sanitize text for database storage"""
-        if not isinstance(text, str):
-            try:
-                text = text.decode('utf-8', errors='replace')
-            except (AttributeError, UnicodeDecodeError):
-                text = str(text)
         
-        # Remove NULL bytes - PostgreSQL cannot store these
-        text = text.replace('\x00', '')
-        
-        # Remove other problematic control characters
-        sanitized = []
-        for char in text:
-            code = ord(char)
-            if code >= 32 or code in (9, 10, 13):
-                sanitized.append(char)
-        
-        return ''.join(sanitized)
     
     def get_or_create_word_id(self, word: str) -> int:
         """
@@ -55,7 +38,7 @@ class WordOperations:
         Returns:
             word_id
         """
-        word = self._sanitize_text(word.lower())
+        word = ValidationProcessor.sanitize_text(word.lower())
         
         # Check cache
         with self._cache_lock:
@@ -109,7 +92,7 @@ class WordOperations:
             cursor = conn.cursor()
             
             # Sanitize words
-            sanitized_words = [self._sanitize_text(w.lower()) for w in words]
+            sanitized_words = [ValidationProcessor.sanitize_text(w.lower()) for w in words]
             
             # Get existing words
             if sanitized_words:
@@ -228,7 +211,7 @@ class WordOperations:
     
     def add_word_to_batch(self, word: str):
         """Add word to batch buffer"""
-        word = self._sanitize_text(word.lower())
+        word = ValidationProcessor.sanitize_text(word.lower())
         if not word:
             return
         
