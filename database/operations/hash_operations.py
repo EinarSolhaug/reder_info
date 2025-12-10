@@ -76,6 +76,7 @@ class HashOperations:
             cursor.close()
             self.connection_manager.return_connection(conn)
     
+    # In hash_operations.py, line ~45-80
     def check_duplicate(
         self,
         file_hash: str,
@@ -83,25 +84,10 @@ class HashOperations:
         side_id: int
     ) -> Tuple[bool, Optional[int]]:
         """
-        Check if file is duplicate.
+        UPDATED: Check if file is duplicate with enhanced logging
         
-        Logic: File is duplicate ONLY if:
-        1. Hash + source_id + side_id combination exists in hashs table, AND
-        2. At least one path exists for that hash
-        
-        If hash exists but no path exists, it's NOT a duplicate - it's an orphaned hash
-        that should be reused for the new file.
-        
-        Args:
-            file_hash: File hash
-            source_id: Source ID
-            side_id: Side ID
-            
         Returns:
             (is_duplicate, existing_path_id or None)
-            - If true duplicate with existing path: (True, path_id)
-            - If not duplicate: (False, None)
-            - If orphaned hash (no path): (False, None)
         """
         if not file_hash or file_hash in ('N/A', 'SKIPPED_LARGE_FILE', 'ERROR'):
             return False, None
@@ -110,7 +96,7 @@ class HashOperations:
         try:
             cursor = conn.cursor()
             
-            # Step 1: Check if hash + source + side combination exists
+            # Step 1: Check if hash + source + side exists
             cursor.execute("""
                 SELECT h.id
                 FROM hashs h
@@ -120,14 +106,13 @@ class HashOperations:
             hash_result = cursor.fetchone()
             
             if not hash_result:
-                # Hash + source + side combination doesn't exist - NOT a duplicate
                 return False, None
             
             hash_id = hash_result[0]
             
             # Step 2: Check if any path exists for this hash
             cursor.execute("""
-                SELECT p.id
+                SELECT p.id, p.file_path, p.file_name
                 FROM paths p
                 WHERE p.hash_id = %s
                 ORDER BY p.id DESC
@@ -136,19 +121,26 @@ class HashOperations:
             path_result = cursor.fetchone()
             
             if path_result:
-                # Hash exists AND path exists - TRUE DUPLICATE
-                path_id = path_result[0]
+                path_id, file_path, file_name = path_result
+                # ADD LOGGING for duplicate detection
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Duplicate detected: hash={file_hash[:16]}..., "
+                        f"existing_path={file_path}, path_id={path_id}")
                 return True, path_id
             else:
-                # Hash exists but NO path exists - ORPHANED HASH
-                # This is NOT a duplicate - the file should be stored
-                # The orphaned hash can be reused
+                # Orphaned hash - log this unusual case
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Orphaned hash detected: hash={file_hash[:16]}..., "
+                            f"hash_id={hash_id}, no paths found")
                 return False, None
-            
+                
         finally:
             cursor.close()
             self.connection_manager.return_connection(conn)
-    
+        
+        
     def get_hash_by_id(self, hash_id: int) -> Optional[str]:
         """
         Get hash string by ID.
