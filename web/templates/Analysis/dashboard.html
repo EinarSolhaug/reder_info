@@ -1,0 +1,1896 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Comprehensive File Analytics') }}{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" >
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+        <h1><i class="bi bi-graph-up-arrow"></i> {{ _('Comprehensive File Analytics') }}</h1>
+        <p>{{ _('Deep insights into your file collection with advanced visualizations and analysis') }}</p>
+    </header>
+
+    <!-- Dashboard Navigation Buttons -->
+    <div class="dashboard-navigation" style="margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary dashboard-nav-btn active">
+                <i class="bi bi-speedometer2"></i> {{ _('Overview') }}
+            </a>
+            <a href="{{ url_for('comprehensive_dashboard') }}" class="btn btn-outline-primary dashboard-nav-btn">
+                <i class="bi bi-layout-three-columns"></i> {{ _('Comprehensive Dashboard') }}
+            </a>
+            <a href="{{ url_for('charts_dashboard') }}" class="btn btn-outline-primary dashboard-nav-btn">
+                <i class="bi bi-graph-up"></i> {{ _('Charts Dashboard') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div id="dashboard-content">
+    <!-- Active Processing Tasks Progress Bar -->
+    <div id="processingProgressContainer" class="processing-progress-container" style="display: none;">
+        <div class="section-card" style="margin-bottom: 1.5rem;">
+            <div class="section-header">
+                <h2><i class="bi bi-arrow-repeat"></i> {{ _('Active Processing Tasks') }}</h2>
+            </div>
+            <div id="activeTasksList">
+                <!-- Active tasks will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="stats-grid" id="summaryStats">
+        <div class="stat-card primary">
+            <div class="icon"><i class="bi bi-files"></i></div>
+            <h3>{{ _('Total Files') }}</h3>
+            <div class="value" id="totalFiles">-</div>
+            <div class="change positive" id="filesChange"><i class="bi bi-arrow-up"></i> {{ _('Loading...') }}</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="icon"><i class="bi bi-check-circle"></i></div>
+            <h3>{{ _('Processed Files') }}</h3>
+            <div class="value" id="processedFiles">-</div>
+            <div class="change" id="processingRate">-{{ _('% processed') }}</div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="icon"><i class="bi bi-folder"></i></div>
+            <h3>{{ _('File Types') }}</h3>
+            <div class="value" id="uniqueTypes">-</div>
+            <div class="change" id="typesInfo">{{ _('Different formats') }}</div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="icon"><i class="bi bi-fonts"></i></div>
+            <h3>{{ _('Total Words') }}</h3>
+            <div class="value" id="totalWords">-</div>
+            <div class="change" id="wordsInfo">{{ _('Unique words extracted') }}</div>
+        </div>
+
+        <div class="stat-card primary">
+            <div class="icon"><i class="bi bi-tags"></i></div>
+            <h3>{{ _('Categories') }}</h3>
+            <div class="value" id="totalCategories">-</div>
+            <div class="change" id="categoriesInfo">{{ _('Classification groups') }}</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="icon"><i class="bi bi-database"></i></div>
+            <h3>{{ _('Storage Used') }}</h3>
+            <div class="value" id="storageSize">-</div>
+            <div class="change" id="storageInfo">{{ _('Total data size') }}</div>
+        </div>
+    </div>
+
+
+
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-button active" onclick="switchTab('overview')">
+            <i class="bi bi-speedometer2"></i> {{ _('Overview') }}
+        </button>
+        <button class="tab-button" onclick="switchTab('categories')">
+            <i class="bi bi-pie-chart"></i> {{ _('Categories') }}
+        </button>
+        <button class="tab-button" onclick="switchTab('keywords')">
+            <i class="bi bi-tag"></i> {{ _('Keywords') }}
+        </button>
+
+        <button class="tab-button" onclick="switchTab('files')">
+            <i class="bi bi-file-earmark-text"></i> {{ _('File Reports') }}
+        </button>
+        <button class="tab-button" onclick="switchTab('search')">
+            <i class="bi bi-search"></i> {{ _('Search & Filter') }}
+        </button>
+        <button class="tab-button" onclick="switchTab('storage')">
+            <i class="bi bi-hdd"></i> {{ _('Storage & Analytics') }}
+        </button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div class="tab-content active" id="tab-overview">
+        <!-- Timeline Chart -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-calendar-event"></i> {{ _('File Timeline') }}</h2>
+                <div class="controls">
+                    <button class="btn-control" onclick="updateTimeline('day')">24H</button>
+                    <button class="btn-control" onclick="updateTimeline('week')">{{ _('Week') }}</button>
+                    <button class="btn-control active" onclick="updateTimeline('month')">{{ _('Month') }}</button>
+                    <button class="btn-control" onclick="updateTimeline('year')">{{ _('Year') }}</button>
+                </div>
+            </div>
+            <div class="chart-container large">
+                <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- File Type Distribution -->
+        <div class="two-column-grid">
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-file-earmark"></i> {{ _('File Type Distribution') }}</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="fileTypeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-header">
+                    <h2><i class="bi bi-bar-chart"></i> {{ _('Processing Statistics') }}</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="processingChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Tab -->
+    <div class="tab-content" id="tab-categories">
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-pie-chart"></i> {{ _('Category Distribution') }}</h2>
+            </div>
+            <div class="two-column-grid">
+                <div class="chart-container large">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+                <div class="chart-container large">
+                    <canvas id="categoryBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keywords Tab -->
+    <div class="tab-content" id="tab-keywords">
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-tag"></i> {{ _('Word Frequency Analysis') }}</h2>
+                <div class="controls">
+                    <button class="btn-control" onclick="updateWordLimit(25)">{{ _('Top 25') }}</button>
+                    <button class="btn-control active" onclick="updateWordLimit(50)">{{ _('Top 50') }}</button>
+                    <button class="btn-control" onclick="updateWordLimit(100)">{{ _('Top 100') }}</button>
+                </div>
+            </div>
+            <div class="word-frequency-grid" id="wordFrequencyGrid">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>{{ _('Loading word frequency data...') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paths Tab -->
+    <div class="tab-content" id="tab-paths">
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-folder-tree"></i> {{ _('Path Level Analysis') }}</h2>
+            </div>
+            <ul class="path-tree" id="pathTree">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>{{ _('Loading path hierarchy...') }}</p>
+                </div>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Files Tab -->
+    <div class="tab-content" id="tab-files">
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-file-earmark-text"></i> {{ _('Detailed File Reports') }}</h2>
+            </div>
+            <div class="file-reports-grid" id="fileReportsGrid">
+                <div class="loading-state">
+                    <div class="spinner"></div>
+                    <p>{{ _('Loading file reports...') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Tab -->
+    <div class="tab-content" id="tab-search">
+        <div class="search-filter-section">
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchQuery" placeholder="{{ _('Search files by keyword, category, or path...') }}">
+                <select class="search-input" id="searchType" style="flex: 0.3;">
+                    <option value="">{{ _('All Types') }}</option>
+                </select>
+                <button class="search-btn" onclick="performSearch()">
+                    <i class="bi bi-search"></i> {{ _('Search') }}
+                </button>
+            </div>
+            <div class="filter-tags" id="categoryFilters">
+                <!-- Dynamic filter tags will be inserted here -->
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-list-ul"></i> {{ _('Search Results') }}</h2>
+                <span id="searchResultCount">{{ _('0 results') }}</span>
+            </div>
+            <div class="file-reports-grid" id="searchResults">
+                <div class="empty-state">
+                    <i class="bi bi-search"></i>
+                    <h3>{{ _('Enter search criteria') }}</h3>
+                    <p>{{ _('Use the search bar above to find specific files') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage & Analytics Tab -->
+    <div class="tab-content" id="tab-storage">
+        <!-- Storage Analysis Section -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-pie-chart"></i> {{ _('Storage Distribution') }}</h2>
+                <div class="controls">
+                    <button class="btn-control active" onclick="updateStorageView('type', this)">{{ _('By Type') }}</button>
+                    <button class="btn-control" onclick="updateStorageView('status', this)">{{ _('By Status') }}</button>
+                    <button class="btn-control" onclick="updateStorageView('size', this)">{{ _('By Size') }}</button>
+                </div>
+            </div>
+            <div class="two-column-grid">
+                <div class="chart-container" id="storageChartContainer">
+                    <canvas id="storageChart"></canvas>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 1rem;">{{ _('Storage Details') }}</h4>
+                    <div id="storageDetails" style="max-height: 350px; overflow-y: auto;">
+                        <div class="loading-state"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Storage Timeline -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-calendar-event"></i> {{ _('Storage Growth Over Time') }}</h2>
+            </div>
+            <div class="chart-container large">
+                <canvas id="storageTimelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Processing Statistics -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-graph-up"></i> {{ _('Processing Performance') }}</h2>
+            </div>
+            <div class="two-column-grid">
+                <div class="chart-container">
+                    <h4>{{ _('Success Rate by File Type') }}</h4>
+                    <canvas id="successRateChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h4>{{ _('Processing Speed (Last 30 Days)') }}</h4>
+                    <canvas id="processingSpeedChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Statistics -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-file-text"></i> {{ _('Content Analysis') }}</h2>
+            </div>
+            <div class="two-column-grid">
+                <div>
+                    <h4 style="margin-bottom: 1rem;">{{ _('Content Coverage') }}</h4>
+                    <div class="chart-container">
+                        <canvas id="contentCoverageChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 1rem;">{{ _('Top Categories') }}</h4>
+                    <div class="chart-container">
+                        <canvas id="topCategoriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Words Word Cloud -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-cloud"></i> {{ _('Most Frequent Words') }}</h2>
+            </div>
+            <div class="word-cloud" id="topWordsCloud">
+                <div class="loading-state"><div class="spinner"></div></div>
+            </div>
+        </div>
+
+        <!-- Largest Files Table -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2><i class="bi bi-file-earmark-arrow-up"></i> {{ _('Largest Files') }}</h2>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>{{ _('File Name') }}</th>
+                            <th>{{ _('Type') }}</th>
+                            <th>{{ _('Size') }}</th>
+                            <th>{{ _('Source') }}</th>
+                            <th>{{ _('Path') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="largestFilesTable">
+                        <tr><td colspan="5" class="text-center"><div class="spinner"></div></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- End Dashboard Content -->
+</div>
+
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<script>
+// Translation strings for JavaScript
+const translations = {
+    loading: "{{ _('Loading...') }}",
+    loadingWordFrequency: "{{ _('Loading word frequency data...') }}",
+    loadingPathHierarchy: "{{ _('Loading path hierarchy...') }}",
+    loadingFileReports: "{{ _('Loading file reports...') }}",
+    searching: "{{ _('Searching...') }}",
+    noWordData: "{{ _('No word data available') }}",
+    errorLoadingData: "{{ _('Error loading data') }}",
+    noPathData: "{{ _('No path data available') }}",
+    noFilesAvailable: "{{ _('No files available') }}",
+    noResultsFound: "{{ _('No results found') }}",
+    tryDifferentCriteria: "{{ _('Try different search criteria') }}",
+    searchError: "{{ _('Search error') }}",
+    totalFiles: "{{ _('Total Files') }}",
+    processedFiles: "{{ _('Processed Files') }}",
+    thisWeek: "{{ _('this week') }}",
+    results: "{{ _('results') }}",
+    files: "{{ _('files') }}",
+    processed: "{{ _('processed') }}",
+    filesAnalyzed: "{{ _('Files analyzed') }}",
+    totalInstances: "{{ _('Total instances') }}",
+    filesClassified: "{{ _('Files classified') }}",
+    successRate: "{{ _('Success Rate (%)') }}",
+    filesProcessed: "{{ _('Files Processed') }}",
+    storageMB: "{{ _('Storage (MB)') }}",
+    filesAdded: "{{ _('Files Added') }}",
+    storageAdded: "{{ _('Storage Added (MB)') }}",
+    numberFiles: "{{ _('Number of Files') }}",
+    filesPerCategory: "{{ _('Files per Category') }}",
+    categoryDistribution: "{{ _('Category Distribution (Pie Chart)') }}",
+    withContent: "{{ _('With Content') }}",
+    withWords: "{{ _('With Words') }}",
+    noContent: "{{ _('No Content') }}",
+    unknown: "{{ _('Unknown') }}",
+    source: "{{ _('Source') }}",
+    status: "{{ _('Status') }}"
+};
+
+let charts = {};
+let storageData = null;
+let currentStorageView = 'type';
+
+// Enhanced chart configuration for prominent, eye-catching charts
+const CHART_CONFIG = {
+    layout: {
+        padding: {
+            top: 30,
+            right: 30,
+            bottom: 40,
+            left: 30
+        }
+    },
+    plugins: {
+        legend: {
+            labels: {
+                font: {
+                    size: 16,
+                    weight: '600'
+                },
+                padding: 25,
+                boxWidth: 20,
+                boxHeight: 20,
+                usePointStyle: true
+            }
+        },
+        tooltip: {
+            padding: 12,
+            titleFont: {
+                size: 14,
+                weight: '600'
+            },
+            bodyFont: {
+                size: 13,
+                weight: '500'
+            },
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: (window.ChartColors && window.ChartColors.getThemeColors().primary) ? window.ChartColors.getThemeColors().primary : '#667eea',
+            borderWidth: 2,
+            cornerRadius: 8
+        }
+    },
+        scales: {
+            x: {
+                ticks: {
+                    font: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    padding: 12
+                },
+                title: {
+                    display: true,
+                    font: {
+                        size: 16,
+                        weight: '700'
+                    },
+                    padding: {
+                        top: 15
+                    }
+                }
+            },
+            y: {
+                ticks: {
+                    font: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    padding: 12
+                },
+                title: {
+                    display: true,
+                    font: {
+                        size: 16,
+                        weight: '700'
+                    },
+                    padding: {
+                        bottom: 15
+                    }
+                }
+            }
+        }
+};
+
+// Initialize dashboard - storage stats will load when storage tab is activated
+
+// Load all statistics
+async function loadAllStatistics() {
+    await Promise.all([
+        loadStorageStatistics(),
+        loadProcessingStatistics(),
+        loadContentStatistics()
+    ]);
+}
+
+// Load storage statistics
+async function loadStorageStatistics() {
+    try {
+        const response = await fetch('/api/analytics/storage-stats');
+        const data = await response.json();
+        storageData = data;
+        
+        // Update summary cards only if they exist (they're in the main dashboard)
+        const totalFilesEl = document.getElementById('totalFiles');
+        if (totalFilesEl) {
+            totalFilesEl.textContent = data.total.files.toLocaleString();
+        }
+        
+        // Render storage charts
+        updateStorageView('type', null);
+        renderStorageTimeline(data.timeline);
+        renderLargestFiles(data.largest_files);
+        
+    } catch (error) {
+        console.error('Error loading storage statistics:', error);
+    }
+}
+
+// Update storage view
+function updateStorageView(view, clickedButton) {
+    currentStorageView = view;
+    
+    // Update active button
+    document.querySelectorAll('.section-card .btn-control').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    } else {
+        // Find button with matching onclick
+        document.querySelectorAll('.section-card .btn-control').forEach(btn => {
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${view}'`)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    if (!storageData) return;
+    
+    let chartData, detailsHtml;
+    
+    if (view === 'type') {
+        chartData = {
+            labels: storageData.by_type.map(t => t.type),
+            data: storageData.by_type.map(t => t.total_size)
+        };
+        
+        detailsHtml = storageData.by_type.map(t => `
+            <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <span><strong>${t.type}</strong> (${t.count} ${translations.files})</span>
+                <span>${formatFileSize(t.total_size)}</span>
+            </div>
+        `).join('');
+        
+    } else if (view === 'status') {
+        chartData = {
+            labels: storageData.by_status.map(s => s.status),
+            data: storageData.by_status.map(s => s.total_size)
+        };
+        
+        detailsHtml = storageData.by_status.map(s => `
+            <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <span><strong>${s.status}</strong> (${s.count} ${translations.files})</span>
+                <span>${formatFileSize(s.total_size)}</span>
+            </div>
+        `).join('');
+        
+    } else { // size
+        const sizeCategories = [
+            { name: 'Tiny (<100KB)', min: 0, max: 100 * 1024 },
+            { name: 'Small (100KB-1MB)', min: 100 * 1024, max: 1024 * 1024 },
+            { name: 'Medium (1-10MB)', min: 1024 * 1024, max: 10 * 1024 * 1024 },
+            { name: 'Large (10-100MB)', min: 10 * 1024 * 1024, max: 100 * 1024 * 1024 },
+            { name: 'Huge (>100MB)', min: 100 * 1024 * 1024, max: Infinity }
+        ];
+        
+        // Calculate from by_type data
+        const sizeData = sizeCategories.map(cat => ({
+            name: cat.name,
+            size: storageData.by_type.reduce((sum, t) => {
+                if (t.avg_size >= cat.min && t.avg_size < cat.max) {
+                    return sum + t.total_size;
+                }
+                return sum;
+            }, 0)
+        }));
+        
+        chartData = {
+            labels: sizeData.map(s => s.name),
+            data: sizeData.map(s => s.size)
+        };
+        
+        detailsHtml = sizeData.map(s => `
+            <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <span><strong>${s.name}</strong></span>
+                <span>${formatFileSize(s.size)}</span>
+            </div>
+        `).join('');
+    }
+    
+    document.getElementById('storageDetails').innerHTML = detailsHtml;
+    renderStorageChart(chartData);
+}
+
+// Render storage chart
+function renderStorageChart(chartData) {
+    const canvas = document.getElementById('storageChart');
+    
+    if (charts.storage) {
+        charts.storage.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.storage = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                data: chartData.data,
+                backgroundColor: window.ChartColors ? window.ChartColors.getChartColors(10) : [
+                    '#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444',
+                    '#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: CHART_CONFIG.layout,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    ...CHART_CONFIG.plugins.legend
+                },
+                tooltip: {
+                    ...CHART_CONFIG.plugins.tooltip,
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + formatFileSize(context.parsed);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Attach chart controls (type selector and export)
+    if (window.ChartExport) {
+        const chartContainer = canvas.closest('.chart-container, .section-card');
+        if (chartContainer) {
+            setTimeout(() => {
+                window.ChartExport.attachExportButtonsToCharts(chartContainer);
+            }, 100);
+        }
+    }
+}
+
+// Render storage timeline
+function renderStorageTimeline(timeline) {
+    const canvas = document.getElementById('storageTimelineChart');
+    
+    if (charts.storageTimeline) {
+        charts.storageTimeline.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.storageTimeline = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: timeline.map(t => t.month),
+            datasets: [
+                {
+                    label: translations.filesAdded,
+                    data: timeline.map(t => t.count),
+                    borderColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    yAxisID: 'y'
+                },
+                {
+                    label: translations.storageAdded,
+                    data: timeline.map(t => t.size / (1024 * 1024)),
+                    borderColor: window.ChartColors ? window.ChartColors.getThemeColors().success : '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: CHART_CONFIG.plugins.legend,
+                    tooltip: CHART_CONFIG.plugins.tooltip
+                },
+                scales: {
+                    x: {
+                        ...CHART_CONFIG.scales.x
+                    },
+                    y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Files'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: translations.storageMB
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Load processing statistics
+async function loadProcessingStatistics() {
+    try {
+        const response = await fetch('/api/analytics/processing-statistics');
+        const data = await response.json();
+        
+        // Update summary cards only if they exist
+        const processingRateEl = document.getElementById('processingRate');
+        if (processingRateEl) {
+            const totalProcessed = data.by_type.reduce((sum, t) => sum + t.processed, 0);
+            const totalFiles = data.by_type.reduce((sum, t) => sum + t.total, 0);
+            const overallRate = totalFiles > 0 ? ((totalProcessed / totalFiles) * 100).toFixed(1) : 0;
+            processingRateEl.textContent = overallRate + '%';
+        }
+        
+        // Render charts
+        renderSuccessRateChart(data.by_type);
+        renderProcessingSpeedChart(data.daily_speed);
+        
+    } catch (error) {
+        console.error('Error loading processing statistics:', error);
+    }
+}
+
+// Render success rate chart
+function renderSuccessRateChart(typeData) {
+    const canvas = document.getElementById('successRateChart');
+    
+    if (charts.successRate) {
+        charts.successRate.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.successRate = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: typeData.slice(0, 10).map(t => t.type),
+            datasets: [{
+                label: translations.successRate,
+                data: typeData.slice(0, 10).map(t => t.success_rate),
+                backgroundColor: window.ChartColors ? window.ChartColors.getThemeColors().success : '#10b981'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: CHART_CONFIG.layout,
+            plugins: {
+                legend: CHART_CONFIG.plugins.legend,
+                tooltip: CHART_CONFIG.plugins.tooltip
+            },
+            scales: {
+                x: {
+                    ...CHART_CONFIG.scales.x
+                },
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ...CHART_CONFIG.scales.y
+                }
+            }
+        }
+    });
+    
+    // Attach chart controls
+    if (window.ChartExport) {
+        const chartContainer = canvas.closest('.chart-container, .section-card');
+        if (chartContainer) {
+            setTimeout(() => {
+                window.ChartExport.attachExportButtonsToCharts(chartContainer);
+            }, 100);
+        }
+    }
+}
+
+// Render processing speed chart
+function renderProcessingSpeedChart(speedData) {
+    const canvas = document.getElementById('processingSpeedChart');
+    
+    if (charts.processingSpeed) {
+        charts.processingSpeed.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.processingSpeed = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: speedData.map(d => new Date(d.date).toLocaleDateString()),
+            datasets: [{
+                label: translations.filesProcessed,
+                data: speedData.map(d => d.files),
+                borderColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: CHART_CONFIG.layout,
+            plugins: {
+                legend: CHART_CONFIG.plugins.legend,
+                tooltip: CHART_CONFIG.plugins.tooltip
+            },
+            scales: {
+                x: {
+                    ...CHART_CONFIG.scales.x
+                },
+                y: {
+                    beginAtZero: true,
+                    ...CHART_CONFIG.scales.y
+                }
+            }
+        }
+    });
+    
+    // Attach chart controls
+    if (window.ChartExport) {
+        const chartContainer = canvas.closest('.chart-container, .section-card');
+        if (chartContainer) {
+            setTimeout(() => {
+                window.ChartExport.attachExportButtonsToCharts(chartContainer);
+            }, 100);
+        }
+    }
+}
+
+// Load content statistics
+async function loadContentStatistics() {
+    try {
+        const response = await fetch('/api/analytics/content-statistics');
+        const data = await response.json();
+        
+        // Update summary cards only if they exist
+        const totalCategoriesEl = document.getElementById('totalCategories');
+        if (totalCategoriesEl) {
+            totalCategoriesEl.textContent = data.categories.length;
+        }
+        
+        // Render charts
+        renderContentCoverageChart(data.coverage);
+        renderTopCategoriesChart(data.categories.slice(0, 10));
+        renderTopWordsCloud(data.top_words.slice(0, 30));
+        
+    } catch (error) {
+        console.error('Error loading content statistics:', error);
+    }
+}
+
+// Render content coverage chart
+function renderContentCoverageChart(coverage) {
+    const canvas = document.getElementById('contentCoverageChart');
+    
+    if (charts.contentCoverage) {
+        charts.contentCoverage.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.contentCoverage = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: [translations.withContent, translations.withWords, translations.noContent],
+            datasets: [{
+                data: [
+                    coverage.with_content,
+                    coverage.with_words,
+                    coverage.total_files - coverage.with_content
+                ],
+                backgroundColor: window.ChartColors ? [
+                    window.ChartColors.getThemeColors().success,
+                    window.ChartColors.getThemeColors().primary,
+                    window.ChartColors.getThemeColors().danger
+                ] : ['#10b981', '#667eea', '#ef4444']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: CHART_CONFIG.layout,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    ...CHART_CONFIG.plugins.legend
+                },
+                tooltip: CHART_CONFIG.plugins.tooltip
+            }
+        }
+    });
+    
+    // Attach chart controls
+    if (window.ChartExport) {
+        const chartContainer = canvas.closest('.chart-container, .section-card');
+        if (chartContainer) {
+            setTimeout(() => {
+                window.ChartExport.attachExportButtonsToCharts(chartContainer);
+            }, 100);
+        }
+    }
+}
+
+// Render top categories chart
+function renderTopCategoriesChart(categories) {
+    const canvas = document.getElementById('topCategoriesChart');
+    
+    if (charts.topCategories) {
+        charts.topCategories.destroy();
+    }
+    
+    const ctx = canvas.getContext('2d');
+    charts.topCategories = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: categories.map(c => c.name),
+            datasets: [{
+                label: 'Files',
+                data: categories.map(c => c.file_count),
+                backgroundColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    // Attach chart controls
+    if (window.ChartExport) {
+        const chartContainer = canvas.closest('.chart-container, .section-card');
+        if (chartContainer) {
+            setTimeout(() => {
+                window.ChartExport.attachExportButtonsToCharts(chartContainer);
+            }, 100);
+        }
+    }
+}
+
+// Render top words cloud
+function renderTopWordsCloud(words) {
+    const container = document.getElementById('topWordsCloud');
+    container.innerHTML = '';
+    
+    words.forEach((word, index) => {
+        const wordItem = document.createElement('div');
+        wordItem.className = 'word-item';
+        const fontSize = Math.min(0.875 + (word.files / words[0].files) * 0.75, 1.75);
+        wordItem.style.fontSize = fontSize + 'rem';
+        wordItem.innerHTML = `${word.word} <span class="count">(${word.files})</span>`;
+        wordItem.onclick = () => {
+            window.location.href = `/search?q=${encodeURIComponent(word.word)}`;
+        };
+        container.appendChild(wordItem);
+    });
+}
+
+// Render largest files table
+function renderLargestFiles(files) {
+    const tbody = document.getElementById('largestFilesTable');
+    tbody.innerHTML = '';
+    
+    files.forEach(file => {
+        const row = document.createElement('tr');
+        row.style.cursor = 'pointer';
+        row.onclick = () => window.location.href = `/file/${file.id}`;
+        
+        row.innerHTML = `
+            <td><strong>${file.name}</strong></td>
+            <td><span class="badge bg-primary">${file.type || translations.unknown}</span></td>
+            <td><strong>${formatFileSize(file.size)}</strong></td>
+            <td>${file.source}</td>
+            <td style="font-size: 0.875rem; color: var(--text-light);">${file.path}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+// Helper function
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+// Additional dashboard variables (charts object already declared above)
+let currentWordLimit = 50;
+let currentTimelinePeriod = 'month';
+
+// 🚀 OPTIMIZED: Initialize dashboard with lazy loading
+document.addEventListener('DOMContentLoaded', function() {
+    // Update active navigation button based on current page
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.dashboard-nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        const href = btn.getAttribute('href');
+        if (href && (currentPath === href || (href === '/' && currentPath === '/') || (href !== '/' && currentPath.startsWith(href)))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Load critical data immediately
+    loadDashboardSummary();
+    loadTimelineData('month');
+    loadCategoryDistribution();
+    loadFileTypeDistribution();
+    
+    // 🚀 OPTIMIZED: Lazy load file types (only needed for search dropdown)
+    // Load when search tab is activated instead of on page load
+    const searchTab = document.getElementById('tab-search');
+    if (searchTab) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !searchTab.dataset.loaded) {
+                    loadFileTypes();
+                    searchTab.dataset.loaded = 'true';
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.1 });
+        observer.observe(searchTab);
+    }
+});
+
+// 🚀 OPTIMIZED: Tab switching with lazy loading
+function switchTab(tabName) {
+    // Update buttons
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    if (event && event.target) {
+        event.target.closest('.tab-button')?.classList.add('active');
+    }
+    
+    // Update content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    const activeTab = document.getElementById('tab-' + tabName);
+    if (activeTab) {
+        activeTab.classList.add('active');
+        
+        // 🚀 OPTIMIZED: Load tab-specific data only when tab is activated
+        switch(tabName) {
+            case 'keywords':
+                if (!activeTab.dataset.loaded) {
+                    loadWordFrequency(currentWordLimit);
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+            case 'paths':
+                if (!activeTab.dataset.loaded) {
+                    loadPathHierarchy();
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+            case 'files':
+                if (!activeTab.dataset.loaded) {
+                    loadFileReports();
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+            case 'categories':
+                if (!activeTab.dataset.loaded) {
+                    loadCategoryCharts();
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+            case 'storage':
+                if (!activeTab.dataset.loaded) {
+                    loadAllStatistics();
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+            case 'search':
+                // Load file types when search tab is first opened
+                if (!activeTab.dataset.loaded) {
+                    loadFileTypes();
+                    activeTab.dataset.loaded = 'true';
+                }
+                break;
+        }
+    }
+}
+
+// 🚀 OPTIMIZED: Load dashboard summary with error handling
+async function loadDashboardSummary() {
+    try {
+        const response = await fetch('/api/analytics/dashboard-summary');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // 🚀 OPTIMIZED: Check if elements exist before updating
+        const totalFilesEl = document.getElementById('totalFiles');
+        if (totalFilesEl) totalFilesEl.textContent = (data.totalFiles || 0).toLocaleString();
+        
+        const processedFilesEl = document.getElementById('processedFiles');
+        if (processedFilesEl) processedFilesEl.textContent = (data.processedFiles || 0).toLocaleString();
+        
+        const uniqueTypesEl = document.getElementById('uniqueTypes');
+        if (uniqueTypesEl) uniqueTypesEl.textContent = data.uniqueTypes || 0;
+        
+        const totalWordsEl = document.getElementById('totalWords');
+        if (totalWordsEl) totalWordsEl.textContent = (data.totalWords || 0).toLocaleString();
+        
+        const totalCategoriesEl = document.getElementById('totalCategories');
+        if (totalCategoriesEl) totalCategoriesEl.textContent = data.totalCategories || 0;
+        
+        // Format storage size
+        const storageSizeEl = document.getElementById('storageSize');
+        if (storageSizeEl) {
+            const sizeGB = ((data.totalSize || 0) / (1024 ** 3)).toFixed(2);
+            storageSizeEl.textContent = sizeGB + ' GB';
+        }
+        
+        // Update change indicators
+        const processingRateEl = document.getElementById('processingRate');
+        if (processingRateEl) {
+            processingRateEl.textContent = (data.processingRate || 0).toFixed(1) + '% ' + translations.processed;
+        }
+        
+        const filesChangeEl = document.getElementById('filesChange');
+        if (filesChangeEl) {
+            filesChangeEl.innerHTML = `<i class="bi bi-arrow-up"></i> ${data.recentFiles || 0} ${translations.thisWeek}`;
+        }
+        
+    } catch (error) {
+        console.error('Error loading dashboard summary:', error);
+        // Show error in UI if elements exist
+        const totalFilesEl = document.getElementById('totalFiles');
+        if (totalFilesEl) totalFilesEl.textContent = '-';
+    }
+}
+
+// Load timeline data
+async function loadTimelineData(period) {
+    currentTimelinePeriod = period;
+    try {
+        const response = await fetch(`/api/analytics/timeline-data?period=${period}`);
+        const data = await response.json();
+        
+        if (charts.timeline) {
+            charts.timeline.destroy();
+        }
+        
+        const ctx = document.getElementById('timelineChart').getContext('2d');
+        charts.timeline = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: translations.totalFiles,
+                        data: data.fileCount,
+                        borderColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: translations.processedFiles,
+                        data: data.processedCount,
+                        borderColor: window.ChartColors ? window.ChartColors.getThemeColors().success : '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        ...CHART_CONFIG.plugins.legend
+                    },
+                    tooltip: CHART_CONFIG.plugins.tooltip,
+                    title: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ...CHART_CONFIG.scales.x
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ...CHART_CONFIG.scales.y
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading timeline data:', error);
+    }
+}
+
+function updateTimeline(period) {
+    document.querySelectorAll('#tab-overview .btn-control').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    loadTimelineData(period);
+}
+
+// Load category distribution
+async function loadCategoryDistribution() {
+    try {
+        const response = await fetch('/api/analytics/category-distribution');
+        const data = await response.json();
+        
+        if (charts.processing) {
+            charts.processing.destroy();
+        }
+        
+        const ctx = document.getElementById('processingChart').getContext('2d');
+        charts.processing = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.labels.slice(0, 5),
+                datasets: [{
+                    data: data.values.slice(0, 5),
+                    backgroundColor: window.ChartColors ? [
+                        window.ChartColors.getThemeColors().primary,
+                        window.ChartColors.getThemeColors().success,
+                        window.ChartColors.getThemeColors().warning,
+                        window.ChartColors.getThemeColors().danger,
+                        window.ChartColors.getThemeColors().secondary
+                    ] : [
+                        '#667eea',
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444',
+                        '#06b6d4'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        ...CHART_CONFIG.plugins.legend
+                    },
+                    tooltip: CHART_CONFIG.plugins.tooltip
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading category distribution:', error);
+    }
+}
+
+// Load category charts (for categories tab)
+async function loadCategoryCharts() {
+    try {
+        const response = await fetch('/api/analytics/category-distribution');
+        const data = await response.json();
+        
+        // Pie chart
+        if (charts.categoryPie) {
+            charts.categoryPie.destroy();
+        }
+        
+        const pieCtx = document.getElementById('categoryPieChart').getContext('2d');
+        charts.categoryPie = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    data: data.values,
+                    backgroundColor: window.ChartColors ? window.ChartColors.getChartColors(15) : [
+                        '#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444',
+                        '#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6',
+                        '#6366f1', '#84cc16', '#f43f5e', '#06b6d4', '#a855f7'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        ...CHART_CONFIG.plugins.legend
+                    },
+                    tooltip: CHART_CONFIG.plugins.tooltip,
+                    title: {
+                        display: true,
+                        text: translations.categoryDistribution,
+                        font: {
+                            size: 16,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Bar chart
+        if (charts.categoryBar) {
+            charts.categoryBar.destroy();
+        }
+        
+        const barCtx = document.getElementById('categoryBarChart').getContext('2d');
+        charts.categoryBar = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: translations.numberFiles,
+                    data: data.values,
+                    backgroundColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: CHART_CONFIG.plugins.tooltip,
+                    title: {
+                        display: true,
+                        text: translations.filesPerCategory,
+                        font: {
+                            size: 16,
+                            weight: '600'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ...CHART_CONFIG.scales.x
+                    },
+                    y: {
+                        ...CHART_CONFIG.scales.y
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading category charts:', error);
+    }
+}
+
+// Load file type distribution
+async function loadFileTypeDistribution() {
+    try {
+        const response = await fetch('/api/analytics/file-type-distribution');
+        const data = await response.json();
+        
+        if (charts.fileType) {
+            charts.fileType.destroy();
+        }
+        
+        const ctx = document.getElementById('fileTypeChart').getContext('2d');
+        charts.fileType = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.types.map(t => t.type).slice(0, 10),
+                datasets: [{
+                    label: translations.numberFiles,
+                    data: data.types.map(t => t.count).slice(0, 10),
+                    backgroundColor: window.ChartColors ? window.ChartColors.getThemeColors().primary : '#667eea'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: CHART_CONFIG.layout,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: CHART_CONFIG.plugins.tooltip
+                },
+                scales: {
+                    x: {
+                        ...CHART_CONFIG.scales.x
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ...CHART_CONFIG.scales.y
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading file type distribution:', error);
+    }
+}
+
+// Load word frequency
+async function loadWordFrequency(limit) {
+    currentWordLimit = limit;
+    const grid = document.getElementById('wordFrequencyGrid');
+    grid.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>${translations.loadingWordFrequency}</p></div>`;
+    
+    try {
+        const response = await fetch(`/api/analytics/word-frequency?limit=${limit}`);
+        const data = await response.json();
+        
+        if (data.words && data.words.length > 0) {
+            grid.innerHTML = '';
+            data.words.forEach(word => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.innerHTML = `
+                    <div class="word">${word.word}</div>
+                    <div class="frequency">${word.frequency} ${translations.files}</div>
+                `;
+                wordItem.onclick = () => {
+                    document.getElementById('searchQuery').value = word.word;
+                    switchTab('search');
+                    performSearch();
+                };
+                grid.appendChild(wordItem);
+            });
+        } else {
+            grid.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><h3>${translations.noWordData}</h3></div>`;
+        }
+    } catch (error) {
+        console.error('Error loading word frequency:', error);
+        grid.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-circle"></i><h3>${translations.errorLoadingData}</h3></div>`;
+    }
+}
+
+function updateWordLimit(limit) {
+    document.querySelectorAll('#tab-keywords .btn-control').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    loadWordFrequency(limit);
+}
+
+// Load path hierarchy
+async function loadPathHierarchy() {
+    const tree = document.getElementById('pathTree');
+    if (!tree) return; // Element might not exist if tab not active
+    
+    tree.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>${translations.loadingPathHierarchy}</p></div>`;
+    
+    try {
+        const response = await fetch('/api/analytics/path-hierarchy');
+        const data = await response.json();
+        
+        // 🚀 FIXED: Use 'structure' instead of 'hierarchy' to match API response
+        const structure = data.structure || data.hierarchy || [];
+        
+        if (structure.length > 0) {
+            tree.innerHTML = '';
+            structure.forEach(path => {
+                const li = document.createElement('li');
+                const processingRate = path.file_count > 0 ? 
+                    ((path.processed_count / path.file_count) * 100).toFixed(1) : 0;
+                li.innerHTML = `
+                    <div class="path-item">
+                        <div class="path-name">
+                            <i class="bi ${path.isArchive ? 'bi-file-earmark-zip' : 'bi-folder'}"></i>
+                            <span>${path.name || path.path || 'Root'}</span>
+                        </div>
+                        <div class="path-metrics">
+                            <span><i class="bi bi-files"></i> ${path.file_count || path.totalFiles || 0} ${translations.files}</span>
+                            <span><i class="bi bi-check-circle"></i> ${path.processed_count || path.processedFiles || 0} ${translations.processed}</span>
+                            <span><i class="bi bi-hdd"></i> ${formatFileSize(path.total_size || path.totalSize || 0)}</span>
+                            <span><i class="bi bi-percent"></i> ${processingRate}%</span>
+                        </div>
+                    </div>
+                `;
+                tree.appendChild(li);
+            });
+        } else {
+            tree.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><h3>${translations.noPathData}</h3></div>`;
+        }
+    } catch (error) {
+        console.error('Error loading path hierarchy:', error);
+        tree.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-circle"></i><h3>${translations.errorLoadingData}</h3></div>`;
+    }
+}
+
+// Load file reports
+async function loadFileReports() {
+    const grid = document.getElementById('fileReportsGrid');
+    grid.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>${translations.loadingFileReports}</p></div>`;
+    
+    try {
+        const response = await fetch('/api/analytics/search-files?limit=20');
+        const data = await response.json();
+        
+        if (data.files && data.files.length > 0) {
+            grid.innerHTML = '';
+            data.files.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'file-report-card';
+                card.onclick = () => window.location.href = `/file/${file.id}`;
+                
+                const fileIcon = getFileIcon(file.type);
+                const fileSize = formatFileSize(file.size);
+                
+                card.innerHTML = `
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-meta">
+                        <span><i class="bi bi-file-earmark"></i> ${file.type || 'Unknown'}</span>
+                        <span><i class="bi bi-hdd"></i> ${fileSize}</span>
+                        <span><i class="bi bi-calendar"></i> ${file.date ? new Date(file.date).toLocaleDateString() : 'N/A'}</span>
+                    </div>
+                    <div class="file-summary">
+                        ${translations.source}: ${file.source || translations.unknown}<br>
+                        ${translations.status}: ${file.status || translations.unknown}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } else {
+            grid.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i><h3>${translations.noFilesAvailable}</h3></div>`;
+        }
+    } catch (error) {
+        console.error('Error loading file reports:', error);
+        grid.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-circle"></i><h3>${translations.errorLoadingData}</h3></div>`;
+    }
+}
+
+// Load file types for dropdown
+async function loadFileTypes() {
+    try {
+        const response = await fetch('/api/analytics/file-type-distribution');
+        const data = await response.json();
+        
+        const select = document.getElementById('searchType');
+        data.types.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.type;
+            option.textContent = type.type;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error loading file types:', error);
+    }
+}
+
+// Perform search
+async function performSearch() {
+    const query = document.getElementById('searchQuery').value;
+    const type = document.getElementById('searchType').value;
+    const resultsGrid = document.getElementById('searchResults');
+    
+    resultsGrid.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>${translations.searching}</p></div>`;
+    
+    try {
+        const params = new URLSearchParams();
+        if (query) params.append('q', query);
+        if (type) params.append('type', type);
+        params.append('limit', '50');
+        
+        const response = await fetch(`/api/analytics/search-files?${params.toString()}`);
+        const data = await response.json();
+        
+        document.getElementById('searchResultCount').textContent = `${data.files.length} ${translations.results}`;
+        
+        if (data.files && data.files.length > 0) {
+            resultsGrid.innerHTML = '';
+            data.files.forEach(file => {
+                const card = document.createElement('div');
+                card.className = 'file-report-card';
+                card.onclick = () => window.location.href = `/file/${file.id}`;
+                
+                const fileIcon = getFileIcon(file.type);
+                const fileSize = formatFileSize(file.size);
+                
+                card.innerHTML = `
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-meta">
+                        <span><i class="bi bi-file-earmark"></i> ${file.type || 'Unknown'}</span>
+                        <span><i class="bi bi-hdd"></i> ${fileSize}</span>
+                        <span><i class="bi bi-calendar"></i> ${file.date ? new Date(file.date).toLocaleDateString() : 'N/A'}</span>
+                    </div>
+                    <div class="file-summary">
+                        ${translations.source}: ${file.source || translations.unknown}<br>
+                        ${translations.status}: ${file.status || translations.unknown}
+                    </div>
+                `;
+                resultsGrid.appendChild(card);
+            });
+        } else {
+            resultsGrid.innerHTML = `<div class="empty-state"><i class="bi bi-search"></i><h3>${translations.noResultsFound}</h3><p>${translations.tryDifferentCriteria}</p></div>`;
+        }
+    } catch (error) {
+        console.error('Error performing search:', error);
+        resultsGrid.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-circle"></i><h3>${translations.searchError}</h3></div>`;
+    }
+}
+
+// Helper functions
+function getFileIcon(type) {
+    const iconMap = {
+        'pdf': '<i class="bi bi-file-pdf"></i>',
+        'doc': '<i class="bi bi-file-word"></i>',
+        'docx': '<i class="bi bi-file-word"></i>',
+        'xls': '<i class="bi bi-file-excel"></i>',
+        'xlsx': '<i class="bi bi-file-excel"></i>',
+        'ppt': '<i class="bi bi-file-ppt"></i>',
+        'pptx': '<i class="bi bi-file-ppt"></i>',
+        'txt': '<i class="bi bi-file-text"></i>',
+        'jpg': '<i class="bi bi-file-image"></i>',
+        'jpeg': '<i class="bi bi-file-image"></i>',
+        'png': '<i class="bi bi-file-image"></i>',
+        'gif': '<i class="bi bi-file-image"></i>',
+        'mp4': '<i class="bi bi-file-play"></i>',
+        'mp3': '<i class="bi bi-file-music"></i>',
+        'zip': '<i class="bi bi-file-zip"></i>',
+        'rar': '<i class="bi bi-file-zip"></i>'
+    };
+    return iconMap[type?.toLowerCase()] || '<i class="bi bi-file-earmark"></i>';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Allow Enter key to trigger search
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Start polling for active processing tasks
+    startProcessingProgressPolling();
+});
+
+// Processing Progress Bar Functions
+let processingProgressInterval = null;
+
+function startProcessingProgressPolling() {
+    // Poll every 2 seconds for active tasks
+    processingProgressInterval = setInterval(updateProcessingProgress, 2000);
+    // Initial update
+    updateProcessingProgress();
+}
+
+function stopProcessingProgressPolling() {
+    if (processingProgressInterval) {
+        clearInterval(processingProgressInterval);
+        processingProgressInterval = null;
+    }
+}
+
+async function updateProcessingProgress() {
+    try {
+        const response = await fetch('/upload/active-tasks');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const container = document.getElementById('processingProgressContainer');
+        const tasksList = document.getElementById('activeTasksList');
+        
+        if (data.success && data.tasks && data.tasks.length > 0) {
+            // Show container
+            container.style.display = 'block';
+            
+            // Render tasks
+            tasksList.innerHTML = data.tasks.map(task => {
+                const progressPercent = task.progress_percent || 0;
+                const statusClass = task.status === 'running' ? 'running' : 'pending';
+                const statusIcon = task.status === 'running' ? 'bi-arrow-repeat' : 'bi-hourglass-split';
+                
+                return `
+                    <div class="processing-task-item ${statusClass}">
+                        <div class="task-header">
+                            <div class="task-info">
+                                <i class="bi ${statusIcon}"></i>
+                                <span class="task-label">${escapeHtml(task.label || 'Processing...')}</span>
+                            </div>
+                            <span class="task-percent">${Math.round(progressPercent)}%</span>
+                        </div>
+                        <div class="task-message">${escapeHtml(task.message || '')}</div>
+                        <div class="progress-bar-wrapper" style="margin-top: 0.5rem;">
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width: ${progressPercent}%;"></div>
+                                <div class="progress-bar-text">${task.current || 0} / ${task.total || 0} files</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            // Hide container if no active tasks
+            container.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error updating processing progress:', error);
+        // Don't show error to user, just hide the container
+        document.getElementById('processingProgressContainer').style.display = 'none';
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+
+<style>
+/* Dashboard Navigation */
+.dashboard-navigation {
+    background: var(--bg-section);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.dashboard-nav-btn {
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.dashboard-nav-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--text-white);
+}
+
+.dashboard-nav-btn:hover:not(.active) {
+    background-color: var(--border-light);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.processing-progress-container {
+    margin-bottom: 1.5rem;
+}
+
+.processing-task-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--bg-section);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    border-left: 4px solid var(--info-color);
+}
+
+.processing-task-item.running {
+    border-left-color: var(--info-color);
+    background: var(--alert-info-bg);
+}
+
+.processing-task-item.pending {
+    border-left-color: var(--warning-color);
+    background: var(--alert-warning-bg);
+}
+
+.task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.task-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task-info i {
+    font-size: 1.1rem;
+    color: var(--info-color);
+}
+
+.task-label {
+    font-weight: 600;
+    color: var(--text-heading);
+}
+
+.task-percent {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--info-color);
+}
+
+.task-message {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar-wrapper {
+    background: var(--border-light);
+    border-radius: 0.25rem;
+    padding: 2px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007acc 0%, #005a9e 100%);
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.progress-bar-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #495057;
+    font-size: 11px;
+    font-weight: 600;
+    z-index: 1;
+    pointer-events: none;
+}
+</style>
+{% endblock %}
+

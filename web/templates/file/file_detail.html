@@ -1,0 +1,1316 @@
+{% extends "base.html" %}
+
+{% block title %}{{ file[1] }} - {{ _('File Details') }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ================= Tabs visibility fix ================= */
+/* Some earlier blocks set `.tab-content { display:none; }` which hides all tabs. */
+.tab-content {
+    display: block !important; /* container should participate in layout */
+}
+
+/* Let Bootstrap handle panes, but ensure a sane fallback */
+.tab-content .tab-pane { display: none; }
+.tab-content .tab-pane.active,
+.tab-content .tab-pane.show { display: block; }
+/* ================= End tabs fix ================= */
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- File Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h4 mb-0">
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                {{ file[1][:100] }}{% if file[1]|length > 100 %}...{% endif %}
+                            </h1>
+                            <div class="d-flex gap-3 mt-2">
+                                <small><i class="bi bi-hdd me-1"></i>
+                                    {% if file[3] > 1048576 %}
+                                        {{ (file[3] / 1048576)|round(1) }} MB
+                                    {% else %}
+                                        {{ (file[3] / 1024)|round(1) }} KB
+                                    {% endif %}
+                                </small>
+                                <small><i class="bi bi-calendar me-1"></i>{{ file[7].strftime('%Y-%m-%d') if file[7] else 'N/A' }}</small>
+                                <small><i class="bi bi-building me-1"></i>{{ file[9] if file|length > 9 else 'Unknown' }}</small>
+                                <small><i class="bi bi-flag me-1"></i>{{ file[10] if file|length > 10 else 'Unknown' }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light btn-sm" onclick="toggleFullscreen()">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="shareFile()">
+                                <i class="bi bi-share"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="window.print()">
+                                <i class="bi bi-printer"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm" onclick="exportFile()">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="fileTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="content-tab-btn" data-bs-toggle="tab" data-bs-target="#tabContent" type="button" role="tab">
+                        <i class="bi bi-file-text me-2"></i>{{ _('Content') }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analysis-tab-btn" data-bs-toggle="tab" data-bs-target="#tabAnalysis" type="button" role="tab">
+                        <i class="bi bi-graph-up me-2"></i>{{ _('Analysis') }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="metadata-tab-btn" data-bs-toggle="tab" data-bs-target="#tabMetadata" type="button" role="tab">
+                        <i class="bi bi-info-circle me-2"></i>{{ _('Metadata') }}
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="fileTabContent">
+        <!-- CONTENT TAB -->
+        <div class="tab-pane fade show active" id="tabContent" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-lg-9">
+                    <!-- Search Controls -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-search me-2"></i>{{ _('Search in Document') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="bi bi-search"></i>
+                                        </span>
+                                        <input type="text" class="form-control" id="searchInput" 
+                                               placeholder="{{ _('Search within this document...') }}" 
+                                               value="{{ search_query }}"
+                                               onkeypress="if(event.key==='Enter') performSearch()">
+                                        <button class="btn btn-primary" onclick="performSearch()">
+                                            <i class="bi bi-search me-1"></i>{{ _('Search') }}
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="clearSearch()">
+                                            <i class="bi bi-x-circle me-1"></i>{{ _('Clear') }}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="caseSensitive" 
+                                                   {% if case_sensitive %}checked{% endif %}>
+                                            <label class="form-check-label" for="caseSensitive">
+                                                {{ _('Case Sensitive') }}
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="wholeWord" 
+                                                   {% if whole_word %}checked{% endif %}>
+                                            <label class="form-check-label" for="wholeWord">
+                                                {{ _('Whole Word') }}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Search Results -->
+                            <div class="mt-3" id="searchResults" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-primary" id="resultCount">{{ _('0 results') }}</span>
+                                        <span class="badge bg-info ms-2" id="currentMatch">{{ _('Match 0 of 0') }}</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="findPrevious()">
+                                            <i class="bi bi-arrow-up"></i> {{ _('Previous') }}
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="findNext()">
+                                            <i class="bi bi-arrow-down"></i> {{ _('Next') }}    
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Display -->
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-file-text me-2"></i>{{ _('Document Content') }}
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyContent()">
+                                    <i class="bi bi-clipboard me-1"></i>{{ _('Copy') }}
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadContent()">
+                                    <i class="bi bi-download me-1"></i>{{ _('Download') }}  
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            {% set content_str = content|string if content else '' %}
+                            {% set content_length = content_str|length if content_str else 0 %}
+                            {% if content_length > 0 %}
+                            <div class="content-viewer" id="contentViewer">
+                                <pre class="content-text" id="contentText">{{ content_str|e }}</pre>
+                            </div>
+                            
+                            <!-- Pagination -->
+                            {% if total_pages > 1 %}
+                            <div class="pagination-controls mt-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="goToPage({{ current_page - 1 }})" 
+                                                {% if current_page <= 1 %}disabled{% endif %}>
+                                            <i class="bi bi-chevron-left"></i> {{ _('Previous') }}
+                                        </button>
+                                        
+                                        <span class="text-muted">
+                                            {{ _('Page') }} <strong>{{ current_page }}</strong> {{ _('of') }} <strong>{{ total_pages }}</strong>
+                                        </span>
+                                        
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="goToPage({{ current_page + 1 }})" 
+                                                {% if current_page >= total_pages %}disabled{% endif %}>
+                                            {{ _('Next') }} <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label class="form-label mb-0">{{ _('Page size:') }}</label>
+                                        <select class="form-select form-select-sm" style="width: auto;" onchange="changePageSize(this.value)">
+                                            <option value="2000" {% if per_page == 2000 %}selected{% endif %}>2,000</option>
+                                            <option value="5000" {% if per_page == 5000 %}selected{% endif %}>5,000</option>
+                                            <option value="10000" {% if per_page == 10000 %}selected{% endif %}>10,000</option>
+                                        </select>
+                                        
+                                        <div class="d-flex align-items-center gap-1">
+                                            <label class="form-label mb-0">{{ _('Go to:') }}</label>
+                                            <input type="number" class="form-control form-control-sm" style="width: 80px;" 
+                                                   id="pageJump" min="1" max="{{ total_pages }}" value="{{ current_page }}"
+                                                   onkeypress="if(event.key==='Enter') jumpToPage()">
+                                            <button class="btn btn-sm btn-primary" onclick="jumpToPage()">{{ _('Go') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="mt-3">
+                                <a href="/file/{{ file[0] }}/full-content?page={{ current_page }}&per_page={{ per_page }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye me-1"></i>{{ _('View Full Content') }}
+                                </a>
+                                <a href="/file/{{ file[0] }}/reprocess" class="btn btn-warning btn-sm ms-2" 
+                                   onclick="return confirm({{ _('Reprocess this file? This may take a moment.')|tojson }})">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>{{ _('Reprocess') }}
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox display-4 text-muted"></i>
+                                <h5 class="text-muted mt-3">{{ _('No content available') }}</h5>
+                                <p class="text-muted">{{ _('This file may not have been processed yet, or the content could not be loaded.') }}</p>
+                                <div class="mt-3">
+                                    <a href="/file/{{ file[0] }}/reprocess" class="btn btn-warning btn-sm" 
+                                       onclick="return confirm({{ _('Reprocess this file? This will extract and store the content again.')|tojson }})">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>{{ _('Reprocess File') }}
+                                    </a>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <!-- File Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>{{ _('File Information') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr><th>{{ _('Type:') }}</th><td><span class="badge bg-secondary">{{ file[4] }}</span></td></tr>
+                                <tr><th>{{ _('Size:') }}</th><td>{{ (file[3] / 1024)|round(2) }} KB</td></tr>
+                                <tr><th>{{ _('Created:') }}</th><td>{{ file[7].strftime('%Y-%m-%d %H:%M') if file[7] else 'N/A' }}</td></tr>
+                                <tr><th>{{ _('Status:') }}</th><td><span class="badge bg-success">{{ file[5] }}</span></td></tr>
+                                <tr><th>{{ _('Source:') }}</th><td>{{ file[9] if file|length > 9 else 'Unknown' }}</td></tr>
+                                <tr><th>{{ _('Side:') }}</th><td>{{ file[10] if file|length > 10 else 'Unknown' }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    {% if enhanced_stats %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-bar-chart me-2"></i>{{ _('Quick Stats') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="h4 text-primary">{{ enhanced_stats.words or 0 }}</div>
+                                        <small class="text-muted">{{ _('Words') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="h4 text-success">{{ enhanced_stats.sentences or 0 }}</div>
+                                        <small class="text-muted">{{ _('Sentences') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="h4 text-info">{{ enhanced_stats.paragraphs or 0 }}</div>
+                                        <small class="text-muted">{{ _('Paragraphs') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-item">
+                                        <div class="h4 text-warning">{{ enhanced_stats.characters or 0 }}</div>
+                                        <small class="text-muted">{{ _('Characters') }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYSIS TAB -->
+        <div class="tab-pane fade" id="tabAnalysis" role="tabpanel">
+            <div class="row mt-4">
+                <!-- Classification Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-pie-chart me-2"></i>{{ _('Classification Analysis') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if percentages %}
+                            <div class="chart-container">
+                                <canvas id="classificationChart"></canvas>
+                            </div>
+                            
+                            <div class="mt-4">
+                                {% for category, data in percentages.items() %}
+                                {% if loop.index0 < 5 %}
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>{{ category }}</strong>
+                                        <span class="badge bg-primary">{{ (data.percentage or 0)|round(1) }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar" style="width: {{ data.percentage or 0 }}%"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-graph-down display-4 text-muted"></i>
+                                <p class="text-muted mt-3">{{ _('No classification data available') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+           
+                <!-- Word Frequency Chart -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-bar-chart me-2"></i>{{ _('Word Frequency') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if word_frequencies %}
+                            <div class="chart-container">
+                                <canvas id="frequencyChart"></canvas>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-graph-down display-4 text-muted"></i>
+                                <p class="text-muted mt-3">{{ _('No frequency data available') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Keywords (simplified) -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-list-ul me-2"></i>{{ _('Top Keywords') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if word_frequencies %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="50">#</th>
+                                            <th>{{ _('Keyword') }}</th>
+                                            <th width="120">{{ _('Frequency') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in word_frequencies[:20] %}
+                                            {% if item[0] is defined %}
+                                                <tr>
+                                                    <td><span class="badge bg-secondary">{{ loop.index }}</span></td>
+                                                    <td>{{ item[0] }}</td>
+                                                    <td><span class="badge bg-primary">{{ item[1] }}</span></td>
+                                                </tr>
+                                            {% elif item.word is defined %}
+                                                <tr>
+                                                    <td><span class="badge bg-secondary">{{ loop.index }}</span></td>
+                                                    <td>{{ item.word }}</td>
+                                                    <td><span class="badge bg-primary">{{ item.count or item.frequency or item.word_count or 0 }}</span></td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="bi bi-inbox display-4 text-muted"></i>
+                                <p class="text-muted mt-3">{{ _('No keywords available') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- METADATA TAB -->
+        <div class="tab-pane fade" id="tabMetadata" role="tabpanel">
+            <div class="row mt-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-pencil-square me-2"></i>{{ _('Document Metadata') }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="metadataForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('File Name') }}</label>
+                                        <input type="text" class="form-control" value="{{ file[1] }}" id="metaName">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('File Type') }}</label>
+                                        <input type="text" class="form-control" value="{{ file[4] }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('Source') }}</label>
+                                        <input type="text" class="form-control" value="{{ file[9] if file|length > 9 else 'Unknown' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('Side') }}</label>
+                                        <input type="text" class="form-control" value="{{ file[10] if file|length > 10 else 'Unknown' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('File Date') }}  </label>
+                                        <input type="text" class="form-control" value="{{ file[6].strftime('%Y-%m-%d') if file[6] else 'N/A' }}" readonly>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">{{ _('Date Created') }}</label>
+                                        <input type="text" class="form-control" value="{{ file[7].strftime('%Y-%m-%d %H:%M:%S') if file[7] else 'N/A' }}" readonly>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">{{ _('Notes') }}</label>
+                                        <textarea class="form-control" rows="5" id="metaNotes" 
+                                                  placeholder="{{ _('Add your notes about this document...') }}"></textarea>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="button" class="btn btn-primary" onclick="saveMetadata()">
+                                        <i class="bi bi-save me-2"></i>{{ _('Save Changes') }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>{{ _('File Details') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr><th>{{ _('ID:') }}</th><td>{{ file[0] }}</td></tr>
+                                <tr><th>{{ _('Path:') }}</th><td><small class="text-muted" style="word-break: break-all;">{{ file[2] }}</small></td></tr>
+                                <tr><th>{{ _('Size:') }}</th><td>{{ (file[3] / 1024)|round(2) }} KB</td></tr>
+                                <tr><th>{{ _('File Date:') }}</th><td>{{ file[6].strftime('%Y-%m-%d') if file[6] else 'N/A' }}</td></tr>
+                                <tr><th>{{ _('Created:') }}</th><td>{{ file[7].strftime('%Y-%m-%d %H:%M:%S') if file[7] else 'N/A' }}</td></tr>
+                                <tr><th>{{ _('Status:') }}</th><td><span class="badge bg-success">{{ file[5] }}</span></td></tr>
+                                <tr><th>{{ _('Hash ID:') }}</th><td><small class="text-muted">{{ file[8] if file|length > 8 else 'N/A' }}</small></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-shield-lock me-2"></i>{{ _('Security & Hash') }}
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr><th>{{ _('Hash:') }}</th><td><small class="text-muted" style="word-break: break-all;">{{ file[11] if file|length > 11 and file[11] else 'N/A' }}</small></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+
+<script>
+// Translations for JavaScript
+const translations = {
+    noMatches: {{ _('No matches')|tojson }},
+    chartLibraryNotLoaded: {{ _('Chart library not loaded')|tojson }},
+    noDataAvailable: {{ _('No data available')|tojson }},
+    noFrequencyDataAvailable: {{ _('No frequency data available')|tojson }},
+    invalidDataFormat: {{ _('Invalid data format')|tojson }},
+    noValidFrequencyData: {{ _('No valid frequency data')|tojson }},
+    contentCopiedToClipboard: {{ _('Content copied to clipboard!')|tojson }},
+    metadataSavedSuccessfully: {{ _('Metadata saved successfully!')|tojson }},
+    shareLinkCopiedToClipboard: {{ _('Share link copied to clipboard!')|tojson }},
+    error: {{ _('Error')|tojson }}
+};
+
+// Global variables
+const fileId = {{ file[0] }};
+let currentPage = {{ current_page }};
+let totalPages = {{ total_pages or 0 }};
+let perPage = {{ per_page }};
+let totalChars = {{ total_chars or 0 }};
+let searchResults = [];
+let currentSearchIndex = 0;
+let chartInstances = {};
+let chartsInitialized = false;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('File detail page loaded');
+    console.log(`Total chars: ${totalChars}, Total pages: ${totalPages}`);
+    
+    // Verify content element and store original content
+    const contentElement = document.getElementById('contentText');
+    if (contentElement) {
+        const contentLength = contentElement.textContent.length;
+        console.log(`Content element found with ${contentLength} characters`);
+        
+        // Store original content for search functionality
+        if (!contentElement.getAttribute('data-original-content')) {
+            contentElement.setAttribute('data-original-content', contentElement.innerHTML);
+        }
+        
+        if (contentLength === 0 && totalChars > 0) {
+            console.warn('Content element empty but total_chars indicates content exists');
+        }
+        
+        // Verify content is visible
+        if (contentLength > 0) {
+            console.log('✅ Content is available and visible');
+            
+            // Force visibility with explicit styles
+            contentElement.style.display = 'block';
+            contentElement.style.visibility = 'visible';
+            contentElement.style.opacity = '1';
+            contentElement.style.color = 'var(--text-dark)';
+            contentElement.style.background = 'var(--bg-white)';
+            contentElement.style.whiteSpace = 'pre-wrap';
+            contentElement.style.wordWrap = 'break-word';
+            contentElement.style.overflowWrap = 'break-word';
+            contentElement.style.padding = '1rem';
+            contentElement.style.margin = '0';
+            contentElement.style.boxSizing = 'border-box';
+            
+            // Use scrollHeight to get actual content height and set it explicitly
+            setTimeout(function() {
+                const scrollHeight = contentElement.scrollHeight;
+                if (scrollHeight > 0) {
+                    contentElement.style.height = scrollHeight + 'px';
+                    console.log('Set height from scrollHeight:', scrollHeight);
+                } else {
+                    // Fallback: estimate from content
+                    const charCount = contentElement.textContent.length;
+                    const estimatedHeight = Math.max(400, Math.ceil(charCount / 4)); // ~4 chars per pixel
+                    contentElement.style.height = estimatedHeight + 'px';
+                    console.log('Set estimated height:', estimatedHeight);
+                }
+            }, 10);
+            
+            // Also ensure parent is visible
+            const contentViewer = document.getElementById('contentViewer');
+            if (contentViewer) {
+                contentViewer.style.display = 'block';
+                contentViewer.style.visibility = 'visible';
+                contentViewer.style.opacity = '1';
+                console.log('✅ Content viewer container made visible');
+            }
+            
+            // Check if content is actually visible
+            const computedStyle = window.getComputedStyle(contentElement);
+            const rect = contentElement.getBoundingClientRect();
+            console.log('Content element computed styles:', {
+                display: computedStyle.display,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                color: computedStyle.color,
+                height: computedStyle.height,
+                width: computedStyle.width,
+                boundingRect: { width: rect.width, height: rect.height, top: rect.top, left: rect.left }
+            });
+            
+            // If element has no dimensions, force them
+            if (rect.height === 0 || rect.width === 0) {
+                console.log('Element text content length:', contentElement.textContent.length);
+                console.log('Element innerHTML length:', contentElement.innerHTML.length);
+                
+                // Force explicit dimensions
+                contentElement.style.minHeight = '200px';
+                contentElement.style.height = 'auto';
+                contentElement.style.width = '100%';
+                contentElement.style.position = 'relative';
+                contentElement.style.whiteSpace = 'pre-wrap';
+                contentElement.style.padding = '1rem';
+                contentElement.style.margin = '0';
+                contentElement.style.boxSizing = 'border-box';
+                
+                // Force parent dimensions too
+                if (contentViewer) {
+                    contentViewer.style.minHeight = '400px';
+                    contentViewer.style.height = 'auto';
+                    contentViewer.style.width = '100%';
+                    contentViewer.style.position = 'relative';
+                    contentViewer.style.overflow = 'visible';
+                }
+                
+                // Try to force a reflow
+                void contentElement.offsetHeight;
+                
+                // Check again after forcing
+                setTimeout(function() {
+                    const newRect = contentElement.getBoundingClientRect();
+                    console.log('After forcing dimensions:', {
+                        width: newRect.width,
+                        height: newRect.height,
+                        top: newRect.top,
+                        left: newRect.left
+                    });
+                    
+                    if (newRect.height === 0) {
+                  
+                        // Last resort: set explicit height based on content
+                        const text = contentElement.textContent || '';
+                        const lineCount = text.split('\n').length;
+                        const charCount = text.length;
+                        // Estimate: ~80 chars per line, ~20px per line
+                        const estimatedLines = Math.max(lineCount, Math.ceil(charCount / 80));
+                        const estimatedHeight = Math.max(400, estimatedLines * 20);
+                        contentElement.style.height = estimatedHeight + 'px';
+                        contentElement.style.overflowY = 'auto';
+                        console.log('Set explicit height to:', estimatedHeight, 'px (lines:', estimatedLines, ', chars:', charCount, ')');
+                        
+                        // Also try setting scrollHeight if available
+                        if (contentElement.scrollHeight > 0) {
+                            contentElement.style.height = contentElement.scrollHeight + 'px';
+                            console.log('Using scrollHeight:', contentElement.scrollHeight);
+                        }
+                    }
+                }, 50);
+            }
+            
+            // Last resort: try to make it absolutely visible
+            setTimeout(function() {
+                contentElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+                console.log('Attempted to scroll content into view');
+            }, 100);
+        } else {
+            console.log('⚠️ Content element is empty');
+        }
+    } else {
+        console.warn('Content element not found - this is expected if no content is available');
+    }
+    
+    // Initialize search state
+    restoreSearchState();
+    
+    // Set up tab event listeners with both Bootstrap 5 events and click fallbacks
+    const analysisTab = document.getElementById('analysis-tab-btn');
+    const metadataTab = document.getElementById('metadata-tab-btn');
+    
+    if (analysisTab) {
+        // Bootstrap 5 event
+        analysisTab.addEventListener('shown.bs.tab', function() {
+            console.log('Analysis tab shown');
+            if (!chartsInitialized) {
+                setTimeout(initializeCharts, 100); // Small delay to ensure DOM is ready
+            }
+        });
+        
+        // Click fallback for compatibility
+        analysisTab.addEventListener('click', function() {
+            setTimeout(function() {
+                const analysisPane = document.getElementById('tabAnalysis');
+                if (analysisPane && analysisPane.classList.contains('active')) {
+                    if (!chartsInitialized) {
+                        initializeCharts();
+                    }
+                }
+            }, 200);
+        });
+    }
+    
+    if (metadataTab) {
+        // Bootstrap 5 event
+        metadataTab.addEventListener('shown.bs.tab', ensureMetadataVisible);
+        
+        // Click fallback for compatibility
+        metadataTab.addEventListener('click', function() {
+            setTimeout(ensureMetadataVisible, 200);
+        });
+    }
+});
+
+// ==================== SEARCH FUNCTIONALITY ====================
+
+function restoreSearchState() {
+    try {
+        const q = {{ search_query|tojson|safe }};
+        const cs = {{ case_sensitive|lower }};
+        const ww = {{ whole_word|lower }};
+        const input = document.getElementById('searchInput');
+        const csEl = document.getElementById('caseSensitive');
+        const wwEl = document.getElementById('wholeWord');
+        if (typeof q === 'string' && q.length > 0 && input) {
+            input.value = q;
+            if (csEl) csEl.checked = (cs === true || cs === 'true');
+            if (wwEl) wwEl.checked = (ww === true || ww === 'true');
+            setTimeout(performSearch, 50);
+        }
+    } catch (error) {
+        console.error('Error restoring search state:', error);
+    }
+}
+
+function performSearch() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) {
+        clearSearch();
+        return;
+    }
+    
+    const caseSensitive = document.getElementById('caseSensitive').checked;
+    const wholeWord = document.getElementById('wholeWord').checked;
+    
+    const contentElement = document.getElementById('contentText');
+    if (!contentElement) return;
+    
+    const content = contentElement.textContent;
+    searchResults = [];
+    currentSearchIndex = 0;
+    
+    let pattern = query;
+    if (wholeWord) {
+        pattern = `\\b${pattern}\\b`;
+    }
+    
+    const flags = caseSensitive ? 'g' : 'gi';
+    const regex = new RegExp(pattern, flags);
+    
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+        searchResults.push({ 
+            index: match.index, 
+            length: match[0].length,
+            text: match[0]
+        });
+    }
+    
+    updateSearchUI();
+    highlightMatches();
+    document.getElementById('searchResults').style.display = 'block';
+    
+    if (searchResults.length > 0) {
+        scrollToMatch(searchResults[0]);
+    }
+}
+
+function updateSearchUI() {
+    const resultCount = document.getElementById('resultCount');
+    const currentMatch = document.getElementById('currentMatch');
+    
+    if (searchResults.length === 0) {
+        resultCount.textContent = '0 results';
+        resultCount.className = 'badge bg-secondary';
+        currentMatch.textContent = translations.noMatches;
+        currentMatch.className = 'badge bg-secondary';
+    } else {
+        resultCount.textContent = `${searchResults.length} result${searchResults.length > 1 ? 's' : ''}`;
+        resultCount.className = 'badge bg-primary';
+        currentMatch.textContent = `Match ${currentSearchIndex + 1} of ${searchResults.length}`;
+        currentMatch.className = 'badge bg-info';
+    }
+}
+
+function highlightMatches() {
+    const contentElement = document.getElementById('contentText');
+    if (!contentElement || searchResults.length === 0) {
+        if (contentElement) {
+            const originalContent = contentElement.getAttribute('data-original-content');
+            if (originalContent !== null) {
+                contentElement.innerHTML = originalContent;
+            }
+        }
+        return;
+    }
+    
+    if (!contentElement.getAttribute('data-original-content')) {
+        contentElement.setAttribute('data-original-content', contentElement.innerHTML);
+    }
+    
+    const content = contentElement.textContent;
+    let highlightedContent = '';
+    let lastIndex = 0;
+    
+    // Sort matches by index in ascending order for proper insertion
+    const sortedMatches = [...searchResults].sort((a, b) => a.index - b.index);
+    
+    sortedMatches.forEach((match, index) => {
+        // Add text before match
+        highlightedContent += escapeHtml(content.substring(lastIndex, match.index));
+        
+        // Add highlighted match
+        const matchText = content.substring(match.index, match.index + match.length);
+        const highlightClass = index === currentSearchIndex ? 'search-highlight current-match' : 'search-highlight';
+        highlightedContent += `<span class="${highlightClass}">${escapeHtml(matchText)}</span>`;
+        
+        lastIndex = match.index + match.length;
+    });
+    
+    // Add remaining text
+    highlightedContent += escapeHtml(content.substring(lastIndex));
+    
+    contentElement.innerHTML = highlightedContent;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function findNext() {
+    if (searchResults.length === 0) return;
+    currentSearchIndex = (currentSearchIndex + 1) % searchResults.length;
+    scrollToMatch(searchResults[currentSearchIndex]);
+    updateSearchUI();
+    highlightMatches();
+}
+
+function findPrevious() {
+    if (searchResults.length === 0) return;
+    currentSearchIndex = (currentSearchIndex - 1 + searchResults.length) % searchResults.length;
+    scrollToMatch(searchResults[currentSearchIndex]);
+    updateSearchUI();
+    highlightMatches();
+}
+
+function scrollToMatch(result) {
+    const highlights = document.querySelectorAll('.search-highlight');
+    if (highlights.length > currentSearchIndex) {
+        highlights[currentSearchIndex].scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center'
+        });
+    }
+}
+
+function clearSearch() {
+    searchResults = [];
+    currentSearchIndex = 0;
+    
+    const searchInput = document.getElementById('searchInput');
+    const caseSensitive = document.getElementById('caseSensitive');
+    const wholeWord = document.getElementById('wholeWord');
+    const searchResultsDiv = document.getElementById('searchResults');
+    
+    if (searchInput) searchInput.value = '';
+    if (caseSensitive) caseSensitive.checked = false;
+    if (wholeWord) wholeWord.checked = false;
+    if (searchResultsDiv) searchResultsDiv.style.display = 'none';
+    
+    // Restore original content
+    const contentElement = document.getElementById('contentText');
+    if (contentElement) {
+        const originalContent = contentElement.getAttribute('data-original-content');
+        if (originalContent !== null) {
+            contentElement.innerHTML = originalContent;
+        } else {
+            // Fallback: remove highlights
+            const highlightedContent = contentElement.innerHTML;
+            const cleanContent = highlightedContent.replace(/<span class="search-highlight[^"]*">([^<]*)<\/span>/g, '$1');
+            contentElement.innerHTML = cleanContent;
+        }
+    }
+}
+
+// ==================== PAGINATION ====================
+
+function goToPage(page) {
+    if (page < 1 || page > totalPages) return;
+    const url = new URL(window.location);
+    url.searchParams.set('page', page);
+    url.searchParams.set('per_page', perPage);
+    window.location.href = url.toString();
+}
+
+function changePageSize(newPerPage) {
+    const url = new URL(window.location);
+    url.searchParams.set('page', 1);
+    url.searchParams.set('per_page', newPerPage);
+    window.location.href = url.toString();
+}
+
+function jumpToPage() {
+    const pageInput = document.getElementById('pageJump');
+    const page = parseInt(pageInput.value);
+    
+    if (page >= 1 && page <= totalPages) {
+        goToPage(page);
+    } else {
+        alert(`Please enter a page number between 1 and ${totalPages}`);
+        pageInput.value = currentPage;
+    }
+}
+
+// ==================== CHARTS ====================
+
+function initializeCharts() {
+    // Prevent multiple initializations
+    if (chartsInitialized) {
+        console.log('Charts already initialized, skipping...');
+        return;
+    }
+    
+    console.log('Initializing charts...');
+    
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded!');
+        setTimeout(() => {
+            if (typeof Chart !== 'undefined') {
+                initializeCharts();
+            }
+        }, 500);
+        return;
+    }
+    
+    Object.values(chartInstances).forEach(chart => {
+        if (chart && typeof chart.destroy === 'function') {
+            try {
+                chart.destroy();
+            } catch (e) {
+                console.log('Error destroying chart:', e);
+            }
+        }
+    });
+    chartInstances = {};
+    
+    createClassificationChart();
+    createFrequencyChart();
+    
+    // Mark as initialized
+    chartsInitialized = true;
+    console.log('Charts initialized successfully');
+}
+
+function createClassificationChart() {
+    const ctx = document.getElementById('classificationChart');
+    if (!ctx) return;
+    
+    if (typeof Chart === 'undefined') {
+        ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-exclamation-circle display-4 text-danger"></i><p class="text-danger mt-3">${translations.chartLibraryNotLoaded}</p></div>`;
+        return;
+    }
+    
+    const chartPercentages = {{ percentages | tojson }};
+    if (!chartPercentages || Object.keys(chartPercentages).length === 0) {
+        ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-graph-down display-4 text-muted"></i><p class="text-muted mt-3">${translations.noDataAvailable}</p></div>`;
+        return;
+    }
+    
+    try {
+        const chartLabels = Object.keys(chartPercentages);
+        const chartData = Object.values(chartPercentages).map(p => {
+            if (typeof p === 'object' && p !== null && 'percentage' in p) {
+                return p.percentage || 0;
+            }
+            return p || 0;
+        });
+        const colors = generateColors(chartLabels.length);
+        
+        chartInstances.classification = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    data: chartData,
+                    backgroundColor: colors,
+                    borderColor: colors.map(c => adjustBrightness(c, -20)),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 10,
+                            usePointStyle: true,
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => context.label + ': ' + context.parsed.toFixed(1) + '%'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Attach chart controls
+        if (window.ChartExport) {
+            const chartContainer = ctx.closest('.chart-container, .section-card');
+            if (chartContainer) {
+                setTimeout(() => {
+                    window.ChartExport.attachExportButtonsToCharts(chartContainer);
+                }, 100);
+            }
+        }
+    } catch (error) {
+        console.error('Error creating classification chart:', error);
+        ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-circle display-4 text-danger"></i><p class="text-danger mt-3">Error: ' + error.message + '</p></div>';
+    }
+}
+
+function createFrequencyChart() {
+    const ctx = document.getElementById('frequencyChart');
+    if (!ctx) {
+        console.warn('Frequency chart canvas not found');
+        return;
+    }
+    
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded');
+        ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-exclamation-circle display-4 text-danger"></i><p class="text-danger mt-3">${translations.chartLibraryNotLoaded}</p></div>`;
+        return;
+    }
+    
+    const wordFreqData = {{ word_frequencies | tojson }};
+    console.log('Word frequency data:', wordFreqData);
+    
+    if (!wordFreqData || (Array.isArray(wordFreqData) && wordFreqData.length === 0)) {
+        console.log('No word frequency data available');
+        ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-graph-down display-4 text-muted"></i><p class="text-muted mt-3">${translations.noFrequencyDataAvailable}</p></div>`;
+        return;
+    }
+    
+    try {
+        // Handle multiple data formats flexibly
+        let topWords = [];
+        
+        if (Array.isArray(wordFreqData)) {
+            topWords = wordFreqData.slice(0, 15);
+        } else if (wordFreqData && typeof wordFreqData === 'object') {
+            // Convert object to array format
+            topWords = Object.entries(wordFreqData)
+                .map(([word, count]) => [word, count])
+                .sort((a, b) => (b[1] || 0) - (a[1] || 0))
+                .slice(0, 15);
+        } else {
+            console.warn('Unexpected word frequency data format:', typeof wordFreqData);
+            ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-graph-down display-4 text-muted"></i><p class="text-muted mt-3">${translations.invalidDataFormat}</p></div>`;
+            return;
+        }
+        
+        const freqLabels = topWords.map(w => {
+            if (Array.isArray(w)) {
+                return String(w[0] || w.word || '');
+            }
+            if (w && typeof w === 'object') {
+                return String(w.word || w.text || w.keyword || '');
+            }
+            return String(w || '');
+        }).filter(label => label.length > 0);
+        
+        const freqData = topWords.map(w => {
+            if (Array.isArray(w)) {
+                return Number(w[1] || w.count || w.frequency || 0);
+            }
+            if (w && typeof w === 'object') {
+                return Number(w.count || w.frequency || w.word_count || w.occurrences || 0);
+            }
+            return Number(w) || 0;
+        }).filter(val => !isNaN(val) && val > 0);
+        
+        if (freqLabels.length === 0 || freqData.length === 0) {
+            console.warn('No valid frequency data extracted');
+            ctx.parentElement.innerHTML = `<div class="text-center py-5"><i class="bi bi-graph-down display-4 text-muted"></i><p class="text-muted mt-3">${translations.noValidFrequencyData}</p></div>`;
+            return;
+        }
+        
+        // Ensure arrays have same length
+        const minLength = Math.min(freqLabels.length, freqData.length);
+        const finalLabels = freqLabels.slice(0, minLength);
+        const finalData = freqData.slice(0, minLength);
+        
+        console.log(`Creating frequency chart with ${finalLabels.length} items`);
+        
+        // Create gradient using theme colors
+        const chartCtx = ctx.getContext('2d');
+        const gradient = chartCtx.createLinearGradient(0, 0, 0, 400);
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim() || '#4f46e5';
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim() || '#06b6d4';
+        gradient.addColorStop(0, primaryColor);
+        gradient.addColorStop(1, secondaryColor);
+        
+        chartInstances.frequency = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: finalLabels,
+                datasets: [{
+                    label: 'Occurrences',
+                    data: finalData,
+                    backgroundColor: gradient,
+                    borderColor: primaryColor,
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => 'Count: ' + context.parsed.y
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Attach chart controls
+        if (window.ChartExport) {
+            const chartContainer = ctx.closest('.chart-container, .section-card');
+            if (chartContainer) {
+                setTimeout(() => {
+                    window.ChartExport.attachExportButtonsToCharts(chartContainer);
+                }, 100);
+            }
+        }
+        
+        console.log('✅ Frequency chart created successfully');
+    } catch (error) {
+        console.error('Error creating frequency chart:', error);
+        console.error('Error stack:', error.stack);
+        ctx.parentElement.innerHTML = '<div class="text-center py-5"><i class="bi bi-exclamation-circle display-4 text-danger"></i><p class="text-danger mt-3">Error: ' + (error.message || 'Unknown error') + '</p></div>';
+    }
+}
+
+// ==================== UTILITY FUNCTIONS ====================
+
+function generateColors(count) {
+    const colors = [];
+    const hueStep = 360 / count;
+    for (let i = 0; i < count; i++) {
+        colors.push(`hsl(${i * hueStep}, 70%, 60%)`);
+    }
+    return colors;
+}
+
+function adjustBrightness(color, amount) {
+    const usePound = color[0] === '#';
+    const col = usePound ? color.slice(1) : color;
+    const num = parseInt(col, 16);
+    let r = (num >> 16) + amount;
+    let g = (num >> 8 & 0x00FF) + amount;
+    let b = (num & 0x0000FF) + amount;
+    
+    r = r > 255 ? 255 : r < 0 ? 0 : r;
+    g = g > 255 ? 255 : g < 0 ? 0 : g;
+    b = b > 255 ? 255 : b < 0 ? 0 : b;
+    
+    return (usePound ? '#' : '') + (r << 16 | g << 8 | b).toString(16);
+}
+
+// ==================== CONTENT ACTIONS ====================
+
+function copyContent() {
+    const content = document.getElementById('contentText').textContent;
+    navigator.clipboard.writeText(content).then(() => {
+        alert(translations.contentCopiedToClipboard);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
+}
+
+function downloadContent() {
+    const content = document.getElementById('contentText').textContent;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `{{ file[1] }}_page_${currentPage}_of_${totalPages}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// ==================== METADATA ACTIONS ====================
+
+function saveMetadata() {
+    const name = document.getElementById('metaName').value.trim();
+    const notes = document.getElementById('metaNotes').value.trim();
+    console.log('Saving metadata:', { name, notes });
+    alert(translations.metadataSavedSuccessfully);
+}
+
+// ==================== FULLSCREEN & SHARE ====================
+
+function toggleFullscreen() {
+    const elem = document.documentElement;
+    if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => {
+            alert(translations.error + ': ' + err.message);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function shareFile() {
+    const shareLink = `${window.location.origin}/file/${fileId}/share`;
+    const shareText = `Check out this document: {{ file[1] }}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ file[1] }}',
+            text: shareText,
+            url: shareLink
+        }).catch(err => console.log('Error sharing:', err));
+    } else {
+        navigator.clipboard.writeText(shareLink).then(() => {
+            alert(translations.shareLinkCopiedToClipboard);
+        });
+    }
+}
+
+function exportFile() {
+    window.location.href = `/file/${fileId}/export?format=pdf`;
+}
+
+function ensureMetadataVisible() {
+    const metadataPane = document.getElementById('tabMetadata');
+    if (metadataPane) {
+        // Force visibility
+        metadataPane.style.display = 'block';
+        metadataPane.style.visibility = 'visible';
+        metadataPane.style.opacity = '1';
+        metadataPane.classList.add('show', 'active');
+        
+        // Remove any conflicting classes
+        const allTabPanes = document.querySelectorAll('.tab-pane');
+        allTabPanes.forEach(pane => {
+            if (pane.id !== 'metadata') {
+                pane.classList.remove('show', 'active');
+            }
+        });
+        
+        console.log('✅ Metadata tab made visible');
+    } else {
+        console.warn('Metadata pane element not found');
+    }
+}
+</script>
+{% endblock %}
+
+

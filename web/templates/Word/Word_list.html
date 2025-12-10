@@ -1,0 +1,1003 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Words Management') }}{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/file-manger.css') }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/fmas.css') }}" rel="stylesheet" />
+<style>
+    /* Ensure table spans full width */
+    #wordsTable {
+        width: 100% !important;
+        table-layout: auto;
+    }
+    
+    /* Table wrapper with scrollbar */
+    .stat-card .table-wrapper {
+        overflow-x: auto;
+        overflow-y: auto;
+        width: 100%;
+        max-height: 70vh;
+        position: relative;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 0.5rem;
+        background: white;
+    }
+    
+    /* Custom Scrollbar Styling */
+    .stat-card .table-wrapper::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-track {
+        background: var(--border-light);
+        border-radius: 4px;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-thumb {
+        background: var(--border-dark);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+    }
+    
+    /* Firefox scrollbar */
+    .stat-card .table-wrapper {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-dark) var(--border-light);
+    }
+    
+    /* Sticky table header */
+    #wordsTable thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-section);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Ensure pagination is visible and properly positioned below the table */
+    .pagination-container {
+        display: flex !important;
+        width: 100% !important;
+        padding: 1rem 0;
+        clear: both;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .stat-card .table-wrapper {
+            max-height: 50vh;
+        }
+        
+        .filter-controls-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+    
+    /* Ensure stat-card with table displays as block */
+    .stat-card:has(#wordsTable) {
+        display: block !important;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><i class="bi bi-book me-2"></i> {{ _('Words') }} ({{ total_words|default(0) }})</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" onclick="openAddWordModal()"><i class="bi bi-plus-circle me-2"></i> {{ _('Add Word') }}</button>
+        <button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i> {{ _('Refresh') }}</button>
+    </div>
+</div>
+
+<div class="row g-4 mb-2">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-info-bg); color: var(--primary-color);"><i class="bi bi-book"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Total Words') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ total_words|default(0) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-success-bg); color: var(--success-color);"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Active') }}</div>
+                    <h3 class="stat-card-value mb-0" id="activeCount">{{ words|selectattr('usage_count','gt',0)|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-danger-bg); color: var(--danger-color);"><i class="bi bi-dash-circle"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Unused') }}</div>
+                    <h3 class="stat-card-value mb-0" id="unusedCount">{{ words|selectattr('usage_count','eq',0)|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="file-filters-section">
+    <!-- Search and Main Filters -->
+    <div class="filter-controls-grid">
+        <div class="filter-group filter-group-search">
+            <label for="searchWords" class="filter-label">
+                <i class="bi bi-search"></i>
+                {{ _('Search Words') }}
+            </label>
+            <div class="search-input-wrapper">
+                <input type="text" 
+                       id="searchWords" 
+                       class="form-control search-input" 
+                       placeholder="{{ _('Search words...') }}" 
+                       autocomplete="off">
+                <button class="btn-clear-search" onclick="clearSearch()" title="{{ _('Clear search') }}">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label for="statusFilter" class="filter-label">
+                <i class="bi bi-check-circle"></i>
+                {{ _('Status') }}
+            </label>
+            <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                <option value="">{{ _('All Status') }}</option>
+                <option value="active">{{ _('Active') }}</option>
+                <option value="unused">{{ _('Unused') }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sortBy" class="filter-label">
+                <i class="bi bi-sort-alpha-down"></i>
+                {{ _('Sort By') }}
+            </label>
+            <select class="form-select" id="sortBy" onchange="applySorting()">
+                <option value="usage_count">{{ _('Usage Count') }}</option>
+                <option value="word">{{ _('Word') }}</option>
+                <option value="id">{{ _('ID') }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sortOrder" class="filter-label">
+                <i class="bi bi-arrow-down-up"></i>
+                {{ _('Order') }}
+            </label>
+            <select class="form-select" id="sortOrder" onchange="applySorting()">
+                <option value="desc">{{ _('Descending') }}</option>
+                <option value="asc">{{ _('Ascending') }}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="action-group">
+            <span class="action-label">{{ _('Selection:') }}</span>
+            <button class="btn-action" onclick="selectAll()">
+                <i class="bi bi-check-square"></i>
+                {{ _('Select All') }}
+            </button>
+            <button class="btn-action" onclick="selectNone()">
+                <i class="bi bi-square"></i>
+                {{ _('Select None') }}
+            </button>
+        </div>
+        <div class="action-group">
+            <span class="action-label">{{ _('Bulk Actions:') }}</span>
+            <button class="btn-action btn-outline-warning" onclick="bulkUpdate()" id="bulkUpdateBtn" disabled>
+                <i class="bi bi-pencil"></i>
+                {{ _('Edit Selected') }}
+            </button>
+            <button class="btn-action btn-outline-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                <i class="bi bi-trash"></i>
+                {{ _('Delete Selected') }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination info above table -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <small class="text-muted" id="searchResultsInfo" aria-live="polite">{{ _('Loading...') }}</small>
+    </div>
+    <div class="d-flex align-items-center">
+        <label for="perPage" class="form-label me-2 mb-0">{{ _('Per Page:') }}</label>
+        <select class="form-select form-select-sm" id="perPage" style="width: auto;" onchange="changePageSize()">
+            <option value="10">{{ _('10') }}</option>
+            <option value="25">{{ _('25') }}</option>
+            <option value="50">{{ _('50') }}</option>
+            <option value="100">{{ _('100') }}</option>
+        </select>
+    </div>
+</div>
+
+<div class="stat-card">
+    <div class="table-wrapper">
+        <table class="table table-hover align-middle" id="wordsTable" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width:50px">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                    </th>
+                    <th style="width:70px">#</th>
+                    <th>
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Word') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('word')" title="{{ _('Sort by word') }}" id="sortBtn-word">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-word"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:120px">
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Usage') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('usage_count')" title="{{ _('Sort by usage') }}" id="sortBtn-usage_count">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-usage_count"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:120px">
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Status') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('status')" title="{{ _('Sort by status') }}" id="sortBtn-status">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-status"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:200px">{{ _('Actions') }}</th>
+                </tr>
+            </thead>
+            <tbody id="wordsTableBody">
+                <!-- Table content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    {# Pagination will be inserted here by JavaScript #}
+</div>
+
+<!-- Add/Edit Word Modal -->
+<div class="modal fade" id="wordModal" tabindex="-1" aria-labelledby="wordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="wordModalLabel"><i class="bi bi-book"></i> {{ _('Add Word') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="wordForm">
+                    <div class="mb-3">
+                        <label for="wordInput" class="form-label">{{ _('Word') }} *</label>
+                        <input type="text" class="form-control" id="wordInput" required>
+                        <div class="form-text">{{ _('Enter a single word. Words must be unique.') }}</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="submitWord()">{{ _('Save Word') }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    // Translations
+    const translations = {
+        editWord: {{ _('Edit Word')|tojson }},
+        addWord: {{ _('Add Word')|tojson }},
+        deleteWord: {{ _('Delete Word')|tojson }},
+        errorLoadingWords: {{ _('Error loading words')|tojson }},
+        noWordsFound: {{ _('No words found matching')|tojson }},
+        noWordsYet: {{ _('No words yet — add your first word.')|tojson }},
+        active: {{ _('Active')|tojson }},
+        unused: {{ _('Unused')|tojson }},
+        deleteWordConfirm: {{ _('Delete word #')|tojson }},
+        wordDeletedSuccessfully: {{ _('Word deleted successfully!')|tojson }},
+        failedToDelete: {{ _('Failed to delete')|tojson }},
+        error: {{ _('Error')|tojson }},
+        showing: {{ _('Showing')|tojson }},
+        page: {{ _('Page')|tojson }},
+        of: {{ _('of')|tojson }},
+        words: {{ _('words')|tojson }},
+        errorUpdatingWord: {{ _('Error updating word')|tojson }},
+        errorDeletingWords: {{ _('Error deleting words')|tojson }},
+        deleteSelectedWords: {{ _('Delete selected words?')|tojson }},
+        successfullyDeleted: {{ _('Successfully deleted')|tojson }},
+        successfullyUpdated: {{ _('Successfully updated')|tojson }},
+        wordUpdatedSuccessfully: {{ _('Word updated successfully')|tojson }},
+        wordAddedSuccessfully: {{ _('Word added successfully')|tojson }},
+        wordAlreadyExists: {{ _('Word already exists')|tojson }},
+        wordRequired: {{ _('Word is required')|tojson }}
+    };
+    
+    const tableBody = document.getElementById('wordsTableBody');
+    const searchInput = document.getElementById('searchWords');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortBySelect = document.getElementById('sortBy');
+    const sortOrderSelect = document.getElementById('sortOrder');
+    const perPageSelect = document.getElementById('perPage');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const bulkUpdateBtn = document.getElementById('bulkUpdateBtn');
+    
+    let currentPage = 1;
+    let currentPerPage = 10;
+    let currentSort = 'usage_count';
+    let currentOrder = 'desc';
+    let selectedWords = new Set();
+    let wordModal = null;
+    let editWordId = null;
+    
+    // Initialize Bootstrap modal
+    function initializeModal() {
+        const modalElement = document.getElementById('wordModal');
+        if (modalElement) {
+            if (typeof bootstrap !== 'undefined') {
+                try {
+                    wordModal = new bootstrap.Modal(modalElement);
+                } catch (e) {
+                    console.error('Error initializing Bootstrap modal:', e);
+                }
+            } else {
+                // Bootstrap not loaded yet, try again after a short delay
+                setTimeout(initializeModal, 100);
+            }
+        }
+    }
+    
+    // Initialize
+    function init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        currentPage = parseInt(urlParams.get('page')) || 1;
+        
+        if (perPageSelect) {
+            currentPerPage = parseInt(perPageSelect.value) || 10;
+        }
+        
+        if (sortBySelect) {
+            sortBySelect.value = currentSort;
+        }
+        if (sortOrderSelect) {
+            sortOrderSelect.value = currentOrder;
+        }
+        
+        updateSortIcons();
+        createPaginationContainer();
+        fetchPage(currentPage);
+        setupEventListeners();
+        
+        // Initialize Bootstrap modal - ensure it's available
+        initializeModal();
+    }
+    
+    function updateSortIcons() {
+        document.querySelectorAll('[id^="sortIcon-"]').forEach(icon => {
+            icon.className = 'bi bi-arrow-down-up';
+        });
+        
+        const activeIcon = document.getElementById(`sortIcon-${currentSort}`);
+        if (activeIcon) {
+            if (currentOrder === 'asc') {
+                activeIcon.className = 'bi bi-arrow-up';
+            } else {
+                activeIcon.className = 'bi bi-arrow-down';
+            }
+        }
+    }
+    
+    function setupEventListeners() {
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                fetchPage(1);
+            }, 300);
+        });
+        
+        perPageSelect.addEventListener('change', () => {
+            currentPerPage = parseInt(perPageSelect.value);
+            currentPage = 1;
+            fetchPage(1);
+        });
+    }
+    
+    function renderRows(words, page) {
+        if (!tableBody) return;
+        
+        tableBody.innerHTML = '';
+        
+        if (!words || words.length === 0) {
+            const query = searchInput?.value?.trim() || '';
+            const message = query ? 
+                `${translations.noWordsFound} "${query}".` : 
+                translations.noWordsYet;
+            
+            tableBody.innerHTML = `
+                <tr><td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bi bi-book display-4 mb-3"></i>
+                    <div>${message}</div>
+                </td></tr>`;
+            return;
+        }
+        
+        words.forEach((word, idx) => {
+            if (!word || !word.id) return;
+            
+            const globalIndex = ((page - 1) * currentPerPage) + (idx + 1);
+            const tr = document.createElement('tr');
+            tr.dataset.wordId = word.id;
+            
+            tr.innerHTML = `
+                <td>
+                    <input type="checkbox" class="form-check-input word-checkbox" 
+                           value="${word.id}" onchange="updateSelection()">
+                </td>
+                <td><span class="badge bg-secondary">${globalIndex}</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <span class="word-text" data-word-id="${word.id}">
+                            <strong>${(word.word || '').replace(/</g,'&lt;')}</strong>
+                        </span>
+                        <button class="btn btn-sm btn-link p-0 ms-1" onclick="editWord(${word.id})" title="${translations.editWord}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                </td>
+                <td><span class="badge bg-info">${word.usage_count || 0}</span></td>
+                <td>${word.usage_count > 0 ? `<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>${translations.active}</span>` : `<span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>${translations.unused}</span>`}</td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="viewWord(${word.id})" title="{{ _('View Details') }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                </td>`;
+            tableBody.appendChild(tr);
+        });
+        
+        // Update stats
+        const activeCount = words.filter(w => w.usage_count > 0).length;
+        const unusedCount = words.filter(w => w.usage_count === 0).length;
+        const activeEl = document.getElementById('activeCount');
+        const unusedEl = document.getElementById('unusedCount');
+        if (activeEl) activeEl.textContent = activeCount;
+        if (unusedEl) unusedEl.textContent = unusedCount;
+    }
+    
+    function renderPaginator(page, total_pages) {
+        const paginationContainer = document.querySelector('.pagination-container') || createPaginationContainer();
+        
+        let pageInfo = paginationContainer.querySelector('.pagination-info');
+        if (!pageInfo) {
+            pageInfo = document.createElement('div');
+            pageInfo.className = 'small text-muted pagination-info';
+            paginationContainer.insertBefore(pageInfo, paginationContainer.firstChild);
+        }
+        pageInfo.textContent = `${translations.page} ${page} ${translations.of} ${total_pages}`;
+        
+        let pagContainer = paginationContainer.querySelector('ul.pagination');
+        if (!pagContainer) {
+            pagContainer = createPaginationList();
+            paginationContainer.appendChild(pagContainer);
+        }
+        pagContainer.innerHTML = '';
+        
+        const windowSize = 2;
+        const start = Math.max(1, page - windowSize);
+        const end = Math.min(total_pages, page + windowSize);
+        
+        function addItem(label, p, disabled=false, active=false) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = label;
+            a.addEventListener('click', function(ev){
+                ev.preventDefault();
+                if (disabled || active) return;
+                const url = new URL(window.location);
+                url.searchParams.set('page', p);
+                window.history.pushState({}, '', url);
+                fetchPage(p);
+            });
+            li.appendChild(a);
+            pagContainer.appendChild(li);
+        }
+        
+        addItem('««', 1, page === 1);
+        addItem('«', Math.max(1, page - 1), page === 1);
+        
+        if (start > 1) addItem('1', 1);
+        if (start > 2) {
+            const li = document.createElement('li'); 
+            li.className='page-item disabled';
+            li.innerHTML = '<span class="page-link">…</span>'; 
+            pagContainer.appendChild(li);
+        }
+        
+        for (let p = start; p <= end; p++) {
+            addItem(String(p), p, false, p === page);
+        }
+        
+        if (end < total_pages - 1) {
+            const li = document.createElement('li'); 
+            li.className='page-item disabled';
+            li.innerHTML = '<span class="page-link">…</span>'; 
+            pagContainer.appendChild(li);
+        }
+        if (end < total_pages) addItem(String(total_pages), total_pages);
+        
+        addItem('»', Math.min(total_pages, page + 1), page === total_pages);
+        addItem('»»', total_pages, page === total_pages);
+    }
+    
+    function createPaginationContainer() {
+        const wordsTable = document.getElementById('wordsTable');
+        if (!wordsTable) return null;
+        
+        const statCard = wordsTable.closest('.stat-card');
+        if (!statCard) return null;
+        
+        let container = statCard.querySelector('.pagination-container');
+        if (container) {
+            container.style.display = 'flex';
+            return container;
+        }
+        
+        container = document.createElement('div');
+        container.className = 'd-flex justify-content-between align-items-center mt-3 mb-3 pagination-container';
+        container.style.display = 'flex';
+        container.style.width = '100%';
+        container.style.clear = 'both';
+        
+        const tableWrapper = statCard.querySelector('.table-wrapper');
+        if (tableWrapper && tableWrapper.parentNode) {
+            tableWrapper.parentNode.insertBefore(container, tableWrapper.nextSibling);
+        } else {
+            statCard.appendChild(container);
+        }
+        
+        return container;
+    }
+    
+    function createPaginationList() {
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm mb-0';
+        return ul;
+    }
+    
+    let pendingFetch = null;
+    function fetchPage(page=1) {
+        currentPage = page;
+        if (pendingFetch) pendingFetch.abort();
+        const controller = new AbortController();
+        pendingFetch = controller;
+        
+        const url = new URL('{{ url_for("api_words", _external=False) }}', window.location.origin);
+        url.searchParams.set('page', page);
+        url.searchParams.set('per_page', currentPerPage);
+        url.searchParams.set('sort', currentSort);
+        url.searchParams.set('order', currentOrder);
+        
+        if (searchInput.value.trim()) url.searchParams.set('q', searchInput.value.trim());
+        if (statusFilter.value) url.searchParams.set('status', statusFilter.value);
+        url.searchParams.set('_t', Date.now());
+        
+        fetch(url.toString(), { 
+            signal: controller.signal,
+            cache: 'no-cache'
+        })
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
+                return r.json();
+            })
+            .then(json => {
+                if (!json || json.success === false) {
+                    tableBody.innerHTML = `
+                        <tr><td colspan="6" class="text-center py-5 text-danger">
+                            <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                            <div>${translations.errorLoadingWords}: ${json?.error || 'Invalid response'}</div>
+                        </td></tr>`;
+                    return;
+                }
+                
+                if (json.per_page) {
+                    currentPerPage = json.per_page;
+                    if (perPageSelect) perPageSelect.value = json.per_page;
+                }
+                
+                if (json.sort_by) {
+                    currentSort = json.sort_by;
+                    if (sortBySelect) sortBySelect.value = currentSort;
+                }
+                if (json.sort_order) {
+                    currentOrder = json.sort_order;
+                    if (sortOrderSelect) sortOrderSelect.value = currentOrder;
+                }
+                updateSortIcons();
+                
+                const words = json.words || [];
+                const pageNum = json.page || 1;
+                const totalPages = json.total_pages || 1;
+                
+                renderRows(words, pageNum);
+                renderPaginator(pageNum, totalPages);
+                updateSearchInfo(json);
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                console.error('Fetch error', err);
+                tableBody.innerHTML = `
+                    <tr><td colspan="6" class="text-center py-5 text-danger">
+                        <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                        <div>${translations.errorLoadingWords}: ${err.message}</div>
+                    </td></tr>`;
+            })
+            .finally(() => { if (pendingFetch === controller) pendingFetch = null; });
+    }
+    
+    function updateSearchInfo(json) {
+        const infoEl = document.getElementById('searchResultsInfo');
+        if (infoEl) {
+            const start = ((json.page - 1) * json.per_page) + 1;
+            const end = start + ((json.words || []).length) - 1;
+            const total = json.total || 0;
+            const query = searchInput.value.trim();
+            
+            if (query) {
+                infoEl.textContent = `Found ${total} result${total !== 1 ? 's' : ''} for "${query}" (${start}–${end})`;
+            } else {
+                infoEl.textContent = `${translations.showing} ${start}–${end} ${translations.of} ${total} ${translations.words}`;
+            }
+        }
+    }
+    
+    function updateSelection() {
+        const checkboxes = document.querySelectorAll('.word-checkbox:checked');
+        selectedWords.clear();
+        checkboxes.forEach(cb => selectedWords.add(parseInt(cb.value)));
+        
+        const hasSelection = selectedWords.size > 0;
+        bulkDeleteBtn.disabled = !hasSelection;
+        bulkUpdateBtn.disabled = !hasSelection;
+        
+        const allCheckboxes = document.querySelectorAll('.word-checkbox');
+        selectAllCheckbox.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+    
+    function toggleSelectAll() {
+        const isChecked = selectAllCheckbox.checked;
+        document.querySelectorAll('.word-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateSelection();
+    }
+    
+    function selectAll() {
+        document.querySelectorAll('.word-checkbox').forEach(cb => {
+            cb.checked = true;
+        });
+        updateSelection();
+    }
+    
+    function selectNone() {
+        document.querySelectorAll('.word-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelection();
+    }
+    
+    function applyFilters() {
+        currentPage = 1;
+        fetchPage(1);
+    }
+    
+    function sortBy(field) {
+        if (currentSort === field) {
+            currentOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort = field;
+            currentOrder = 'asc';
+        }
+        sortBySelect.value = currentSort;
+        sortOrderSelect.value = currentOrder;
+        updateSortIcons();
+        fetchPage(currentPage);
+    }
+    
+    function applySorting() {
+        currentSort = sortBySelect.value;
+        currentOrder = sortOrderSelect.value;
+        currentPage = 1;
+        updateSortIcons();
+        fetchPage(1);
+    }
+    
+    function changePageSize() {
+        currentPerPage = parseInt(perPageSelect.value);
+        currentPage = 1;
+        fetchPage(1);
+    }
+    
+    function clearSearch() {
+        searchInput.value = '';
+        currentPage = 1;
+        fetchPage(1);
+    }
+    
+    function openAddWordModal() {
+        // Get modal element
+        const modalElement = document.getElementById('wordModal');
+        if (!modalElement) {
+            console.error('Modal element not found');
+            return;
+        }
+        
+        // Check if Bootstrap is available
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap is not loaded');
+            return;
+        }
+        
+        // Create modal instance (create new each time to avoid timing issues)
+        let modal;
+        try {
+            modal = new bootstrap.Modal(modalElement);
+        } catch (e) {
+            console.error('Error creating Bootstrap modal:', e);
+            return;
+        }
+        
+        // Reset form and set title
+        editWordId = null;
+        const wordInput = document.getElementById('wordInput');
+        const wordModalLabel = document.getElementById('wordModalLabel');
+        
+        if (wordInput) wordInput.value = '';
+        if (wordModalLabel) wordModalLabel.innerHTML = '<i class="bi bi-book"></i> ' + translations.addWord;
+        
+        // Show modal
+        try {
+            modal.show();
+            // Also update the stored reference for consistency
+            wordModal = modal;
+        } catch (e) {
+            console.error('Error showing modal:', e);
+        }
+    }
+    
+    function editWord(wordId) {
+        fetch(`/api/words/${wordId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.word) {
+                    const modalElement = document.getElementById('wordModal');
+                    if (!modalElement || typeof bootstrap === 'undefined') {
+                        alert(translations.errorLoadingWords);
+                        return;
+                    }
+                    
+                    editWordId = wordId;
+                    document.getElementById('wordInput').value = data.word.word;
+                    document.getElementById('wordModalLabel').innerHTML = '<i class="bi bi-pencil"></i> ' + translations.editWord;
+                    
+                    // Create and show modal
+                    try {
+                        const modal = new bootstrap.Modal(modalElement);
+                        modal.show();
+                        wordModal = modal; // Store for consistency
+                    } catch (e) {
+                        console.error('Error showing edit modal:', e);
+                        alert(translations.errorLoadingWords);
+                    }
+                } else {
+                    alert(translations.errorLoadingWords);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading word:', error);
+                alert(translations.errorLoadingWords);
+            });
+    }
+    
+    function submitWord() {
+        const wordText = document.getElementById('wordInput').value.trim();
+        if (!wordText) {
+            alert(translations.wordRequired);
+            return;
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        const url = editWordId ? `/api/words/${editWordId}` : '/api/words';
+        const method = editWordId ? 'PUT' : 'POST';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ word: wordText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hide modal
+                const modalElement = document.getElementById('wordModal');
+                if (modalElement && typeof bootstrap !== 'undefined') {
+                    try {
+                        if (wordModal) {
+                            wordModal.hide();
+                        } else {
+                            const modal = bootstrap.Modal.getInstance(modalElement);
+                            if (modal) modal.hide();
+                        }
+                    } catch (e) {
+                        console.error('Error hiding modal:', e);
+                    }
+                }
+                alert(editWordId ? translations.wordUpdatedSuccessfully : translations.wordAddedSuccessfully);
+                fetchPage(currentPage);
+            } else {
+                alert(data.error || translations.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(translations.error);
+        });
+    }
+    
+    function bulkDelete() {
+        if (selectedWords.size === 0) return;
+        
+        if (!confirm(`${selectedWords.size} ${translations.deleteSelectedWords}`)) return;
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch('/api/words/bulk-delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ word_ids: Array.from(selectedWords) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${translations.successfullyDeleted} ${data.deleted_count} ${translations.words}`);
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert(translations.errorDeletingWords + ': ' + (data.error || translations.error));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(translations.errorDeletingWords);
+        });
+    }
+    
+    function bulkUpdate() {
+        if (selectedWords.size === 0) return;
+        
+        if (selectedWords.size === 1) {
+            const wordId = Array.from(selectedWords)[0];
+            editWord(wordId);
+            return;
+        }
+        
+        if (confirm(`Multiple words selected. Edit the first word?`)) {
+            const wordId = Array.from(selectedWords)[0];
+            editWord(wordId);
+        }
+    }
+    
+    // Global functions
+    window.viewWord = function(id) {
+        window.location.href = `/words/${id}`;
+    };
+    
+    window.deleteWord = function(id) {
+        if (!confirm(translations.deleteWordConfirm + id + '?')) return;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch(`/api/words/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(r => r.json())
+        .then(j => {
+            if (j.success) {
+                alert(translations.wordDeletedSuccessfully);
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert(j.error || translations.failedToDelete);
+            }
+        })
+        .catch(e => alert(translations.error + ': ' + e.message));
+    };
+    
+    window.updateSelection = updateSelection;
+    window.toggleSelectAll = toggleSelectAll;
+    window.selectAll = selectAll;
+    window.selectNone = selectNone;
+    window.applyFilters = applyFilters;
+    window.applySorting = applySorting;
+    window.sortBy = sortBy;
+    window.changePageSize = changePageSize;
+    window.clearSearch = clearSearch;
+    window.bulkDelete = bulkDelete;
+    window.bulkUpdate = bulkUpdate;
+    window.openAddWordModal = openAddWordModal;
+    window.editWord = editWord;
+    window.submitWord = submitWord;
+    
+    // Wait for DOM and Bootstrap to be ready
+    function waitForBootstrap(callback, maxAttempts = 50) {
+        if (typeof bootstrap !== 'undefined' && document.getElementById('wordModal')) {
+            callback();
+        } else if (maxAttempts > 0) {
+            setTimeout(() => waitForBootstrap(callback, maxAttempts - 1), 100);
+        } else {
+            console.warn('Bootstrap not available after waiting, initializing anyway');
+            callback();
+        }
+    }
+    
+    // Initialize when DOM and Bootstrap are ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            waitForBootstrap(() => {
+                init();
+            });
+        });
+    } else {
+        // DOM already loaded
+        waitForBootstrap(() => {
+            init();
+        });
+    }
+})();
+</script>
+{% endblock %}
+

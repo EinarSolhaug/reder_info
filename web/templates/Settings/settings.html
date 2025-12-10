@@ -1,0 +1,2363 @@
+<!-- templates/settings.html - Comprehensive Settings Interface -->
+{% extends "base.html" %}
+
+{% block title %}{{ _('Settings') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/Settings.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="page-header mb-4">
+        <div>
+    <h1 class="page-title">
+                <i class="bi bi-gear-fill me-2"></i>
+                {{ _('Settings') }}
+    </h1>
+            <p class="text-muted mb-0">{{ _('Configure and customize your system preferences') }}</p>
+        </div>
+    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-2"></i>
+        {{ _('Back to Dashboard') }}
+    </a>
+</div>
+
+    <!-- Settings Tabs -->
+    <ul class="nav nav-tabs settings-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                <i class="bi bi-sliders me-2"></i>
+                {{ _('General') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="display-tab" data-bs-toggle="tab" data-bs-target="#display" type="button" role="tab">
+                <i class="bi bi-palette me-2"></i>
+                {{ _('Display') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="themes-tab" data-bs-toggle="tab" data-bs-target="#themes" type="button" role="tab">
+                <i class="bi bi-paint-bucket me-2"></i>
+                {{ _('Themes') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">
+                <i class="bi bi-search me-2"></i>
+                {{ _('Search') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button" role="tab">
+                <i class="bi bi-cpu me-2"></i>
+                {{ _('Processing') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="interfaces-tab" data-bs-toggle="tab" data-bs-target="#interfaces" type="button" role="tab">
+                <i class="bi bi-eye me-2"></i>
+                {{ _('Interfaces') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                <i class="bi bi-bell me-2"></i>
+                {{ _('Notifications') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button" role="tab">
+                <i class="bi bi-info-circle me-2"></i>
+                {{ _('System') }}
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- General Settings -->
+        <div class="tab-pane fade show active" id="general" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-person-circle"></i>
+                    {{ _('User Preferences') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Language') }}</strong>
+                        <select class="form-select form-select-sm" style="width: auto;" 
+                                onchange="toggleSystemSetting('language', this.value)">
+                            <option value="en" {% if user_settings.get('system', 'language', 'en') == 'en' %}selected{% endif %}>English</option>
+                            <option value="ar" {% if user_settings.get('system', 'language', 'en') == 'ar' %}selected{% endif %}>العربية</option>
+                        </select>
+            </div>
+                    <div class="setting-description">
+                        {{ _('Select your preferred language for the interface') }}
+    </div>
+            </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Timezone') }}</strong>
+                        <select class="form-select form-select-sm" style="width: auto;"
+                                onchange="toggleSystemSetting('timezone', this.value)">
+                            <option value="UTC" {% if user_settings.get('system', 'timezone', 'UTC') == 'UTC' %}selected{% endif %}>UTC</option>
+                            <option value="America/New_York" {% if user_settings.get('system', 'timezone', 'UTC') == 'America/New_York' %}selected{% endif %}>America/New_York</option>
+                            <option value="Europe/London" {% if user_settings.get('system', 'timezone', 'UTC') == 'Europe/London' %}selected{% endif %}>Europe/London</option>
+                            <option value="Asia/Dubai" {% if user_settings.get('system', 'timezone', 'UTC') == 'Asia/Dubai' %}selected{% endif %}>Asia/Dubai</option>
+                        </select>
+    </div>
+                    <div class="setting-description">
+                        {{ _('Set your timezone for date and time display') }}
+            </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Date Format') }}</strong>
+                        <select class="form-select form-select-sm" style="width: auto;"
+                                onchange="toggleSystemSetting('date_format', this.value)">
+                            <option value="YYYY-MM-DD" {% if user_settings.get('system', 'date_format', 'YYYY-MM-DD') == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD</option>
+                            <option value="MM/DD/YYYY" {% if user_settings.get('system', 'date_format', 'YYYY-MM-DD') == 'MM/DD/YYYY' %}selected{% endif %}>MM/DD/YYYY</option>
+                            <option value="DD/MM/YYYY" {% if user_settings.get('system', 'date_format', 'YYYY-MM-DD') == 'DD/MM/YYYY' %}selected{% endif %}>DD/MM/YYYY</option>
+                        </select>
+                    </div>
+                    <div class="setting-description">
+                        {{ _('Choose how dates are displayed throughout the system') }}
+    </div>
+</div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Time Format') }}</strong>
+                        <select class="form-select form-select-sm" style="width: auto;"
+                                onchange="toggleSystemSetting('time_format', this.value)">
+                            <option value="24h" {% if user_settings.get('system', 'time_format', '24h') == '24h' %}selected{% endif %}>24-hour</option>
+                            <option value="12h" {% if user_settings.get('system', 'time_format', '24h') == '12h' %}selected{% endif %}>12-hour (AM/PM)</option>
+                        </select>
+            </div>
+                    <div class="setting-description">
+                        {{ _('Select 12-hour or 24-hour time format') }}
+            </div>
+            </div>
+        </div>
+
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-lightning-charge"></i>
+                    {{ _('Behavior & Actions') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Auto Save') }}</strong>
+            </div>
+                            <div class="setting-description">
+                                {{ _('Automatically save changes without confirmation dialogs') }}
+            </div>
+            </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoSave"
+                                   {% if user_settings.get('system', 'auto_save', True) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('auto_save', this.checked)">
+        </div>
+    </div>
+</div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Confirm Actions') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Show confirmation dialogs for important or destructive actions') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="confirmActions"
+                                   {% if user_settings.get('system', 'confirm_actions', True) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('confirm_actions', this.checked)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="tab-pane fade" id="display" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-palette"></i>
+                    {{ _('Visual Preferences') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Animations') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Enable smooth animations and transitions throughout the interface') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="animationsEnabled"
+                                   {% if user_settings.get('system', 'animations_enabled', True) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('animations_enabled', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Breadcrumbs') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Show breadcrumb navigation at the top of pages') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="breadcrumbsEnabled"
+                                   {% if user_settings.get('system', 'show_breadcrumbs', True) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('show_breadcrumbs', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Compact Mode') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Use compact layout with reduced spacing for more content on screen') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="compactMode"
+                                   {% if user_settings.get('system', 'compact_mode', False) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('compact_mode', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Compact View') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Use compact view for file lists and tables') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="compactView"
+                                   {% if user_settings.get('display', 'compact_view', False) %}checked{% endif %}
+                                   onchange="toggleUserSetting('display', 'compact_view', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Theme') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Select the application theme') }}
+                    </div>
+                    <select class="form-select" id="theme" 
+                            onchange="toggleSystemSetting('theme', this.value)">
+                        <option value="light" {% if user_settings.get('system', 'theme', 'light') == 'light' %}selected{% endif %}>{{ _('Light') }}</option>
+                        <option value="dark" {% if user_settings.get('system', 'theme', 'light') == 'dark' %}selected{% endif %}>{{ _('Dark') }}</option>
+                        <option value="auto" {% if user_settings.get('system', 'theme', 'light') == 'auto' %}selected{% endif %}>{{ _('Auto') }} ({{ _('System Preference') }})</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Items Per Page') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Number of items to display per page in lists and tables (System-wide)') }}
+                    </div>
+                    <select class="form-select" id="itemsPerPage" 
+                            onchange="toggleSystemSetting('items_per_page', parseInt(this.value))">
+                        <option value="25" {% if user_settings.get('system', 'items_per_page', 50) == 25 %}selected{% endif %}>25 {{ _('items') }}</option>
+                        <option value="50" {% if user_settings.get('system', 'items_per_page', 50) == 50 %}selected{% endif %}>50 {{ _('items') }}</option>
+                        <option value="100" {% if user_settings.get('system', 'items_per_page', 50) == 100 %}selected{% endif %}>100 {{ _('items') }}</option>
+                        <option value="200" {% if user_settings.get('system', 'items_per_page', 50) == 200 %}selected{% endif %}>200 {{ _('items') }}</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Display Results Per Page') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Number of results per page for search and file lists (Display-specific)') }}
+                    </div>
+                    <select class="form-select" id="resultsPerPage" 
+                            onchange="toggleUserSetting('display', 'results_per_page', parseInt(this.value))">
+                        <option value="25" {% if user_settings.get('display', 'results_per_page', 50) == 25 %}selected{% endif %}>25 {{ _('items') }}</option>
+                        <option value="50" {% if user_settings.get('display', 'results_per_page', 50) == 50 %}selected{% endif %}>50 {{ _('items') }}</option>
+                        <option value="100" {% if user_settings.get('display', 'results_per_page', 50) == 100 %}selected{% endif %}>100 {{ _('items') }}</option>
+                        <option value="200" {% if user_settings.get('display', 'results_per_page', 50) == 200 %}selected{% endif %}>200 {{ _('items') }}</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Default Sort') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Default sorting method for file lists') }}
+                    </div>
+                    <select class="form-select" id="defaultSort"
+                            onchange="toggleSystemSetting('default_sort', this.value)">
+                        <option value="date_creation" {% if user_settings.get('system', 'default_sort', 'date_creation') == 'date_creation' %}selected{% endif %}>{{ _('Creation Date') }}</option>
+                        <option value="file_name" {% if user_settings.get('system', 'default_sort', 'date_creation') == 'file_name' %}selected{% endif %}>{{ _('File Name') }}</option>
+                        <option value="file_size" {% if user_settings.get('system', 'default_sort', 'date_creation') == 'file_size' %}selected{% endif %}>{{ _('File Size') }}</option>
+                        <option value="file_type" {% if user_settings.get('system', 'default_sort', 'date_creation') == 'file_type' %}selected{% endif %}>{{ _('File Type') }}</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Sort Direction') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Default sort order (ascending or descending)') }}
+                    </div>
+                    <select class="form-select" id="sortDirection"
+                            onchange="toggleSystemSetting('sort_direction', this.value)">
+                        <option value="desc" {% if user_settings.get('system', 'sort_direction', 'desc') == 'desc' %}selected{% endif %}>{{ _('Descending') }} ({{ _('Newest first') }})</option>
+                        <option value="asc" {% if user_settings.get('system', 'sort_direction', 'desc') == 'asc' %}selected{% endif %}>{{ _('Ascending') }} ({{ _('Oldest first') }})</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Themes Settings -->
+        <div class="tab-pane fade" id="themes" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-palette-fill"></i>
+                    {{ _('Page Colors & Theme Customization') }}
+                </h6>
+                
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    {{ _('Customize all page colors, buttons, sections, and formatting. Changes are applied immediately and saved automatically.') }}
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <!-- Primary Colors -->
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Primary Colors') }}</h6>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Primary Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="primaryColor" 
+                                       value="{{ user_settings.get('theme', 'primary_color', '#4f46e5') }}"
+                                       onchange="updateThemeColor('primary-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="primaryColorText" 
+                                       value="{{ user_settings.get('theme', 'primary_color', '#4f46e5') }}"
+                                       onchange="updateThemeColor('primary-color', this.value)"
+                                       placeholder="#4f46e5">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('primary-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Main brand color for buttons, links, and highlights') }}</small>
+                        </div>
+
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Secondary Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="secondaryColor" 
+                                       value="{{ user_settings.get('theme', 'secondary_color', '#06b6d4') }}"
+                                       onchange="updateThemeColor('secondary-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="secondaryColorText" 
+                                       value="{{ user_settings.get('theme', 'secondary_color', '#06b6d4') }}"
+                                       onchange="updateThemeColor('secondary-color', this.value)"
+                                       placeholder="#06b6d4">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('secondary-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Secondary accent color for gradients and highlights') }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Status Colors -->
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Status Colors') }}</h6>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Success Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="successColor" 
+                                       value="{{ user_settings.get('theme', 'success_color', '#10b981') }}"
+                                       onchange="updateThemeColor('success-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="successColorText" 
+                                       value="{{ user_settings.get('theme', 'success_color', '#10b981') }}"
+                                       onchange="updateThemeColor('success-color', this.value)"
+                                       placeholder="#10b981">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('success-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Color for success messages and positive actions') }}</small>
+                        </div>
+
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Danger Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="dangerColor" 
+                                       value="{{ user_settings.get('theme', 'danger_color', '#ef4444') }}"
+                                       onchange="updateThemeColor('danger-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="dangerColorText" 
+                                       value="{{ user_settings.get('theme', 'danger_color', '#ef4444') }}"
+                                       onchange="updateThemeColor('danger-color', this.value)"
+                                       placeholder="#ef4444">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('danger-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Color for errors, warnings, and destructive actions') }}</small>
+                        </div>
+
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Warning Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="warningColor" 
+                                       value="{{ user_settings.get('theme', 'warning_color', '#f59e0b') }}"
+                                       onchange="updateThemeColor('warning-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="warningColorText" 
+                                       value="{{ user_settings.get('theme', 'warning_color', '#f59e0b') }}"
+                                       onchange="updateThemeColor('warning-color', this.value)"
+                                       placeholder="#f59e0b">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('warning-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Color for warning messages and alerts') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <!-- Background & Text Colors -->
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Background & Text') }}</h6>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Background Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="bgLight" 
+                                       value="{{ user_settings.get('theme', 'bg_light', '#f8fafc') }}"
+                                       onchange="updateThemeColor('bg-light', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="bgLightText" 
+                                       value="{{ user_settings.get('theme', 'bg_light', '#f8fafc') }}"
+                                       onchange="updateThemeColor('bg-light', this.value)"
+                                       placeholder="#f8fafc">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('bg-light')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Main page background color') }}</small>
+                        </div>
+
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Text Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="textDark" 
+                                       value="{{ user_settings.get('theme', 'text_dark', '#1e293b') }}"
+                                       onchange="updateThemeColor('text-dark', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="textDarkText" 
+                                       value="{{ user_settings.get('theme', 'text_dark', '#1e293b') }}"
+                                       onchange="updateThemeColor('text-dark', this.value)"
+                                       placeholder="#1e293b">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('text-dark')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Main text color for content') }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Border & UI Colors -->
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Borders & UI Elements') }}</h6>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Border Color') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="borderColor" 
+                                       value="{{ user_settings.get('theme', 'border_color', '#e2e8f0') }}"
+                                       onchange="updateThemeColor('border-color', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="borderColorText" 
+                                       value="{{ user_settings.get('theme', 'border_color', '#e2e8f0') }}"
+                                       onchange="updateThemeColor('border-color', this.value)"
+                                       placeholder="#e2e8f0">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('border-color')" title="{{ _('Reset to default') }}">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">{{ _('Color for borders, dividers, and separators') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gradient Colors -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <h6 class="small text-uppercase text-muted mb-3">
+                            <i class="bi bi-palette2 me-2"></i>{{ _('Gradient Colors') }}
+                        </h6>
+                        <div class="alert alert-info mb-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            {{ _('Configure gradient backgrounds that can be applied to sections, cards, and other elements.') }}
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="setting-item mb-3">
+                                    <div class="setting-label mb-2">
+                                        <strong>{{ _('Gradient Start Color') }}</strong>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="color" class="form-control form-control-color" 
+                                               id="gradientStart" 
+                                               value="{{ user_settings.get('theme', 'gradient_start', '#4f46e5') }}"
+                                               onchange="updateThemeColor('gradient-start', this.value)"
+                                               style="width: 60px; height: 40px;">
+                                        <input type="text" class="form-control" 
+                                               id="gradientStartText" 
+                                               value="{{ user_settings.get('theme', 'gradient_start', '#4f46e5') }}"
+                                               onchange="updateThemeColor('gradient-start', this.value)"
+                                               placeholder="#4f46e5">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('gradient-start')" title="{{ _('Reset to default') }}">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="setting-item mb-3">
+                                    <div class="setting-label mb-2">
+                                        <strong>{{ _('Gradient End Color') }}</strong>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="color" class="form-control form-control-color" 
+                                               id="gradientEnd" 
+                                               value="{{ user_settings.get('theme', 'gradient_end', '#06b6d4') }}"
+                                               onchange="updateThemeColor('gradient-end', this.value)"
+                                               style="width: 60px; height: 40px;">
+                                        <input type="text" class="form-control" 
+                                               id="gradientEndText" 
+                                               value="{{ user_settings.get('theme', 'gradient_end', '#06b6d4') }}"
+                                               onchange="updateThemeColor('gradient-end', this.value)"
+                                               placeholder="#06b6d4">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="resetThemeColor('gradient-end')" title="{{ _('Reset to default') }}">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="setting-item mb-3">
+                                    <div class="setting-label mb-2">
+                                        <strong>{{ _('Gradient Direction') }}</strong>
+                                    </div>
+                                    <select class="form-select" id="gradientDirection"
+                                            onchange="updateThemeColor('gradient-direction', this.value)">
+                                        <option value="0deg" {% if user_settings.get('theme', 'gradient_direction', '135deg') == '0deg' %}selected{% endif %}>→ Horizontal</option>
+                                        <option value="90deg" {% if user_settings.get('theme', 'gradient_direction', '135deg') == '90deg' %}selected{% endif %}>↓ Vertical</option>
+                                        <option value="135deg" {% if user_settings.get('theme', 'gradient_direction', '135deg') == '135deg' %}selected{% endif %}>↘ Diagonal</option>
+                                        <option value="45deg" {% if user_settings.get('theme', 'gradient_direction', '135deg') == '45deg' %}selected{% endif %}>↗ Diagonal</option>
+                                        <option value="180deg" {% if user_settings.get('theme', 'gradient_direction', '135deg') == '180deg' %}selected{% endif %}>← Reverse Horizontal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 p-3 rounded" id="gradientPreview" style="background: var(--gradient-bg); min-height: 100px; border: 1px solid var(--border-color);">
+                            <p class="text-white mb-0 text-center">{{ _('Gradient Preview') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Colors -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <h6 class="small text-uppercase text-muted mb-3">
+                            <i class="bi bi-layout-sidebar me-2"></i>{{ _('Sidebar Colors') }}
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Sidebar Background') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="sidebarBg" 
+                                       value="{{ user_settings.get('theme', 'sidebar_bg', '#1e293b') }}"
+                                       onchange="updateThemeColor('sidebar-bg', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="sidebarBgText" 
+                                       value="{{ user_settings.get('theme', 'sidebar_bg', '#1e293b') }}"
+                                       onchange="updateThemeColor('sidebar-bg', this.value)"
+                                       placeholder="#1e293b">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Sidebar Text') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="sidebarText" 
+                                       value="{{ user_settings.get('theme', 'sidebar_text', '#e2e8f0') }}"
+                                       onchange="updateThemeColor('sidebar-text', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="sidebarTextText" 
+                                       value="{{ user_settings.get('theme', 'sidebar_text', '#e2e8f0') }}"
+                                       onchange="updateThemeColor('sidebar-text', this.value)"
+                                       placeholder="#e2e8f0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Sidebar Active') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="sidebarActive" 
+                                       value="{{ user_settings.get('theme', 'sidebar_active', '#4f46e5') }}"
+                                       onchange="updateThemeColor('sidebar-active', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="sidebarActiveText" 
+                                       value="{{ user_settings.get('theme', 'sidebar_active', '#4f46e5') }}"
+                                       onchange="updateThemeColor('sidebar-active', this.value)"
+                                       placeholder="#4f46e5">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Sidebar Hover') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="sidebarHover" 
+                                       value="{{ user_settings.get('theme', 'sidebar_hover', '#334155') }}"
+                                       onchange="updateThemeColor('sidebar-hover', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="sidebarHoverText" 
+                                       value="{{ user_settings.get('theme', 'sidebar_hover', '#334155') }}"
+                                       onchange="updateThemeColor('sidebar-hover', this.value)"
+                                       placeholder="#334155">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Button Colors -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <h6 class="small text-uppercase text-muted mb-3">
+                            <i class="bi bi-cursor me-2"></i>{{ _('Button Colors') }}
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Primary Button') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="btnPrimary" 
+                                       value="{{ user_settings.get('theme', 'btn_primary', '#4f46e5') }}"
+                                       onchange="updateThemeColor('btn-primary', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="btnPrimaryText" 
+                                       value="{{ user_settings.get('theme', 'btn_primary', '#4f46e5') }}"
+                                       onchange="updateThemeColor('btn-primary', this.value)"
+                                       placeholder="#4f46e5">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Primary Button Hover') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="btnPrimaryHover" 
+                                       value="{{ user_settings.get('theme', 'btn_primary_hover', '#4338ca') }}"
+                                       onchange="updateThemeColor('btn-primary-hover', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="btnPrimaryHoverText" 
+                                       value="{{ user_settings.get('theme', 'btn_primary_hover', '#4338ca') }}"
+                                       onchange="updateThemeColor('btn-primary-hover', this.value)"
+                                       placeholder="#4338ca">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Secondary Button') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="btnSecondary" 
+                                       value="{{ user_settings.get('theme', 'btn_secondary', '#06b6d4') }}"
+                                       onchange="updateThemeColor('btn-secondary', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="btnSecondaryText" 
+                                       value="{{ user_settings.get('theme', 'btn_secondary', '#06b6d4') }}"
+                                       onchange="updateThemeColor('btn-secondary', this.value)"
+                                       placeholder="#06b6d4">
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Secondary Button Hover') }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="btnSecondaryHover" 
+                                       value="{{ user_settings.get('theme', 'btn_secondary_hover', '#0891b2') }}"
+                                       onchange="updateThemeColor('btn-secondary-hover', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="btnSecondaryHoverText" 
+                                       value="{{ user_settings.get('theme', 'btn_secondary_hover', '#0891b2') }}"
+                                       onchange="updateThemeColor('btn-secondary-hover', this.value)"
+                                       placeholder="#0891b2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Colors -->
+                <div class="row g-3 mb-4">
+                    <div class="col-12">
+                        <h6 class="small text-uppercase text-muted mb-3">
+                            <i class="bi bi-bar-chart me-2"></i>{{ _('Chart Colors') }}
+                        </h6>
+                        <p class="text-muted small mb-3">{{ _('Customize the color palette used in charts and graphs throughout the application.') }}</p>
+                    </div>
+                    {% for i in range(1, 11) %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="setting-item mb-3">
+                            <div class="setting-label mb-2">
+                                <strong>{{ _('Chart Color') }} {{ i }}</strong>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="color" class="form-control form-control-color" 
+                                       id="chartColor{{ i }}" 
+                                       value="{{ user_settings.get('theme', 'chart_color_' ~ i, ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'][i-1]) }}"
+                                       onchange="updateThemeColor('chart-color-{{ i }}', this.value)"
+                                       style="width: 60px; height: 40px;">
+                                <input type="text" class="form-control" 
+                                       id="chartColor{{ i }}Text" 
+                                       value="{{ user_settings.get('theme', 'chart_color_' ~ i, ['#667eea', '#764ba2', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#14b8a6'][i-1]) }}"
+                                       onchange="updateThemeColor('chart-color-{{ i }}', this.value)"
+                                       placeholder="#667eea">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <button class="btn btn-primary" onclick="saveThemeColors()">
+                        <i class="bi bi-save me-2"></i>
+                        {{ _('Save All Colors') }}
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="resetAllThemeColors()">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>
+                        {{ _('Reset All to Defaults') }}
+                    </button>
+                    <button class="btn btn-outline-info" onclick="previewThemeColors()">
+                        <i class="bi bi-eye me-2"></i>
+                        {{ _('Preview Changes') }}
+                    </button>
+                </div>
+
+                <div id="themeColorsMessage" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Search Settings -->
+        <div class="tab-pane fade" id="search" role="tabpanel">
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Show File Preview') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Display file previews in file lists') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="showFilePreview"
+                                   {% if user_settings.get('display', 'show_file_preview', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('display', 'show_file_preview', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Show Metadata') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Display file metadata in file lists') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="showMetadata"
+                                   {% if user_settings.get('display', 'show_metadata', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('display', 'show_metadata', this.checked)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Settings -->
+        <div class="tab-pane fade" id="search" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-search"></i>
+                    {{ _('Search Preferences') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Default Search Type') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Default search interface to use') }}
+                    </div>
+                    <select class="form-select" id="defaultSearchType"
+                            onchange="toggleUserSetting('search', 'default_search_type', this.value)">
+                        <option value="basic" {% if user_settings.get('search', 'default_search_type', 'basic') == 'basic' %}selected{% endif %}>{{ _('Basic Search') }}</option>
+                        <option value="advanced" {% if user_settings.get('search', 'default_search_type', 'basic') == 'advanced' %}selected{% endif %}>{{ _('Advanced Search') }}</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Case Sensitive Search') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Make search queries case-sensitive by default') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="caseSensitive"
+                                   {% if user_settings.get('search', 'case_sensitive', False) %}checked{% endif %}
+                                   onchange="toggleUserSetting('search', 'case_sensitive', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Highlight Results') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Highlight matching terms in search results') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="highlightResults"
+                                   {% if user_settings.get('search', 'highlight_results', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('search', 'highlight_results', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Search in Content') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Include file content in search by default') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="searchInContent"
+                                   {% if user_settings.get('search', 'search_in_content', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('search', 'search_in_content', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Search in Filename') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Include file names in search by default') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="searchInFilename"
+                                   {% if user_settings.get('search', 'search_in_filename', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('search', 'search_in_filename', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Search in Metadata') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Include file metadata in search by default') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="searchInMetadata"
+                                   {% if user_settings.get('search', 'search_in_metadata', False) %}checked{% endif %}
+                                   onchange="toggleUserSetting('search', 'search_in_metadata', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Maximum Results') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Maximum number of search results to return') }}
+                    </div>
+                    <input type="number" class="form-control" id="maxResults" 
+                           min="100" max="10000" step="100"
+                           value="{{ user_settings.get('search', 'max_results', 1000) }}"
+                           onchange="toggleUserSetting('search', 'max_results', parseInt(this.value))">
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Settings -->
+        <div class="tab-pane fade" id="processing" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-cpu"></i>
+                    {{ _('File Processing') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Auto Process Uploads') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Automatically process files immediately after upload') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoProcessUploads"
+                                   {% if user_settings.get('processing', 'auto_process_uploads', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'auto_process_uploads', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Extract Archives') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Automatically extract files from archives (ZIP, RAR, etc.)') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="extractArchives"
+                                   {% if user_settings.get('processing', 'extract_archives', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'extract_archives', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Extract Email Attachments') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Automatically extract attachments from email files') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="extractAttachments"
+                                   {% if user_settings.get('processing', 'extract_attachments', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'extract_attachments', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Process Nested Files') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Process files found inside extracted archives and attachments') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="processNested"
+                                   {% if user_settings.get('processing', 'process_nested', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'process_nested', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Calculate File Hashes') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Calculate and store file hash values (MD5, SHA256) for duplicate detection') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="calculateHashes"
+                                   {% if user_settings.get('processing', 'calculate_hashes', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'calculate_hashes', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Extract Text') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Extract text content from documents for search and analysis') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="extractText"
+                                   {% if user_settings.get('processing', 'extract_text', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'extract_text', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Extract Metadata') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Extract file metadata (author, creation date, etc.) from documents') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="extractMetadata"
+                                   {% if user_settings.get('processing', 'extract_metadata', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('processing', 'extract_metadata', this.checked)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interface Visibility -->
+        <div class="tab-pane fade" id="interfaces" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-eye"></i>
+                    {{ _('Interface Visibility') }}
+                </h6>
+                
+                <div class="alert alert-info mb-3">
+        <i class="bi bi-info-circle me-2"></i>
+                    {{ _('Enable or disable interfaces to customize your navigation menu. All interfaces remain visible but disabled ones are marked.') }}
+    </div>
+    
+                {% if interfaces_by_category %}
+                    {% for category, interfaces in interfaces_by_category.items() %}
+                        <div class="mb-4">
+                            <h6 class="text-capitalize mb-3" style="color: var(--text-dark); font-size: 1rem;">
+                                <i class="bi bi-{% if category == 'main' %}house{% elif category == 'analysis' %}graph-up{% elif category == 'search' %}search{% elif category == 'management' %}folder{% else %}gear{% endif %} me-2"></i>
+                                {{ category|replace('_', ' ')|title }}
+                            </h6>
+                            <div class="row g-3">
+                                {% for interface in interfaces %}
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="card interface-card {% if not interface.enabled %}disabled border-secondary{% else %}border-success{% endif %}">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <div style="flex: 1;">
+                                                        <h6 class="card-title mb-1">
+                                                            <i class="bi {{ interface.icon }} me-2"></i>
+                                                            {{ interface.name }}
+                                                        </h6>
+                                                        <small class="text-muted d-block">{{ interface.description }}</small>
+            </div>
+                                                    <div class="form-check form-switch ms-2">
+                                                        <input 
+                                                            class="form-check-input interface-toggle" 
+                                                            type="checkbox" 
+                                                            id="interface_{{ interface.id }}"
+                                                            data-interface-id="{{ interface.id }}"
+                                                            {% if interface.enabled %}checked{% endif %}
+                                                            {% if interface.get('always_visible', False) %}disabled title="{{ _('This interface cannot be disabled') }}"{% endif %}
+                                                        >
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <small class="text-muted">
+                                                        <i class="bi bi-link-45deg me-1"></i>
+                                                        <code style="font-size: 0.75rem;">{{ interface.endpoint }}</code>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <div class="mt-4 d-flex gap-2">
+                    <button class="btn btn-outline-warning" onclick="resetInterfaceSettings()">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>
+                        {{ _('Reset to Defaults') }}
+                    </button>
+                    <button class="btn btn-primary" onclick="saveInterfaceSettings()">
+                        <i class="bi bi-save me-2"></i>
+                        {{ _('Save Changes') }}
+                    </button>
+            </div>
+            
+                <div id="interfaceSettingsMessage" class="mt-3" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <!-- Notifications -->
+        <div class="tab-pane fade" id="notifications" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-bell"></i>
+                    {{ _('Notification Preferences') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Enable Notifications') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Show system notifications and alerts') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="notificationsEnabled"
+                                   {% if user_settings.get('system', 'notifications_enabled', True) %}checked{% endif %}
+                                   onchange="toggleSystemSetting('notifications_enabled', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Email Notifications') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Send email notifications for important events') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="emailNotifications"
+                                   {% if user_settings.get('notifications', 'email_notifications', False) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'email_notifications', this.checked)">
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Processing Complete') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Notify when file processing is complete') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="processingComplete"
+                                   {% if user_settings.get('notifications', 'processing_complete', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'processing_complete', this.checked)">
+                        </div>
+                    </div>
+            </div>
+            
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Batch Complete') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Notify when batch processing operations complete') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="batchComplete"
+                                   {% if user_settings.get('notifications', 'batch_complete', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'batch_complete', this.checked)">
+                        </div>
+                    </div>
+            </div>
+            
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Errors Only') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Only show notifications for errors and warnings') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="errorsOnly"
+                                   {% if user_settings.get('notifications', 'errors_only', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'errors_only', this.checked)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-calendar-event"></i>
+                    {{ _('Future Events & Alerts') }}
+                </h6>
+                
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Similar Files Notifications') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Notify when similar files are detected') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="similarFilesEnabled"
+                                   {% if user_settings.get('notifications', 'similar_files_enabled', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'similar_files_enabled', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Future Dates Detection') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Detect and alert on future dates found in files') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="futureDatesEnabled"
+                                   {% if user_settings.get('notifications', 'future_dates_enabled', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'future_dates_enabled', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Future Events Detection') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Analyze verb tenses to detect future-focused content') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="futureEventsEnabled"
+                                   {% if user_settings.get('notifications', 'future_events_enabled', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'future_events_enabled', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="setting-label">
+                                <strong>{{ _('Auto-Analyze Files') }}</strong>
+                            </div>
+                            <div class="setting-description">
+                                {{ _('Automatically analyze files for future events during processing') }}
+                            </div>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="autoAnalyzeFiles"
+                                   {% if user_settings.get('notifications', 'auto_analyze_files', True) %}checked{% endif %}
+                                   onchange="toggleUserSetting('notifications', 'auto_analyze_files', this.checked)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <strong>{{ _('Upcoming Events Window') }}</strong>
+                    </div>
+                    <div class="setting-description mb-2">
+                        {{ _('Number of days ahead to show upcoming events') }}
+                    </div>
+                    <input type="number" class="form-control" id="upcomingEventsDays" 
+                           min="7" max="365" step="7"
+                           value="{{ user_settings.get('notifications', 'upcoming_events_days', 30) }}"
+                           onchange="toggleUserSetting('notifications', 'upcoming_events_days', parseInt(this.value))">
+                </div>
+            </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="tab-pane fade" id="system" role="tabpanel">
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-info-circle"></i>
+                    {{ _('System Information') }}
+                </h6>
+                
+                <div class="system-info-grid mb-4">
+                    <div class="info-card">
+                        <h6>{{ _('Application Version') }}</h6>
+                        <div class="value">{% if version %}{{ version }}{% else %}2.0.0{% endif %}</div>
+                        <small style="color: rgba(255,255,255,0.8);">{{ _('Modernized') }}</small>
+                    </div>
+                    <div class="info-card">
+                        <h6>{{ _('Database') }}</h6>
+                        <div class="value">PostgreSQL</div>
+                        <small style="color: rgba(255,255,255,0.8);">{{ _('Production Ready') }}</small>
+                    </div>
+                    <div class="info-card">
+                        <h6>{{ _('Processing Engine') }}</h6>
+                        <div class="value">{{ _('Modern') }}</div>
+                        <small style="color: rgba(255,255,255,0.8);">{{ _('File Processor') }}</small>
+                    </div>
+                    <div class="info-card">
+                        <h6>{{ _('Performance Monitoring') }}</h6>
+                        <div class="value">{{ _('Enabled') }}</div>
+                        <small style="color: rgba(255,255,255,0.8);">{{ _('Real-time') }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-gear"></i>
+                    {{ _('System Configuration') }}
+                </h6>
+                
+                <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    {{ _('Configuration is managed via environment variables. Changes require application restart.') }}
+                </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Processing Settings') }}</h6>
+                        <div class="config-badge">
+                            <strong>{{ _('Max Workers') }}:</strong>
+                            <code>10</code>
+                            <small class="text-muted">(MAX_WORKERS)</small>
+                        </div>
+                        <div class="config-badge">
+                            <strong>{{ _('Chunk Size') }}:</strong>
+                            <code>1 MB</code>
+                            <small class="text-muted">(CHUNK_SIZE)</small>
+                        </div>
+                        <div class="config-badge">
+                            <strong>{{ _('Max Depth') }}:</strong>
+                            <code>10</code>
+                            <small class="text-muted">(MAX_DEPTH)</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="small text-uppercase text-muted mb-3">{{ _('Feature Flags') }}</h6>
+                        <div class="config-badge">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>{{ _('Parallel Processing') }}</strong>
+                        </div>
+                        <div class="config-badge">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>{{ _('Archive Extraction') }}</strong>
+                        </div>
+                        <div class="config-badge">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>{{ _('Email Attachments') }}</strong>
+                        </div>
+                        <div class="config-badge">
+                            <i class="bi bi-check-circle text-success"></i>
+                            <strong>{{ _('Hash Calculation') }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-database"></i>
+        {{ _('Cache Management') }}
+                </h6>
+                
+    <p class="text-muted mb-3">{{ _('Manage search result caching for improved performance.') }}</p>
+    
+                <div class="d-flex gap-3 mb-3">
+        <button class="btn btn-warning" onclick="clearSearchCache()">
+            <i class="bi bi-trash me-2"></i>
+                        {{ _('Clear Cache') }}
+        </button>
+        <button class="btn btn-outline-primary" onclick="viewCacheStats()">
+            <i class="bi bi-bar-chart me-2"></i>
+                        {{ _('View Statistics') }}
+        </button>
+    </div>
+    
+                <div id="cacheStats" style="display: none;">
+                    <div id="cacheStatsContent"></div>
+    </div>
+</div>
+
+            <div class="setting-group">
+                <h6>
+                    <i class="bi bi-plug"></i>
+        {{ _('API Endpoints') }}    
+                </h6>
+                
+    <div class="table-responsive">
+                    <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>{{ _('Endpoint') }}</th>
+                    <th>{{ _('Method') }}</th>
+                    <th>{{ _('Description') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>/api/performance/metrics</code></td>
+                    <td><span class="badge bg-primary">GET</span></td>
+                    <td>{{ _('Current performance metrics') }}</td>
+                </tr>
+                <tr>
+                    <td><code>/api/performance/summary</code></td>
+                    <td><span class="badge bg-primary">GET</span></td>
+                    <td>{{ _('Performance summary report') }}</td>
+                </tr>
+                <tr>
+                    <td><code>/api/cache/clear</code></td>
+                    <td><span class="badge bg-warning">POST</span></td>
+                    <td>{{ _('Clear search cache') }}</td>
+                </tr>
+                <tr>
+                    <td><code>/api/cache/stats</code></td>
+                    <td><span class="badge bg-primary">GET</span></td>
+                                <td>{{ _('Cache statistics') }}</td>
+                </tr>
+            </tbody>
+        </table>
+                </div>
+            </div>
+    </div>
+    </div>
+
+    <div id="systemSettingsMessage" class="mt-3" style="display: none;"></div>
+</div>
+
+<script>
+// Translations for JavaScript
+const translations = {
+    clearCacheConfirm: {{ _('Are you sure you want to clear the search cache?')|tojson }},
+    cacheClearedSuccessfully: {{ _('Cache cleared successfully')|tojson }},
+    errorClearingCache: {{ _('Error clearing cache')|tojson }},
+    error: {{ _('Error')|tojson }},
+    interfaceUpdated: {{ _('Interface visibility updated successfully')|tojson }},
+    interfaceUpdateError: {{ _('Error updating interface visibility')|tojson }},
+    resetConfirm: {{ _('Are you sure you want to reset all interface settings to defaults?')|tojson }},
+    resetSuccess: {{ _('Interface settings reset successfully')|tojson }},
+    resetError: {{ _('Error resetting interface settings')|tojson }},
+    saveSuccess: {{ _('All changes saved successfully')|tojson }},
+    saveError: {{ _('Error saving changes')|tojson }},
+    reloadRequired: {{ _('Please reload the page to see changes')|tojson }}
+};
+
+// Interface visibility management
+let interfaceChanges = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle interface toggle changes
+    const toggles = document.querySelectorAll('.interface-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const interfaceId = this.dataset.interfaceId;
+            const enabled = this.checked;
+            
+            // Store change
+            interfaceChanges[interfaceId] = enabled;
+            
+            // Update card border
+            const card = this.closest('.card');
+            if (card) {
+                card.classList.remove('border-success', 'border-secondary', 'disabled');
+                if (enabled) {
+                    card.classList.add('border-success');
+                    card.classList.remove('disabled');
+                } else {
+                    card.classList.add('border-secondary', 'disabled');
+                }
+            }
+        });
+    });
+});
+
+async function toggleInterface(interfaceId, enabled) {
+    try {
+        const response = await fetch(`/api/settings/interfaces/${interfaceId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ enabled: enabled })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            return true;
+        } else {
+            throw new Error(data.error || translations.interfaceUpdateError);
+        }
+    } catch (error) {
+        console.error('Error toggling interface:', error);
+        throw error;
+    }
+}
+
+async function saveInterfaceSettings() {
+    if (Object.keys(interfaceChanges).length === 0) {
+        showMessage('info', '{{ _("No changes to save") }}');
+        return;
+    }
+    
+    try {
+        // Save all changes
+        const promises = Object.entries(interfaceChanges).map(([interfaceId, enabled]) => 
+            toggleInterface(interfaceId, enabled)
+        );
+        
+        await Promise.all(promises);
+        
+        // Clear changes
+        interfaceChanges = {};
+        
+        showMessage('success', translations.saveSuccess);
+        
+        // Reload after a short delay
+        setTimeout(() => {
+            if (confirm(translations.reloadRequired + ' {{ _("Reload now?") }}')) {
+                window.location.reload();
+            }
+        }, 2000);
+    } catch (error) {
+        showMessage('danger', translations.saveError + ': ' + error.message);
+    }
+}
+
+async function resetInterfaceSettings() {
+    if (!confirm(translations.resetConfirm)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/settings/interfaces/reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            showMessage('success', translations.resetSuccess);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            throw new Error(data.error || translations.resetError);
+        }
+    } catch (error) {
+        showMessage('danger', translations.resetError + ': ' + error.message);
+    }
+}
+
+function showMessage(type, message) {
+    const messageDiv = document.getElementById('interfaceSettingsMessage');
+    if (messageDiv) {
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// System Settings Functions
+async function toggleSystemSetting(settingKey, value) {
+    try {
+        console.log(`✅ Updating system setting: ${settingKey} = ${value}`);
+        const response = await fetch(`/api/settings/system/${settingKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ value: value })
+        });
+        
+        const data = await response.json();
+        console.log('✅ Settings API response:', data);
+        
+        if (data.success) {
+            document.dispatchEvent(new CustomEvent('systemSettingChanged', {
+                detail: { key: settingKey, value: value }
+            }));
+            
+            applySystemSetting(settingKey, value);
+            
+            // Show notification if available
+            if (window.notifications) {
+                window.notifications.success('{{ _("Setting updated successfully and applied system-wide") }}', {
+                    duration: 3000
+                });
+            } else {
+                showSystemMessage('success', '{{ _("Setting updated successfully and applied system-wide") }}');
+            }
+            
+            // Handle settings that require reload
+            if (data.requires_reload) {
+                if (settingKey === 'language') {
+                    // Language is handled in applySystemSetting - it will prompt for reload
+                    // No need to show additional reload prompt here
+                } else {
+                    setTimeout(() => {
+                        if (confirm('{{ _("This setting requires a page reload to take effect. Reload now?") }}')) {
+                            window.location.reload();
+                        }
+                    }, 1000);
+                }
+            }
+        } else {
+            throw new Error(data.error || 'Error updating setting');
+        }
+    } catch (error) {
+        console.error('❌ Error updating system setting:', error);
+        showSystemMessage('danger', '{{ _("Error updating setting") }}: ' + error.message);
+    }
+}
+
+// User Settings Functions (for display, search, processing, notifications, export)
+async function toggleUserSetting(category, settingKey, value) {
+    try {
+        console.log(`Updating user setting: ${category}.${settingKey} = ${value}`);
+        const response = await fetch(`/api/settings/user/${category}/${settingKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ value: value })
+        });
+        
+        const data = await response.json();
+        console.log('Settings API response:', data);
+        
+        if (data.success) {
+            // Dispatch event for other components
+            document.dispatchEvent(new CustomEvent('userSettingChanged', {
+                detail: { category: category, key: settingKey, value: value }
+            }));
+            
+            // Show notification if available
+            if (window.notifications) {
+                window.notifications.success('{{ _("Setting updated successfully and applied system-wide") }}', {
+                    duration: 3000
+                });
+            } else {
+                showSystemMessage('success', '{{ _("Setting updated successfully and applied system-wide") }}');
+            }
+        } else {
+            throw new Error(data.error || 'Error updating setting');
+        }
+    } catch (error) {
+        console.error('Error updating user setting:', error);
+        // Don't fallback to system endpoint - show error instead
+        if (window.notifications) {
+            window.notifications.error('{{ _("Error updating setting") }}: ' + error.message, {
+                duration: 5000
+            });
+        } else {
+            showSystemMessage('danger', '{{ _("Error updating setting") }}: ' + error.message);
+        }
+    }
+}
+
+function applySystemSetting(settingKey, value) {
+    switch(settingKey) {
+        case 'animations_enabled':
+            document.body.classList.toggle('no-animations', !value);
+            break;
+        case 'show_breadcrumbs':
+            const breadcrumb = document.querySelector('.page-navigation-bar');
+            if (breadcrumb) {
+                breadcrumb.style.display = value ? '' : 'none';
+            }
+            break;
+        case 'compact_mode':
+            document.body.classList.toggle('compact-mode', value);
+            break;
+        case 'language':
+            // ✅ SYSTEM-WIDE: Language is updated in settings and session by API
+            // Reload page immediately to apply language change system-wide
+            setTimeout(() => {
+                if (confirm('{{ _("Language changed. Reload page to apply system-wide?") }}')) {
+                    // Reload to apply language change
+                    window.location.reload();
+                }
+            }, 300);
+            break;
+        case 'theme':
+            // Apply theme immediately
+            if (value === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.body.classList.add('dark-theme');
+            } else if (value === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.body.classList.remove('dark-theme');
+            } else if (value === 'auto') {
+                // Auto theme based on system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    document.body.classList.add('dark-theme');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    document.body.classList.remove('dark-theme');
+                }
+            }
+            break;
+    }
+}
+
+function showSystemMessage(type, message) {
+    const messageDiv = document.getElementById('systemSettingsMessage');
+    if (messageDiv) {
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 3000);
+    }
+}
+
+async function clearSearchCache() {
+    if (!confirm(translations.clearCacheConfirm)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/cache/clear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            showCacheMessage('success', translations.cacheClearedSuccessfully + ': ' + data.message);
+        } else {
+            showCacheMessage('danger', translations.errorClearingCache + ': ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        showCacheMessage('danger', translations.error + ': ' + error.message);
+    }
+}
+
+function showCacheMessage(type, message) {
+    const cacheStats = document.getElementById('cacheStats');
+    const cacheStatsContent = document.getElementById('cacheStatsContent');
+    
+    if (cacheStats && cacheStatsContent) {
+        cacheStats.style.display = 'block';
+        cacheStatsContent.className = `alert alert-${type} alert-dismissible fade show`;
+        cacheStatsContent.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        setTimeout(() => {
+            if (type === 'success') {
+                viewCacheStats();
+            }
+        }, 1000);
+    } else {
+        alert(message);
+    }
+}
+
+async function viewCacheStats() {
+    const statsDiv = document.getElementById('cacheStats');
+    const contentDiv = document.getElementById('cacheStatsContent');
+    
+    if (!statsDiv || !contentDiv) return;
+    
+    statsDiv.style.display = 'block';
+    contentDiv.className = 'alert alert-light';
+    contentDiv.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>{{ _("Loading...") }}';
+    
+    try {
+        const response = await fetch('/api/cache/stats');
+        const data = await response.json();
+        
+        if (data.success) {
+            contentDiv.className = 'alert alert-info';
+        contentDiv.innerHTML = `
+                <h6 class="mb-3"><i class="bi bi-bar-chart me-2"></i>{{ _("Cache Statistics") }}</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <strong>{{ _("Size") }}:</strong> ${data.size || 0} / ${data.max_size || 1000} {{ _("entries") }}<br>
+                        <strong>{{ _("TTL") }}:</strong> ${data.ttl_seconds || 300} {{ _("seconds") }}<br>
+                    </div>
+                    <div class="col-md-6">
+                        ${data.avg_age_seconds !== undefined ? `<strong>{{ _("Average Age") }}:</strong> ${data.avg_age_seconds.toFixed(2)} {{ _("seconds") }}<br>` : ''}
+                        ${data.hit_rate !== undefined ? `<strong>{{ _("Hit Rate") }}:</strong> ${(data.hit_rate * 100).toFixed(1)}%<br>` : ''}
+                    </div>
+                </div>
+                ${data.timestamp ? `<small class="text-muted d-block mt-2"><i class="bi bi-clock me-1"></i>{{ _("Last updated") }}: ${new Date(data.timestamp).toLocaleString()}</small>` : ''}
+            `;
+        } else {
+            throw new Error(data.error || 'Unknown error');
+        }
+    } catch (error) {
+        contentDiv.className = 'alert alert-danger';
+        contentDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ _("Error loading cache stats") }}: ${error.message}
+        `;
+    }
+}
+
+// Theme Color Customization Functions
+const defaultThemeColors = {
+    'primary-color': '#4f46e5',
+    'secondary-color': '#06b6d4',
+    'success-color': '#10b981',
+    'danger-color': '#ef4444',
+    'warning-color': '#f59e0b',
+    'bg-light': '#f8fafc',
+    'text-dark': '#1e293b',
+    'border-color': '#e2e8f0',
+    'gradient-start': '#4f46e5',
+    'gradient-end': '#06b6d4',
+    'gradient-direction': '135deg',
+    'sidebar-bg': '#1e293b',
+    'sidebar-text': '#e2e8f0',
+    'sidebar-active': '#4f46e5',
+    'sidebar-hover': '#334155',
+    'btn-primary': '#4f46e5',
+    'btn-primary-hover': '#4338ca',
+    'btn-secondary': '#06b6d4',
+    'btn-secondary-hover': '#0891b2',
+    'chart-color-1': '#667eea',
+    'chart-color-2': '#764ba2',
+    'chart-color-3': '#10b981',
+    'chart-color-4': '#f59e0b',
+    'chart-color-5': '#ef4444',
+    'chart-color-6': '#06b6d4',
+    'chart-color-7': '#8b5cf6',
+    'chart-color-8': '#ec4899',
+    'chart-color-9': '#f97316',
+    'chart-color-10': '#14b8a6'
+};
+
+const colorInputMap = {
+    'primary-color': { color: 'primaryColor', text: 'primaryColorText' },
+    'secondary-color': { color: 'secondaryColor', text: 'secondaryColorText' },
+    'success-color': { color: 'successColor', text: 'successColorText' },
+    'danger-color': { color: 'dangerColor', text: 'dangerColorText' },
+    'warning-color': { color: 'warningColor', text: 'warningColorText' },
+    'bg-light': { color: 'bgLight', text: 'bgLightText' },
+    'text-dark': { color: 'textDark', text: 'textDarkText' },
+    'border-color': { color: 'borderColor', text: 'borderColorText' },
+    'gradient-start': { color: 'gradientStart', text: 'gradientStartText' },
+    'gradient-end': { color: 'gradientEnd', text: 'gradientEndText' },
+    'gradient-direction': { select: 'gradientDirection' },
+    'sidebar-bg': { color: 'sidebarBg', text: 'sidebarBgText' },
+    'sidebar-text': { color: 'sidebarText', text: 'sidebarTextText' },
+    'sidebar-active': { color: 'sidebarActive', text: 'sidebarActiveText' },
+    'sidebar-hover': { color: 'sidebarHover', text: 'sidebarHoverText' },
+    'btn-primary': { color: 'btnPrimary', text: 'btnPrimaryText' },
+    'btn-primary-hover': { color: 'btnPrimaryHover', text: 'btnPrimaryHoverText' },
+    'btn-secondary': { color: 'btnSecondary', text: 'btnSecondaryText' },
+    'btn-secondary-hover': { color: 'btnSecondaryHover', text: 'btnSecondaryHoverText' }
+};
+
+// Add chart colors to colorInputMap
+for (let i = 1; i <= 10; i++) {
+    colorInputMap[`chart-color-${i}`] = { 
+        color: `chartColor${i}`, 
+        text: `chartColor${i}Text` 
+    };
+}
+
+// Apply color to CSS variable immediately (uses ThemeManager if available)
+function applyColorToCSS(cssVar, color) {
+    // Use ThemeManager if available (applies across all pages)
+    if (window.ThemeManager) {
+        // Convert CSS variable name to setting key (e.g., 'primary-color' -> 'primary_color')
+        const settingKey = cssVar.replace(/-/g, '_');
+        window.ThemeManager.updateColor(settingKey, color);
+    } else {
+        // Fallback: Apply directly to CSS
+        document.documentElement.style.setProperty(`--${cssVar}`, color);
+    }
+}
+
+// Update theme color (applies immediately and syncs inputs)
+function updateThemeColor(cssVar, color) {
+    // Handle gradient direction (not a color)
+    if (cssVar === 'gradient-direction') {
+        applyColorToCSS(cssVar, color);
+        const inputs = colorInputMap[cssVar];
+        if (inputs && inputs.select) {
+            const selectInput = document.getElementById(inputs.select);
+            if (selectInput) selectInput.value = color;
+        }
+        // Update gradient preview
+        updateGradientPreview();
+        return;
+    }
+    
+    // Normalize color value (only for hex colors)
+    if (color && !color.startsWith('#') && !color.startsWith('rgb') && !color.startsWith('rgba')) {
+        color = '#' + color;
+    }
+    
+    // Apply to CSS immediately (via ThemeManager for consistency)
+    applyColorToCSS(cssVar, color);
+    
+    // Sync color picker and text input
+    const inputs = colorInputMap[cssVar];
+    if (inputs) {
+        if (inputs.color) {
+            const colorInput = document.getElementById(inputs.color);
+            if (colorInput) colorInput.value = color;
+        }
+        if (inputs.text) {
+            const textInput = document.getElementById(inputs.text);
+            if (textInput) textInput.value = color;
+        }
+    }
+    
+    // Update gradient preview if gradient colors changed
+    if (cssVar === 'gradient-start' || cssVar === 'gradient-end') {
+        updateGradientPreview();
+    }
+}
+
+// Update gradient preview
+function updateGradientPreview() {
+    const preview = document.getElementById('gradientPreview');
+    if (preview) {
+        const gradientBg = getComputedStyle(document.documentElement).getPropertyValue('--gradient-bg');
+        if (gradientBg) {
+            preview.style.background = gradientBg.trim();
+        }
+    }
+}
+
+// Reset single color to default
+function resetThemeColor(cssVar) {
+    const defaultColor = defaultThemeColors[cssVar];
+    if (defaultColor) {
+        updateThemeColor(cssVar, defaultColor);
+    }
+}
+
+// Reset all colors to defaults
+function resetAllThemeColors() {
+    if (!confirm('{{ _("Are you sure you want to reset all colors to defaults?") }}')) {
+        return;
+    }
+    
+    // Use ThemeManager if available
+    if (window.ThemeManager) {
+        window.ThemeManager.resetToDefaults();
+        
+        // Update all color inputs to defaults
+        Object.keys(defaultThemeColors).forEach(cssVar => {
+            const inputs = colorInputMap[cssVar];
+            const defaultColor = defaultThemeColors[cssVar];
+            if (inputs) {
+                if (inputs.color) {
+                    const colorInput = document.getElementById(inputs.color);
+                    if (colorInput) colorInput.value = defaultColor;
+                }
+                if (inputs.text) {
+                    const textInput = document.getElementById(inputs.text);
+                    if (textInput) textInput.value = defaultColor;
+                }
+                if (inputs.select) {
+                    const selectInput = document.getElementById(inputs.select);
+                    if (selectInput) selectInput.value = defaultColor;
+                }
+            }
+        });
+        
+        // Update gradient preview
+        updateGradientPreview();
+    } else {
+        // Fallback: Apply directly
+        Object.keys(defaultThemeColors).forEach(cssVar => {
+            updateThemeColor(cssVar, defaultThemeColors[cssVar]);
+        });
+    }
+    
+    showThemeMessage('success', '{{ _("All colors reset to defaults") }}');
+}
+
+// Save all theme colors to backend
+async function saveThemeColors() {
+    const colors = {};
+    
+    // Collect all current color values from colorInputMap
+    Object.keys(colorInputMap).forEach(cssVar => {
+        const inputs = colorInputMap[cssVar];
+        const settingKey = cssVar.replace(/-/g, '_');
+        
+        if (inputs.color) {
+            const colorInput = document.getElementById(inputs.color);
+            if (colorInput) {
+                colors[settingKey] = colorInput.value;
+            }
+        } else if (inputs.select) {
+            const selectInput = document.getElementById(inputs.select);
+            if (selectInput) {
+                colors[settingKey] = selectInput.value;
+            }
+        }
+    });
+    
+    // Also collect chart colors (they're in colorInputMap but let's be explicit)
+    for (let i = 1; i <= 10; i++) {
+        const chartColorInput = document.getElementById(`chartColor${i}`);
+        if (chartColorInput) {
+            colors[`chart_color_${i}`] = chartColorInput.value;
+        }
+    }
+    
+    try {
+        // Use bulk endpoint to save all colors in a single request
+        const response = await fetch('/api/settings/theme/bulk', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ colors: colors })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload theme colors in ThemeManager to ensure consistency
+            if (window.ThemeManager) {
+                window.ThemeManager.loadThemeColors();
+            }
+            
+            showThemeMessage('success', `{{ _("All colors saved successfully") }} (${data.updated_count || Object.keys(colors).length} colors)`);
+            
+            // Show notification if available
+            if (window.MessageSystem) {
+                window.MessageSystem.show('{{ _("Theme colors saved successfully") }}', 'success');
+            }
+        } else {
+            throw new Error(data.error || 'Failed to save colors');
+        }
+    } catch (error) {
+        console.error('Error saving theme colors:', error);
+        showThemeMessage('danger', '{{ _("Error saving colors") }}: ' + error.message);
+    }
+}
+
+// Preview theme colors (already applied, just show message)
+function previewThemeColors() {
+    showThemeMessage('info', '{{ _("Colors are applied in real-time. Scroll to see changes throughout the page.") }}');
+}
+
+// Show theme message
+function showThemeMessage(type, message) {
+    const messageDiv = document.getElementById('themeColorsMessage');
+    if (messageDiv) {
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Load and apply saved theme colors on page load
+function loadThemeColors() {
+    // ThemeManager handles loading automatically, but we can sync inputs if needed
+    if (window.ThemeManager) {
+        // Colors are already applied by ThemeManager
+        // Just ensure inputs are synced
+        Object.keys(colorInputMap).forEach(cssVar => {
+            const inputs = colorInputMap[cssVar];
+            if (inputs.color) {
+                const colorInput = document.getElementById(inputs.color);
+                const textInput = document.getElementById(inputs.text);
+                if (colorInput && colorInput.value) {
+                    // Ensure both inputs are synced
+                    if (textInput) textInput.value = colorInput.value;
+                }
+            }
+        });
+        
+        // Update gradient preview
+        updateGradientPreview();
+    } else {
+        // Fallback: Apply saved colors from inputs
+        Object.keys(colorInputMap).forEach(cssVar => {
+            const inputs = colorInputMap[cssVar];
+            const colorInput = document.getElementById(inputs.color);
+            if (colorInput && colorInput.value) {
+                applyColorToCSS(cssVar, colorInput.value);
+            }
+        });
+    }
+}
+
+// Sync color picker and text input when either changes
+document.addEventListener('DOMContentLoaded', function() {
+    // Sync color pickers with text inputs
+    Object.keys(colorInputMap).forEach(cssVar => {
+        const inputs = colorInputMap[cssVar];
+        const colorInput = document.getElementById(inputs.color);
+        const textInput = document.getElementById(inputs.text);
+        
+        if (colorInput && textInput) {
+            // When color picker changes, update text input
+            colorInput.addEventListener('input', function() {
+                textInput.value = this.value;
+            });
+            
+            // When text input changes, update color picker (if valid hex)
+            textInput.addEventListener('input', function() {
+                const value = this.value;
+                if (/^#[0-9A-F]{6}$/i.test(value)) {
+                    colorInput.value = value;
+                }
+            });
+        }
+    });
+    
+    // Load saved theme colors
+    loadThemeColors();
+    
+    // Update gradient preview after a short delay to ensure CSS variables are set
+    setTimeout(() => {
+        updateGradientPreview();
+    }, 100);
+    
+    // Listen for gradient changes
+    document.addEventListener('themeGradientChanged', function() {
+        updateGradientPreview();
+    });
+});
+
+// Initialize Bootstrap tabs on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Bootstrap to be available
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+        // Initialize all tab buttons
+        const triggerTabList = document.querySelectorAll('[data-bs-toggle="tab"]');
+        triggerTabList.forEach(function (triggerEl) {
+            triggerEl.addEventListener('click', function (event) {
+                event.preventDefault();
+                const tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            });
+        });
+    } else {
+        // Fallback: Manual tab switching if Bootstrap not available
+        const tabButtons = document.querySelectorAll('.nav-link[data-bs-target]');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-bs-target');
+                
+                // Hide all tabs
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Show selected tab
+                this.classList.add('active');
+                const targetPane = document.querySelector(targetId);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            });
+        });
+    }
+    
+    // Ensure first tab is visible
+    const firstTab = document.getElementById('general');
+    if (firstTab) {
+        firstTab.classList.add('show', 'active');
+    }
+});
+</script>
+{% endblock %}

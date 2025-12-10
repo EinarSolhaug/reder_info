@@ -1,0 +1,402 @@
+/**
+ * Chart Export Buttons and Chart Type Selector Styles
+ */
+
+.chart-controls-wrapper {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-section);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chart-controls-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chart-type-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.chart-type-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    white-space: nowrap;
+}
+
+.chart-type-label i {
+    font-size: 1rem;
+    color: var(--primary-color);
+}
+
+.chart-type-select {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--input-text);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 150px;
+}
+
+.chart-type-select:hover {
+    border-color: var(--border-dark);
+}
+
+.chart-type-select:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.chart-export-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.chart-export-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 1.125rem;
+    color: var(--text-light);
+    background: var(--bg-section);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.chart-export-toggle:hover {
+    background: var(--border-light);
+    border-color: var(--border-dark);
+    color: var(--text-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-export-toggle:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chart-export-toggle i {
+    font-size: 1.125rem;
+}
+
+.chart-export-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--bg-section);
+    border-radius: 0.375rem;
+    border: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    background: var(--bg-white);
+    border: 1px solid var(--input-border);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.chart-export-btn:hover {
+    background: var(--border-light);
+    border-color: var(--border-dark);
+    color: var(--text-heading);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chart-export-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chart-export-btn i {
+    font-size: 1rem;
+}
+
+.chart-export-btn span {
+    font-size: 0.8125rem;
+}
+
+/* Format-specific button colors */
+.chart-export-png {
+    border-color: var(--info-color);
+    color: var(--info-color);
+}
+
+.chart-export-png:hover {
+    background: var(--alert-info-bg);
+    border-color: var(--info-color);
+    color: var(--info-color);
+}
+
+.chart-export-jpg {
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.chart-export-jpg:hover {
+    background: var(--alert-success-bg);
+    border-color: var(--success-color);
+    color: var(--success-color);
+}
+
+.chart-export-svg {
+    border-color: var(--chart-color-7);
+    color: var(--chart-color-7);
+}
+
+.chart-export-svg:hover {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: var(--chart-color-7);
+    color: var(--chart-color-7);
+}
+
+.chart-export-pdf {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.chart-export-pdf:hover {
+    background: var(--alert-danger-bg);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+/* Integration with chart cards - no new sections, just reordering */
+.chart-card .chart-controls-wrapper {
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    order: -1; /* Ensure it appears before chart container */
+    position: relative; /* Not absolute - stays in flow, no offsetting */
+}
+
+/* Only apply flexbox if not already flex */
+.chart-card:not([style*="display: flex"]) {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    order: -2; /* Title comes first */
+}
+
+.chart-card .chart-controls-wrapper {
+    order: -1; /* Controls come after title but before chart */
+}
+
+.chart-card .chart-container {
+    order: 0; /* Chart comes last */
+}
+
+/* Chart controls positioning - ensure they're above charts without creating new sections */
+.section-card .chart-controls-wrapper {
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    order: -1;
+    position: relative; /* Not absolute - stays in flow */
+}
+
+/* Only apply flexbox ordering if not already flex */
+.section-card:not([style*="display: flex"]) {
+    display: flex;
+    flex-direction: column;
+}
+
+.section-card .section-header {
+    order: -2;
+}
+
+.section-card .chart-controls-wrapper {
+    order: -1;
+}
+
+.section-card .chart-container {
+    order: 0;
+}
+
+/* Chart controls should be in the parent card, not inside chart-container */
+.chart-container .chart-controls-wrapper {
+    /* Controls should not be inside chart-container - hide if accidentally placed there */
+    display: none !important;
+}
+
+/* Controls should be in chart-card or section-card, positioned above chart-container */
+.chart-card .chart-controls-wrapper,
+.section-card .chart-controls-wrapper,
+.file-details-analysis-section .chart-controls-wrapper,
+.classification-charts-container .chart-controls-wrapper {
+    display: block;
+}
+
+/* Special styling for file-details-analysis-section */
+.file-details-analysis-section .chart-controls-wrapper,
+.classification-charts-container .chart-controls-wrapper {
+    margin-bottom: 1rem;
+    margin-top: 0.75rem;
+    order: 0; /* Place after filter */
+}
+
+/* Ensure buttons appear below filter in classification charts */
+.classification-charts-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.classification-charts-controls {
+    order: -2; /* Tabs come first */
+}
+
+.chart-filter-container {
+    order: -1; /* Filter comes second */
+}
+
+.classification-charts-container .chart-controls-wrapper {
+    order: 0; /* Buttons come after filter */
+}
+
+.chart-and-table-container {
+    order: 1; /* Chart comes last */
+}
+
+.chart-container-layout .chart-controls-wrapper {
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .chart-controls-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .chart-type-selector-wrapper {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .chart-export-wrapper {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .chart-export-buttons {
+        gap: 0.375rem;
+        padding: 0.375rem;
+        width: 100%;
+    }
+
+    .chart-export-btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        flex: 1;
+    }
+
+    .chart-export-btn span {
+        display: none;
+    }
+
+    .chart-export-btn i {
+        font-size: 1.125rem;
+    }
+    
+    .chart-export-toggle {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode support (if applicable) */
+@media (prefers-color-scheme: dark) {
+    .chart-export-buttons {
+        background: #1e293b;
+        border-color: #334155;
+    }
+
+    .chart-export-btn {
+        background: #0f172a;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .chart-export-btn:hover {
+        background: #1e293b;
+        border-color: #475569;
+        color: #f1f5f9;
+    }
+
+    .chart-type-label {
+        color: #cbd5e1;
+    }
+
+    .chart-type-select {
+        background: #0f172a;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .chart-type-select:hover {
+        border-color: #475569;
+    }
+
+    .chart-type-select:focus {
+        border-color: #667eea;
+    }
+
+    .chart-export-toggle {
+        background: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    .chart-export-toggle:hover {
+        background: #334155;
+        border-color: #475569;
+        color: #f1f5f9;
+    }
+}
+

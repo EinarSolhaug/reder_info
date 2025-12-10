@@ -1,0 +1,771 @@
+
+
+<!-- templates/sides_list.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ _('Sides Management') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="bi bi-diagram-3 me-2"></i>
+            {{ _('Sides') }} ({{ total_sides|default(0) }})
+        </h1>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openSideModal()">
+        <i class="bi bi-plus-circle me-2"></i>
+        {{ _('Add') }}
+    </button>
+</div>
+
+<div class="stat-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="mb-0">
+            <i class="bi bi-list me-2"></i>
+            {{ _('All Sides') }} ({{ _('Page') }} {{ page }}/{{ total_pages }})
+        </h5>
+        <input type="text" id="sideSearch" class="form-control form-control-sm" 
+               placeholder="{{ _('Search sides...') }}" style="width: 250px;">
+    </div>
+    
+    <!-- ID Card Grid -->
+    <div class="row g-4" id="sidesCardContainer">
+        {% for side in sides|sort(attribute='importance', reverse=True) %}
+        <div class="col-md-6 col-lg-4 col-xl-3 side-card-item" data-name="{{ side.name|lower }}">
+            <div class="id-card">
+                <div class="id-card-header" style="background: var(--gradient-bg);">
+                    <div class="id-card-icon">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+                    <div class="id-card-id">
+                        <span class="badge bg-light text-dark">#{{ side.id }}</span>
+                    </div>
+                </div>
+                
+                <div class="id-card-body">
+                    <h3 class="id-card-name">{{ side.name }}</h3>
+                    
+                    <div class="id-card-info">
+                        <div class="id-card-field">
+                            <i class="bi bi-star me-2 text-muted"></i>
+                            <span class="id-card-label">{{ _('Importance') }}:</span>
+                            <div class="id-card-stars">
+                                {% set stars = (side.importance * 5)|round|int %}
+                                {% for i in range(5) %}
+                                    {% if i < stars %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-muted"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2 text-muted">({{ (side.importance * 100)|round|int }}%)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="id-card-field">
+                            <i class="bi bi-building me-2 text-muted"></i>
+                            <span class="id-card-label">{{ _('Sources') }}:</span>
+                            <span class="badge bg-info">{{ side.source_count }}</span>
+                        </div>
+                        
+                        <div class="id-card-field">
+                            <i class="bi bi-file-earmark me-2 text-muted"></i>
+                            <span class="id-card-label">{{ _('Documents') }}:</span>
+                            <span class="badge bg-primary">{{ side.doc_count }}</span>
+                        </div>
+                        
+                        <div class="id-card-field">
+                            <i class="bi bi-calendar me-2 text-muted"></i>
+                            <span class="id-card-label">{{ _('Created') }}:</span>
+                            <span class="id-card-value">{{ side.date_creation.strftime('%Y-%m-%d') if side.date_creation else 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="id-card-footer">
+                    <div class="btn-group btn-group-sm w-100" role="group">
+                        <button class="btn btn-outline-primary" onclick="viewSide({{ side.id }})" title="{{ _('View Details') }}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-success" onclick="editSide({{ side.id }})" title="{{ _('Edit Side') }}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-info" onclick="duplicateSide({{ side.id }})" title="{{ _('Duplicate Side') }}">
+                            <i class="bi bi-files"></i>
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="toggleSideStatus({{ side.id }})" title="{{ _('Toggle Status') }}">
+                            <i class="bi bi-toggle-on"></i>
+                        </button>
+                  <!--      <button class="btn btn-outline-danger" onclick='deleteSide({{ side.id }}, {{ side.name|tojson }})' title="{{ _('Delete Side') }}">
+                            <i class="bi bi-trash"></i>
+                        </button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                <p>{{ _('No sides yet.') }} <a href="#" onclick="openSideModal(); return false;">{{ _('Add your first side') }}</a></p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ _('Confirm Deletion') }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteConfirmMessage" class="mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>
+                    {{ _('Cancel') }}
+                </button>
+<!--                <button type="button" class="btn btn-danger" id="deleteConfirmButton">
+                    <i class="bi bi-trash me-2"></i>
+                    {{ _('Delete') }}
+                </button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Side Add/Edit Modal -->
+<div class="modal fade" id="sideModal" tabindex="-1" aria-labelledby="sideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sideModalLabel">
+                    <i class="bi me-2" id="modalIcon"></i>
+                    <span id="modalTitle">{{ _('Add New Side') }}</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _('Close') }}"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sideForm">
+                    <input type="hidden" id="sideId" name="side_id">
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Side Name') }} *</label>
+                        <input type="text" name="name" id="sideName" class="form-control" 
+                               placeholder="{{ _('e.g., Government, Opposition Party') }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Importance') }} *</label>
+                        <input type="range" name="importance" class="form-range" 
+                               min="0" max="1" step="0.01" 
+                               value="0.5" 
+                               id="importanceSlider">
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>{{ _('Low') }}</span>
+                            <span id="importanceValue">0.50</span>
+                            <span>{{ _('High') }}</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>
+                    {{ _('Cancel') }}
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitSideForm()">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="submitButtonText">{{ _('Create Side') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if cursor_pagination %}
+    {% from "components/cursor_pagination.html" import cursor_pagination %}
+    {{ cursor_pagination(next_cursor, prev_cursor, has_next, has_prev, query_time_ms, total_estimated, 'sides', 50) }}
+{% endif %}
+
+<style>
+.id-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+}
+
+.id-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.id-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+}
+
+.id-card-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.id-card-id {
+    font-size: 0.875rem;
+    opacity: 0.95;
+}
+
+.id-card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.id-card-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+
+.id-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.id-card-field {
+    display: flex;
+    align-items: flex-start;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.id-card-label {
+    font-weight: 500;
+    color: #6c757d;
+    margin-right: 0.5rem;
+    min-width: 80px;
+}
+
+.id-card-value {
+    color: #2c3e50;
+    flex: 1;
+}
+
+.id-card-stars {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.id-card-footer {
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.id-card-footer .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.id-card-footer .btn {
+    flex: 1;
+    min-width: 40px;
+    padding: 0.375rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .id-card-footer .btn-group {
+        flex-direction: column;
+    }
+    
+    .id-card-footer .btn {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;" id="toastContainer"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toast notification helper function
+function showToast(message, type = 'info', duration = 4000) {
+    const toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+    }
+    
+    const toastId = 'toast-' + Date.now();
+    const icons = {
+        success: 'check-circle-fill',
+        error: 'exclamation-triangle-fill',
+        warning: 'exclamation-triangle-fill',
+        info: 'info-circle-fill'
+    };
+    
+    const bgColors = {
+        success: 'success',
+        error: 'danger',
+        warning: 'warning',
+        info: 'info'
+    };
+    
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white bg-${bgColors[type]} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-${icons[type]} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('toastContainer').insertAdjacentHTML('beforeend', toastHtml);
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: duration });
+    toast.show();
+    
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+// Search functionality with card filtering
+document.getElementById('sideSearch').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const cards = document.querySelectorAll('.side-card-item');
+    
+    if (searchTerm.length > 2 || searchTerm.length === 0) {
+        cards.forEach(card => {
+            const name = card.getAttribute('data-name');
+            if (name.includes(searchTerm) || searchTerm.length === 0) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        // If search term is long enough, update URL
+        if (searchTerm.length > 2) {
+            const url = new URL(window.location);
+            url.searchParams.set('search', searchTerm);
+            url.searchParams.set('page', '1');
+            window.history.replaceState({}, '', url);
+        }
+    }
+});
+
+function viewSide(sideId) {
+    window.location.href = `/sides/${sideId}`;
+}
+
+function editSide(sideId) {
+    openSideModal(sideId);
+}
+
+// Translations for JavaScript
+const translations = {
+    createCopyOfSide: {{ _('Create a copy of this side?')|tojson }},
+    deleteSideConfirm: {{ _('Are you sure you want to delete this side? This action cannot be undone.')|tojson }}
+};
+
+function duplicateSide(sideId) {
+    if (confirm(translations.createCopyOfSide)) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch(`/api/sides/${sideId}/duplicate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('{{ _("Side duplicated successfully!") }}', 'success');
+                setTimeout(() => {
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                }, 500);
+            } else {
+                showToast('{{ _("Error duplicating side") }}: ' + (data.message || '{{ _("Unknown error") }}'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('{{ _("Error duplicating side") }}', 'error');
+        });
+    }
+}
+
+function toggleSideStatus(sideId) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    fetch(`/api/sides/${sideId}/toggle-status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('{{ _("Side status updated!") }}', 'success');
+            setTimeout(() => {
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            }, 500);
+        } else {
+            showToast('{{ _("Error updating status") }}: ' + (data.message || '{{ _("Unknown error") }}'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('{{ _("Error updating side status") }}', 'error');
+    });
+}
+
+function deleteSide(sideId, sideName = '') {
+    const confirmMessage = sideName 
+        ? `{{ _('Are you sure you want to delete the side') }} "${sideName}"?\n\n{{ _('This action cannot be undone.') }}`
+        : translations.deleteSideConfirm;
+    
+    // Show confirmation modal
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    const messageEl = document.getElementById('deleteConfirmMessage');
+    const confirmBtn = document.getElementById('deleteConfirmButton');
+    
+    messageEl.textContent = confirmMessage;
+    
+    // Remove any existing event listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    // Add click handler for confirmation
+    newConfirmBtn.addEventListener('click', function performDelete() {
+        modal.hide();
+        
+        // Show processing notification
+        if (window.MessageFormatter) {
+            window.MessageFormatter.showNotification('delete', 'processing', { item: sideName || 'Side' });
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch(`/api/sides/${sideId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show formatted success notification
+                if (window.MessageFormatter) {
+                    window.MessageFormatter.showDeleteSuccess(sideName || 'Side', {
+                        title: '{{ _("Side Deleted") }}',
+                        duration: 4000
+                    });
+                } else {
+                    showToast('{{ _("Side deleted successfully!") }}', 'success');
+                }
+                setTimeout(() => {
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                }, 500);
+            } else {
+                // Show formatted error notification
+                if (window.MessageFormatter) {
+                    window.MessageFormatter.showDeleteError(sideName || 'Side', {
+                        title: '{{ _("Delete Failed") }}',
+                        duration: 6000
+                    });
+                } else {
+                    showToast('{{ _("Error deleting side") }}: ' + (data.error || '{{ _("Unknown error") }}'), 'error');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (window.MessageFormatter) {
+                window.MessageFormatter.showDeleteError(sideName || 'Side', {
+                    title: '{{ _("Delete Error") }}',
+                    duration: 6000
+                });
+            } else {
+                showToast('{{ _("Error deleting side") }}', 'error');
+            }
+        });
+    });
+    
+    modal.show();
+}
+
+// Modal functions
+function openSideModal(sideId = null) {
+    const modal = new bootstrap.Modal(document.getElementById('sideModal'));
+    const form = document.getElementById('sideForm');
+    const modalTitle = document.getElementById('modalTitle');
+    const submitButtonText = document.getElementById('submitButtonText');
+    
+    // Reset form
+    form.reset();
+    document.getElementById('sideId').value = '';
+    document.getElementById('importanceSlider').value = '0.5';
+    document.getElementById('importanceValue').textContent = '0.50';
+    
+    if (sideId) {
+        // Edit mode
+        modalTitle.textContent = '{{ _("Edit Side") }}';
+        submitButtonText.textContent = '{{ _("Update Side") }}';
+        document.getElementById('modalIcon').className = 'bi bi-pencil me-2';
+        document.getElementById('sideId').value = sideId;
+        
+        // Load side data
+        fetch(`/api/sides/${sideId}`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.side) {
+                    const side = data.side;
+                    document.getElementById('sideName').value = side.name || '';
+                    
+                    const importance = side.importance || 0.5;
+                    document.getElementById('importanceSlider').value = importance;
+                    document.getElementById('importanceValue').textContent = parseFloat(importance).toFixed(2);
+                } else {
+                    showToast('{{ _("Error loading side") }}: ' + (data.error || '{{ _("Unknown error") }}'), 'error');
+                    modal.hide();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading side data:', error);
+                showToast('{{ _("Error loading side data") }}: ' + error.message, 'error');
+                modal.hide();
+            });
+    } else {
+        // Add mode
+        modalTitle.textContent = '{{ _("Add New Side") }}';
+        submitButtonText.textContent = '{{ _("Create Side") }}';
+        document.getElementById('modalIcon').className = 'bi bi-plus-circle me-2';
+    }
+    
+    modal.show();
+}
+
+function submitSideForm() {
+    const form = document.getElementById('sideForm');
+    const sideId = document.getElementById('sideId').value;
+    const formData = new FormData(form);
+    
+    // Validate required fields
+    if (!formData.get('name')) {
+        showToast('{{ _("Please fill in the side name") }}', 'warning');
+        return;
+    }
+    
+    // Convert FormData to JSON
+    const data = {
+        name: formData.get('name'),
+        importance: parseFloat(formData.get('importance')) || 0.5
+    };
+    
+    const url = sideId ? `/api/sides/${sideId}` : '/api/sides';
+    const method = sideId ? 'PUT' : 'POST';
+    
+    // ✅ SECURITY: Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        // Check if response is ok (status 200-299)
+        if (!response.ok) {
+            return response.json().then(err => {
+                console.error('Error response:', err);
+                throw new Error(err.error || `HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(result => {
+        console.log('Response result:', result);
+        // Get side name from form
+        const sideName = document.getElementById('sideName')?.value || 'Side';
+        
+        // Check if result has success field (POST/PUT responses)
+        if (result && result.success !== undefined) {
+            if (result.success) {
+                // Show formatted success notification
+                const isEdit = sideId ? true : false;
+                if (window.MessageFormatter) {
+                    if (isEdit) {
+                        window.MessageFormatter.showUpdateSuccess(sideName, {
+                            title: 'Side Updated',
+                            duration: 4000
+                        });
+                    } else {
+                        window.MessageFormatter.showCreateSuccess(sideName, {
+                            title: 'Side Created',
+                            duration: 4000
+                        });
+                    }
+                } else {
+                    showToast(
+                        isEdit ? '{{ _("Side updated successfully!") }}' : '{{ _("Side created successfully!") }}',
+                        'success'
+                    );
+                }
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('sideModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Small delay to ensure modal closes before reload
+                // Add cache-busting parameter to ensure fresh data
+                setTimeout(() => {
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                }, 500);
+            } else {
+                // Show formatted error notification
+                if (window.MessageFormatter) {
+                    const isEdit = sideId ? true : false;
+                    if (isEdit) {
+                        window.MessageFormatter.showUpdateError(sideName, {
+                            title: 'Update Failed',
+                            duration: 6000
+                        });
+                    } else {
+                        window.MessageFormatter.showCreateError(sideName, {
+                            title: 'Create Failed',
+                            duration: 6000
+                        });
+                    }
+                } else {
+                    showToast('{{ _("Error") }}: ' + (result.error || '{{ _("Unknown error") }}'), 'error');
+                }
+            }
+        } else {
+            // If no success field but response was ok, assume it worked
+            console.log('No success field, but response was ok - assuming success');
+            const isEdit = sideId ? true : false;
+            if (window.MessageFormatter) {
+                if (isEdit) {
+                    window.MessageFormatter.showUpdateSuccess(sideName, {
+                        title: 'Side Updated',
+                        duration: 4000
+                    });
+                } else {
+                    window.MessageFormatter.showCreateSuccess(sideName, {
+                        title: 'Side Created',
+                        duration: 4000
+                    });
+                }
+            } else {
+                showToast(
+                    isEdit ? '{{ _("Side updated successfully!") }}' : '{{ _("Side created successfully!") }}',
+                    'success'
+                );
+            }
+            const modal = bootstrap.Modal.getInstance(document.getElementById('sideModal'));
+            if (modal) {
+                modal.hide();
+            }
+            setTimeout(() => {
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            }, 500);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving side:', error);
+        const sideName = document.getElementById('sideName')?.value || 'Side';
+        const isEdit = sideId ? true : false;
+        if (window.MessageFormatter) {
+            if (isEdit) {
+                window.MessageFormatter.showUpdateError(sideName, {
+                    title: 'Update Error',
+                    duration: 6000
+                });
+            } else {
+                window.MessageFormatter.showCreateError(sideName, {
+                    title: 'Create Error',
+                    duration: 6000
+                });
+            }
+        } else {
+            showToast('{{ _("Error saving side") }}: ' + error.message, 'error');
+        }
+    });
+}
+
+// Initialize importance slider
+document.addEventListener('DOMContentLoaded', function() {
+    const slider = document.getElementById('importanceSlider');
+    const valueDisplay = document.getElementById('importanceValue');
+    
+    if (slider && valueDisplay) {
+        slider.addEventListener('input', (e) => {
+            valueDisplay.textContent = parseFloat(e.target.value).toFixed(2);
+        });
+    }
+    
+    // Check if we should open the modal in edit mode from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit');
+    if (editId) {
+        // Remove the edit parameter from URL
+        urlParams.delete('edit');
+        const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+        
+        // Open modal in edit mode
+        openSideModal(parseInt(editId));
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('File Classification Analysis') }} - {{ _('File Analysis System') }}{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+<style>
+    .classification-analysis-container {
+        padding: 2rem;
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+    
+    .analysis-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border-color);
+        flex-wrap: wrap;
+    }
+    
+    .analysis-tab {
+        padding: 1rem 2rem;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-light);
+        transition: all 0.3s;
+    }
+    
+    .analysis-tab:hover {
+        color: var(--primary-color);
+    }
+    
+    .analysis-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+    
+    .analysis-panel {
+        display: none;
+        animation: fadeIn 0.3s;
+    }
+    
+    .analysis-panel.active {
+        display: block;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+    
+    .control-panel {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .method-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .method-option {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--input-border);
+        border-radius: 6px;
+        background: var(--bg-white);
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .method-option:hover {
+        border-color: var(--input-focus);
+    }
+    
+    .method-option.active {
+        border-color: var(--primary-color);
+        background: var(--alert-info-bg);
+    }
+    
+    .results-section {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+    }
+    
+    .file-result-card {
+        background: var(--bg-section);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .file-result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-name {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .category-badge {
+        display: inline-block;
+        background: var(--btn-primary);
+        color: var(--text-white);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .confidence-bar {
+        height: 8px;
+        background: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        background: var(--gradient-bg);
+        transition: width 0.3s;
+    }
+    
+    .category-distribution {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .category-card {
+        background: var(--card-bg);
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-top: 4px solid var(--primary-color);
+    }
+    
+    .category-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .category-count {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+    
+    .loading-content {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .spinner {
+        border: 4px solid var(--border-light);
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .folder-selector {
+        margin-bottom: 1rem;
+    }
+    
+    .file-list {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .chart-container {
+        margin-top: 2rem;
+        height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="classification-analysis-container">
+    <h1 class="mb-4">
+        <i class="bi bi-file-earmark-text"></i> {{ _('File Classification Analysis') }}
+    </h1>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loadingText">{{ _('Processing...') }}</p>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="statTotalFiles">{{ stats.get('total_files', 0) }}</div>
+            <div class="stat-label">{{ _('Total Files') }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statAnalyzedFiles">{{ stats.get('analyzed_files', 0) }}</div>
+            <div class="stat-label">{{ _('Analyzed Files') }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statCategories">{{ stats.get('total_categories', 0) }}</div>
+            <div class="stat-label">{{ _('Categories') }}</div>
+        </div>
+    </div>
+    
+    <!-- Analysis Tabs -->
+    <div class="analysis-tabs">
+        <button class="analysis-tab active" data-panel="folder">
+            <i class="bi bi-folder"></i> {{ _('Folder Analysis') }}
+        </button>
+        <button class="analysis-tab" data-panel="file">
+            <i class="bi bi-file-earmark"></i> {{ _('File Analysis') }}
+        </button>
+        <button class="analysis-tab" data-panel="database">
+            <i class="bi bi-database"></i> {{ _('Database Analysis') }}
+        </button>
+    </div>
+    
+    <!-- Folder Analysis Panel -->
+    <div id="panel-folder" class="analysis-panel active">
+        <div class="control-panel">
+            <h3><i class="bi bi-folder"></i> {{ _('Folder Analysis') }}</h3>
+            <p class="text-muted">{{ _('Analyze and classify all files in a specific folder') }}</p>
+            
+            <div class="mb-3">
+                <label class="form-label"><strong>{{ _('Folder Path:') }}</strong></label>
+                <input type="text" id="folderPathInput" class="form-control" 
+                       placeholder="{{ _('Enter full folder path (e.g., C:\\Users\\Documents or /home/user/documents)') }}"
+                       autocomplete="off">
+                <small class="text-muted">{{ _('Enter the complete path to the folder you want to analyze') }}</small>
+            </div>
+            
+            <div class="method-selector">
+                <label class="form-label"><strong>{{ _('Classification Method:') }}</strong></label>
+                <div class="method-option active" data-method="rule_based">
+                    <i class="bi bi-list-check"></i> {{ _('Rule-Based') }}
+                </div>
+                <div class="method-option" data-method="ml">
+                    <i class="bi bi-cpu"></i> {{ _('Machine Learning') }}
+                </div>
+                <div class="method-option" data-method="deep_learning">
+                    <i class="bi bi-diagram-3"></i> {{ _('Deep Learning') }}
+                </div>
+                <div class="method-option" data-method="ensemble">
+                    <i class="bi bi-stack"></i> {{ _('Ensemble') }}
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="analyzeFolder()">
+                <i class="bi bi-play-circle"></i> {{ _('Analyze Folder') }}
+            </button>
+        </div>
+        
+        <div id="folderResults" class="results-section" style="display: none;"></div>
+    </div>
+    
+    <!-- File Analysis Panel -->
+    <div id="panel-file" class="analysis-panel">
+        <div class="control-panel">
+            <h3><i class="bi bi-file-earmark"></i> {{ _('File Analysis') }}</h3>
+            <p class="text-muted">{{ _('Analyze and classify a single file by content and title') }}</p>
+            
+            <div class="mb-3">
+                <label class="form-label"><strong>{{ _('File ID:') }}</strong></label>
+                <input type="number" id="fileIdInput" class="form-control" placeholder="{{ _('Enter file ID') }}">
+            </div>
+            
+            <div class="method-selector">
+                <label class="form-label"><strong>{{ _('Classification Method:') }}</strong></label>
+                <div class="method-option active" data-method="rule_based">
+                    <i class="bi bi-list-check"></i> {{ _('Rule-Based') }}
+                </div>
+                <div class="method-option" data-method="ml">
+                    <i class="bi bi-cpu"></i> {{ _('Machine Learning') }}
+                </div>
+                <div class="method-option" data-method="deep_learning">
+                    <i class="bi bi-diagram-3"></i> {{ _('Deep Learning') }}
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="analyzeFile()">
+                <i class="bi bi-search"></i> {{ _('Analyze File') }}
+            </button>
+        </div>
+        
+        <div id="fileResults" class="results-section" style="display: none;"></div>
+    </div>
+    
+    <!-- Database Analysis Panel -->
+    <div id="panel-database" class="analysis-panel">
+        <div class="control-panel">
+            <h3><i class="bi bi-database"></i> {{ _('Database Analysis') }}</h3>
+            <p class="text-muted">{{ _('Analyze and classify files across the entire database') }}</p>
+            
+            <div class="mb-3">
+                <label class="form-label"><strong>{{ _('Limit:') }}</strong></label>
+                <input type="number" id="dbLimitInput" class="form-control" value="1000" min="1" max="10000">
+                <small class="text-muted">{{ _('Maximum number of files to analyze (1-10000)') }}</small>
+            </div>
+            
+            <div class="method-selector">
+                <label class="form-label"><strong>{{ _('Classification Method:') }}</strong></label>
+                <div class="method-option active" data-method="rule_based">
+                    <i class="bi bi-list-check"></i> {{ _('Rule-Based') }}
+                </div>
+                <div class="method-option" data-method="ml">
+                    <i class="bi bi-cpu"></i> {{ _('Machine Learning') }}
+                </div>
+                <div class="method-option" data-method="deep_learning">
+                    <i class="bi bi-diagram-3"></i> {{ _('Deep Learning') }}
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="analyzeDatabase()">
+                <i class="bi bi-play-circle"></i> {{ _('Analyze Database') }}
+            </button>
+        </div>
+        
+        <div id="databaseResults" class="results-section" style="display: none;"></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file_classification_analysis.js') }}"></script>
+{% endblock %}
+

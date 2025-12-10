@@ -1,0 +1,822 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Archives') }} - {{ _('File Analysis System') }}{% endblock %}
+{% block extra_css %}
+<!-- Select2 CSS for searchable selects -->
+<link href="{{ url_for('static', filename='dist/css/select2.min.css') }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/fmas.css') }}" rel="stylesheet" />
+
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h1>{{ _('File Management and Analysis') }}</h1>
+    <p class="text-muted mb-0">{{ _('Comprehensive analysis, classification, and insights') }}</p>
+</div>
+<div class="container-fluid py-4">
+    <div class="archives-container">
+        <!-- Analysis View Navigation -->
+        <div class="analysis-view-navigation" style="margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; background: var(--bg-section); padding: 1rem; border-radius: 8px;">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ url_for('archives_page') }}" class="btn btn-outline-primary analysis-view-btn {% if request.endpoint == 'archives_page' %}active{% endif %}" data-view="file">
+                    <i class="bi bi-archive"></i> {{ _('File Analysis') }}
+                </a>
+                <a href="{{ url_for('path_analysis_page') }}" class="btn btn-outline-primary analysis-view-btn {% if request.endpoint == 'path_analysis_page' %}active{% endif %}" data-view="path">
+                    <i class="bi bi-briefcase"></i> {{ _('Path Analysis') }}
+                </a>
+                <a href="{{ url_for('analysis_batch') }}" class="btn btn-outline-primary analysis-view-btn {% if request.endpoint == 'analysis_batch' %}active{% endif %}" data-view="batch">
+                    <i class="bi bi-lightning-charge"></i> {{ _('Batch Analysis') }}
+                </a>
+            </div>
+        </div>
+
+            
+
+        <!-- Advanced Filters Panel -->
+        <div class="section filters-panel" id="filtersPanel" style="display: none;">
+            <div class="section-header">
+                <div class="section-label">{{ _('Advanced Filters') }}</div>
+                <button class="close-filters-btn" onclick="hideFilters()" title="{{ _('Close Filters') }}" aria-label="{{ _('Close Filters') }}">×</button>
+            </div>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filterCategory">{{ _('Category') }}</label>
+                    <select id="filterCategory" class="filter-select" title="{{ _('Filter by Category') }}" aria-label="{{ _('Filter by Category') }}">
+                        <option value="">{{ _('All Categories') }}</option>
+                        {% for cat in categories[:50] %}
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSource">{{ _('Source') }}</label>
+                    <select id="filterSource" class="filter-select" title="{{ _('Filter by Source') }}" aria-label="{{ _('Filter by Source') }}">
+                        <option value="">{{ _('All Sources') }}</option>
+                        {% for src in sources[:50] %}
+                        <option value="{{ src.id }}">{{ src.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterSide">{{ _('Side') }}</label>
+                    <select id="filterSide" class="filter-select" title="{{ _('Filter by Side') }}" aria-label="{{ _('Filter by Side') }}">
+                        <option value="">{{ _('All Sides') }}</option>
+                        {% for side in sides[:50] %}
+                        <option value="{{ side.id }}">{{ side.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterDateFrom">{{ _('Date Range') }}</label>
+                    <input type="date" id="filterDateFrom" class="filter-input" title="{{ _('Filter from date') }}" aria-label="{{ _('Filter from date') }}" placeholder="{{ _('From date') }}">
+                    <input type="date" id="filterDateTo" class="filter-input" title="{{ _('Filter to date') }}" aria-label="{{ _('Filter to date') }}" placeholder="{{ _('To date') }}">
+                </div>
+            </div>
+            <div class="filter-actions">
+                <button class="btn-apply" onclick="applyFilters()" title="{{ _('Apply Filters') }}" aria-label="{{ _('Apply Filters') }}">{{ _('Apply Filters') }}</button>
+                <button class="btn-reset" onclick="resetFilters()" title="{{ _('Reset Filters') }}" aria-label="{{ _('Reset Filters') }}">{{ _('Reset') }}</button>
+            </div>
+        </div>
+
+
+
+        <!-- Navigation Bar -->
+        <div class="navigation-bar">
+            <div class="nav-buttons">
+                <button class="nav-btn" id="navBackBtn" onclick="navigateBack()" title="{{ _('Back') }}" disabled>
+                    <i class="bi bi-arrow-left"></i>
+                </button>
+                <button class="nav-btn" id="navForwardBtn" onclick="navigateForward()" title="{{ _('Forward') }}" disabled>
+                    <i class="bi bi-arrow-right"></i>
+                </button>
+                <button class="nav-btn" onclick="navigateToRoot()" title="{{ _('Home') }}">
+                    <i class="bi bi-house"></i>
+                </button>
+            </div>
+            <div class="breadcrumb-nav" id="breadcrumbNav">
+                <div class="breadcrumb-item">
+                    <span class="breadcrumb-link" onclick="navigateToRoot()">{{ _('Home') }}</span>
+                </div>
+            </div>
+            <div class="search-bar" style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+                <div style="position: relative; flex: 1;">
+                    <label for="globalSearch" class="sr-only">{{ _('Search') }}</label>
+                    <input type="text" id="globalSearch" placeholder="{{ _('Search all data: files, categories, keywords, sources, sides, words, titles...') }}" oninput="handleGlobalSearch(this.value)" title="{{ _('Search all data in database') }}" aria-label="{{ _('Search all data in database') }}" style="width: 100%;">
+                    <i class="bi bi-search" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;" aria-hidden="true"></i>
+                </div>
+            </div>
+            <div class="nav-item-count" id="navItemCount" style="display: none; font-size: 0.875rem; color: var(--text-light); white-space: nowrap; margin-right: 0.5rem;">
+                <span id="navItemCountText"></span>
+            </div>
+            <div class="sort-control" style="display: flex; align-items: center; gap: 0.5rem; margin-right: 0.5rem;">
+                <label for="sortBy" class="sr-only">{{ _('Sort By') }}</label>
+                <select id="sortBy" class="form-select form-select-sm" style="min-width: 150px; font-size: 0.875rem;" onchange="handleSortChange()" title="{{ _('Sort By') }}" aria-label="{{ _('Sort By') }}">
+                    <option value="id_asc">{{ _('ID (Ascending)') }}</option>
+                    <option value="id_desc">{{ _('ID (Descending)') }}</option>
+                    <option value="name_asc">{{ _('Name (A-Z)') }}</option>
+                    <option value="name_desc">{{ _('Name (Z-A)') }}</option>
+                    <option value="file_count_desc" selected>{{ _('File Count (High to Low)') }}</option>
+                    <option value="file_count_asc">{{ _('File Count (Low to High)') }}</option>
+                </select>
+            </div>
+            <div class="view-toggle">
+                <button class="view-toggle-btn active" data-view="grid" onclick="setViewMode('grid')" title="{{ _('Grid View') }}" aria-label="{{ _('Switch to Grid View') }}">
+                    <i class="bi bi-grid-3x3" aria-hidden="true"></i>
+                </button>
+                <button class="view-toggle-btn" data-view="list" onclick="setViewMode('list')" title="{{ _('List View') }}" aria-label="{{ _('Switch to List View') }}">
+                    <i class="bi bi-list-ul" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- File Manager Layout -->
+        <div class="file-manager-layout">
+            <!-- Sidebar -->
+            <div class="file-manager-sidebar" id="fileManagerSidebar">
+
+                <div class="sidebar-items">
+                    <div class="sidebar-item" data-section="category" onclick="navigateToSection('category')" role="button" tabindex="0" title="{{ _('Category') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Category') }}</div>
+                            <div class="sidebar-item-count" id="sidebarCategoryCount">{{ stats.total_categories|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-item" data-section="keywords" onclick="navigateToSection('keywords')" role="button" tabindex="0" title="{{ _('Keywords') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-tag-fill"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Keywords') }}</div>
+                            <div class="sidebar-item-count" id="sidebarKeywordsCount">{{ stats.total_keywords|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-item" data-section="titles" onclick="navigateToSection('titles')" role="button" tabindex="0" title="{{ _('Titles') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-file-earmark-text-fill"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Titles') }}</div>
+                            <div class="sidebar-item-count" id="sidebarTitlesCount">{{ stats.total_titles|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-item" data-section="sources" onclick="navigateToSection('sources')" role="button" tabindex="0" title="{{ _('Sources') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Sources') }}</div>
+                            <div class="sidebar-item-count" id="sidebarSourcesCount">{{ stats.total_sources|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-item" data-section="sides" onclick="navigateToSection('sides')" role="button" tabindex="0" title="{{ _('Sides') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-diagram-3-fill"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Sides') }}</div>
+                            <div class="sidebar-item-count" id="sidebarSidesCount">{{ stats.total_sides|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                    <div class="sidebar-item" data-section="hash" onclick="navigateToSection('hash')" role="button" tabindex="0" title="{{ _('Hash') }}">
+                        <div class="sidebar-item-icon">
+                            <i class="bi bi-hash"></i>
+                        </div>
+                        <div class="sidebar-item-content">
+                            <div class="sidebar-item-name">{{ _('Hash') }}</div>
+                            <div class="sidebar-item-count" id="sidebarHashCount">{{ stats.total_hashes|default(0) }} {{ _('items') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="file-manager-content">
+                <!-- Unified Content View -->
+                <div class="unified-content-view" id="unifiedContentView">
+                    <!-- Content will be loaded dynamically by JavaScript -->
+                    <div class="content-loading">
+                        <i class="bi bi-arrow-repeat"></i>
+                        <div>{{ _('Loading...') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Add Source Modal -->
+<div class="archives-modal" id="addSourceModal">
+    <div class="archives-modal-content add-item-modal">
+        <div class="add-item-modal-header">
+            <h3><i class="bi bi-people"></i> {{ _('Add New Source') }}</h3>
+            <button class="add-item-modal-close" onclick="closeAddItemModal('addSourceModal')" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+        </div>
+
+        <div class="add-item-modal-body">
+            <div class="add-item-search-box" style="display: none;">
+                <i class="bi bi-search"></i>
+                <input type="text" id="sourceSearchInput" placeholder="{{ _('Search sources...') }}" oninput="searchItems('source')">
+            </div>
+
+            <div class="add-item-form" id="sourceForm">
+                <input type="hidden" id="sourceId" name="source_id">
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Source Name') }} *</label>
+                    <input type="text" id="sourceName" name="name" placeholder="{{ _('e.g., International News Agency') }}" required>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Job/Type') }} *</label>
+                    <input type="text" id="sourceJob" name="job" placeholder="{{ _('e.g., International News Job') }}" required>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Importance') }} *</label>
+                    <input type="range" id="sourceImportance" name="importance" min="0" max="1" step="0.01" value="0.5">
+                    <div class="add-item-range-labels">
+                        <span>{{ _('Low') }}</span>
+                        <span id="importanceValue">0.50</span>
+                        <span>{{ _('High') }}</span>
+                    </div>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Country') }} *</label>
+                    <input type="text" id="sourceCountry" name="country" required>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('City') }}</label>
+                    <input type="text" id="sourceCity" name="city" placeholder="{{ _('e.g., Washington DC') }}" list="cities">
+                    <datalist id="cities">
+                        <option value="Washington DC">
+                        <option value="New York">
+                        <option value="Los Angeles">
+                        <option value="Chicago">
+                        <option value="London">
+                        <option value="Paris">
+                        <option value="Berlin">
+                        <option value="Tokyo">
+                        <option value="Beijing">
+                        <option value="Moscow">
+                    </datalist>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Description') }}</label>
+                    <textarea id="sourceDescription" name="description" rows="3" placeholder="{{ _('Brief description of the source...') }}"></textarea>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Social Media Accounts') }}</label>
+                    <input type="text" id="sourceAccounts" name="accounts" placeholder="{{ _('e.g., @twitter_handle, facebook.com/page') }}">
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Attachments') }}</label>
+                    <input type="text" id="sourceAttachments" name="attachments" placeholder="{{ _('e.g., document.pdf, image.jpg') }}">
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Notes') }}</label>
+                    <textarea id="sourceNote" name="note" rows="2" placeholder="{{ _('Additional notes...') }}"></textarea>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Ownership') }}</label>
+                    <select id="sourceOwnership" name="ownership">
+                        <option value="">-- {{ _('Select Ownership') }} --</option>
+                        <option value="Private">Private</option>
+                        <option value="Government">Government</option>
+                        <option value="Corporate">Corporate</option>
+                        <option value="Non-Profit">Non-Profit</option>
+                        <option value="Public">Public</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Access Status') }}</label>
+                    <select id="sourceAccessStatus" name="access_status">
+                        <option value="">-- {{ _('Select Access Status') }} --</option>
+                        <option value="Open">Open</option>
+                        <option value="Restricted">Restricted</option>
+                        <option value="Classified">Classified</option>
+                        <option value="Confidential">Confidential</option>
+                        <option value="Public">Public</option>
+                        <option value="Limited">Limited</option>
+                    </select>
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Date of Source Discovery') }}</label>
+                    <input type="date" id="sourceDateDiscovery" name="date_source_discovery">
+                </div>
+
+                <div class="add-item-form-group">
+                    <label>{{ _('Category') }}</label>
+                    <select id="sourceCategory" name="category_id">
+                        <option value="">-- {{ _('Select Category') }} --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="add-item-list" id="sourceList" style="display: none;"></div>
+
+            <div class="add-item-pagination" id="sourcePagination" style="display: none;">
+                <div class="add-item-pagination-info" id="sourcePaginationInfo"></div>
+                <div class="add-item-pagination-controls" id="sourcePaginationControls"></div>
+            </div>
+
+            <div class="add-item-modal-actions">
+                <button class="add-item-btn-cancel" onclick="closeAddItemModal('addSourceModal')">{{ _('Cancel') }}</button>
+                <button class="add-item-btn-submit" onclick="submitAddItem('source')" id="sourceSubmitBtn">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span id="submitButtonText">{{ _('Create Source') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Add Side Modal -->
+    <div class="archives-modal" id="addSideModal">
+        <div class="archives-modal-content add-item-modal">
+            <div class="add-item-modal-header">
+                <h3><i class="bi bi-diagram-3"></i> {{ _('Add Side') }}</h3>
+                <button class="add-item-modal-close" onclick="closeAddItemModal('addSideModal')" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+            </div>
+            <div class="add-item-modal-body">
+                <div class="add-item-form" id="sideForm">
+                    <div class="add-item-form-group">
+                        <label>{{ _('Side Name') }} *</label>
+                        <input type="text" id="sideName" required>
+                    </div>
+                    <div class="add-item-form-group">
+                        <label>{{ _('Importance') }}</label>
+                        <input type="number" id="sideImportance" min="0" max="1" step="0.0001" value="0.5">
+                    </div>
+            
+                </div>
+                <div class="add-item-list" id="sideList" style="display: none;"></div>
+                <div class="add-item-pagination" id="sidePagination" style="display: none;">
+                    <div class="add-item-pagination-info" id="sidePaginationInfo"></div>
+                    <div class="add-item-pagination-controls" id="sidePaginationControls"></div>
+                </div>
+                <div class="add-item-modal-actions">
+                    <button class="add-item-btn-cancel" onclick="closeAddItemModal('addSideModal')">{{ _('Cancel') }}</button>
+                    <button class="add-item-btn-submit" onclick="submitAddItem('side')" id="sideSubmitBtn">{{ _('Add Side') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Keyword Modal -->
+    <div class="archives-modal" id="addKeywordModal">
+        <div class="archives-modal-content add-item-modal">
+            <div class="add-item-modal-header">
+                <h3><i class="bi bi-key"></i> {{ _('Add Keyword') }}</h3>
+                <button class="add-item-modal-close" onclick="closeAddItemModal('addKeywordModal')" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+            </div>
+            <div class="add-item-modal-body">
+                <div class="add-item-search-box" style="display: none;">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="keywordSearchInput" placeholder="{{ _('Search keywords...') }}" oninput="searchItems('keyword')">
+                </div>
+                <div class="add-item-form" id="keywordForm">
+                    <div class="add-item-form-group">
+                        <label style="display: none;">{{ _('Words (from Words table)') }} *</label>
+                        <select id="keywordWords" class="keyword-words-select" multiple required>
+                            <option value="">{{ _('Type to search and select words...') }}</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> {{ _('Type at least 2 characters to search for words from the words table. You must select at least 2 words to create a keyword phrase.') }}
+                        </div>
+                    </div>
+                    <div class="add-item-form-group">
+                        <label style="display: none;">{{ _('Category (from Categories table)') }}</label>
+                        <select id="keywordCategory" class="keyword-category-select">
+                            <option value="">{{ _('Type to search for a category...') }}</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> {{ _('Type to search for categories from the categories table.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="add-item-list" id="keywordList" style="display: none;"></div>
+                <div class="add-item-pagination" id="keywordPagination" style="display: none;">
+                    <div class="add-item-pagination-info" id="keywordPaginationInfo"></div>
+                    <div class="add-item-pagination-controls" id="keywordPaginationControls"></div>
+                </div>
+                <div class="add-item-modal-actions">
+                    <button class="add-item-btn-cancel" onclick="closeAddItemModal('addKeywordModal')">{{ _('Cancel') }}</button>
+                    <button class="add-item-btn-submit" onclick="submitAddItem('keyword')" id="keywordSubmitBtn">{{ _('Add Keyword') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="archives-modal" id="addCategoryModal">
+        <div class="archives-modal-content add-item-modal">
+            <div class="add-item-modal-header">
+                <h3><i class="bi bi-tags"></i> {{ _('Add Category') }}</h3>
+                <button class="add-item-modal-close" onclick="closeAddItemModal('addCategoryModal')" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+            </div>
+            <div class="add-item-modal-body">
+                <div class="add-item-search-box" style="display: none;">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="categorySearchInput" placeholder="{{ _('Search words from words table...') }}" oninput="searchCategoryWords()">
+                </div>
+                <div class="add-item-form" id="categoryForm">
+                    <div class="add-item-form-group">
+                        <label style="display: none;">{{ _('Category Name (from Words table)') }} *</label>
+                        <select id="categoryName" class="category-word-select" required>
+                            <option value="">{{ _('Type to search for a word...') }}</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> {{ _('Type at least 2 characters to search for existing words from the words table. You can also type a completely new word.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="add-item-list" id="categoryList" style="display: none;"></div>
+                <div class="add-item-pagination" id="categoryPagination" style="display: none;">
+                    <div class="add-item-pagination-info" id="categoryPaginationInfo"></div>
+                    <div class="add-item-pagination-controls" id="categoryPaginationControls"></div>
+                </div>
+                <div class="add-item-modal-actions">
+                    <button class="add-item-btn-cancel" onclick="closeAddItemModal('addCategoryModal')">{{ _('Cancel') }}</button>
+                    <button class="add-item-btn-submit" onclick="submitAddItem('category')" id="categorySubmitBtn">{{ _('Add Category') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Words-Categorys Modal -->
+    <div class="archives-modal" id="addWordsCategorysModal">
+        <div class="archives-modal-content add-item-modal">
+            <div class="add-item-modal-header">
+                <h3><i class="bi bi-link-45deg"></i> {{ _('Add Word-Category Relationship') }}</h3>
+                <button class="add-item-modal-close" onclick="closeAddItemModal('addWordsCategorysModal')" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+            </div>
+            <div class="add-item-modal-body">
+                <div class="add-item-form" id="wordsCategorysForm">
+                    <div class="add-item-form-group">
+                        <label style="display: none;">{{ _('Word') }} *</label>
+                        <select id="wordsCategorysWordId" class="words-categorys-word-select" required>
+                            <option value="">{{ _('Type to search for a word...') }}</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> {{ _('Select a word from the words table.') }}
+                        </div>
+                    </div>
+                    <div class="add-item-form-group" style="margin-top: 1rem;">
+                        <label style="display: none;">{{ _('Category') }} *</label>
+                        <select id="wordsCategorysCategoryId" class="words-categorys-category-select" required>
+                            <option value="">{{ _('Type to search for a category...') }}</option>
+                        </select>
+                        <div class="form-text">
+                            <i class="bi bi-info-circle"></i> {{ _('Select a category from the categories table.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="add-item-modal-actions">
+                    <button class="add-item-btn-cancel" onclick="closeAddItemModal('addWordsCategorysModal')">{{ _('Cancel') }}</button>
+                    <button class="add-item-btn-submit" onclick="submitAddWordsCategorys()" id="wordsCategorysSubmitBtn">{{ _('Add Relationship') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Details Modal -->
+    <div class="archives-modal" id="fileModal">
+        <div class="archives-modal-content file-details-modal">
+            <div class="archives-modal-header">
+                <div class="file-modal-nav-controls">
+                    <button class="file-nav-btn" id="prevFileBtn" onclick="navigateFileInModal(-1)" title="{{ _('Previous File') }}" aria-label="{{ _('Previous File') }}" disabled>
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                        <span class="sr-only">{{ _('Previous File') }}</span>
+                    </button>
+                    <button class="file-nav-btn" id="nextFileBtn" onclick="navigateFileInModal(1)" title="{{ _('Next File') }}" aria-label="{{ _('Next File') }}" disabled>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        <span class="sr-only">{{ _('Next File') }}</span>
+                    </button>
+                </div>
+                <h2 class="archives-modal-title" id="modalTitle">{{ _('File Details') }}</h2>
+                <div class="file-modal-header-right">
+                    <span class="file-nav-counter" id="fileNavCounter" style="display: none;">1 / 1</span>
+                    <button class="archives-close-btn" onclick="closeFileModal()" title="{{ _('Close') }}" aria-label="{{ _('Close File Details') }}">×</button>
+                </div>
+            </div>
+            <div class="file-details-modal-body" id="modalBody">
+                <div class="file-details-container">
+                    <!-- Left Section: File Content -->
+                    <div class="file-details-content-section">
+                        <div class="file-details-section-header">
+                            <h3><i class="bi bi-file-text"></i> {{ _('File Content') }}</h3>
+                            <div class="file-content-actions" style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button class="btn btn-sm btn-outline-primary" onclick="copyModalContent()" title="{{ _('Copy Content') }}">
+                                    <i class="bi bi-clipboard me-1"></i>{{ _('Copy') }}
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="downloadModalContent()" title="{{ _('Download Content') }}">
+                                    <i class="bi bi-download me-1"></i>{{ _('Download') }}
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="exportModalFile()" title="{{ _('Export File') }}">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i>{{ _('Export') }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Search Controls -->
+                        <div class="file-content-search" style="padding: 1rem; background: var(--bg-section); border-bottom: 1px solid var(--border-color);">
+                            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="display: flex; gap: 0.25rem;">
+                                        <input type="text" id="modalSearchInput" class="form-control form-control-sm" 
+                                               placeholder="{{ _('Search in document...') }}" 
+                                               onkeypress="if(event.key==='Enter') performModalSearch()">
+                                        <button class="btn btn-sm btn-primary" onclick="performModalSearch()">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="clearModalSearch()">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <div class="form-check" style="margin: 0;">
+                                        <input class="form-check-input" type="checkbox" id="modalCaseSensitive">
+                                        <label class="form-check-label" for="modalCaseSensitive" style="font-size: 0.875rem;">
+                                            {{ _('Case Sensitive') }}
+                                        </label>
+                                    </div>
+                                    <div class="form-check" style="margin: 0;">
+                                        <input class="form-check-input" type="checkbox" id="modalWholeWord">
+                                        <label class="form-check-label" for="modalWholeWord" style="font-size: 0.875rem;">
+                                            {{ _('Whole Word') }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Search Results -->
+                            <div id="modalSearchResults" style="display: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span class="badge bg-primary" id="modalResultCount">{{ _('0 results') }}</span>
+                                        <span class="badge bg-info ms-2" id="modalCurrentMatch">{{ _('Match 0 of 0') }}</span>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="findModalPrevious()">
+                                            <i class="bi bi-arrow-up"></i> {{ _('Previous') }}
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="findModalNext()">
+                                            <i class="bi bi-arrow-down"></i> {{ _('Next') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-details-content-view" id="fileContentSection" style="position: relative; overflow-y: auto; max-height: calc(100vh - 400px);">
+                            <div class="content-loading">{{ _('Loading content...') }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Section: Analysis/Classification -->
+                    <div class="file-details-analysis-section">
+                        <div class="file-details-section-header">
+                            <h3><i class="bi bi-diagram-3"></i> {{ _('Classification & Analysis') }}</h3>
+                        </div>
+                        <div class="file-details-analysis-view" id="fileAnalysisSection">
+                            <div class="content-loading">{{ _('Loading analysis...') }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Bottom Section: Metadata -->
+                    <div class="file-details-metadata-section">
+                        <div class="file-details-section-header">
+                            <h3><i class="bi bi-info-circle"></i> {{ _('Metadata') }}</h3>
+                        </div>
+                        <div class="file-details-metadata-view" id="fileMetadataSection">
+                            <div class="content-loading">{{ _('Loading metadata...') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<!-- Load chart-export.js without defer to ensure it's available when charts are created -->
+<script src="{{ url_for('static', filename='js/chart-export.js') }}"></script>
+
+<!-- Data Injection: Pass all Jinja2 variables to JavaScript -->
+<script>
+    // Inject all data from Jinja2 template to JavaScript
+    window.appData = {
+        translations: {
+            addSource:  {{ _("Add Source")|tojson }},
+            addSide:  {{ _("Add Side")|tojson }},
+            addKeyword: {{ _("Add Keyword")|tojson }},
+            addCategory: {{ _("Add Category")|tojson }},
+            addWordCategory: {{ _("Add Word-Category")|tojson }},
+            pageNavigation: {{ _("Page Navigation")|tojson }},
+            previousPage: {{ _("Previous Page")|tojson }},
+            previous: {{ _("Previous")|tojson }},
+            goToPage: {{ _("Go to page")|tojson }},
+            home: {{ _("Home")|tojson }},
+            items: {{ _("items")|tojson }},
+            loading: {{ _("Loading...")|tojson }},
+            loadingFiles: {{ _("Loading files...")|tojson }},
+            noItemsFound: {{ _("No items found in this section")|tojson }},
+            errorLoadingFiles: {{ _("Error loading files")|tojson }},
+            files: {{ _("Files")|tojson }},
+            searchFiles: {{ _("Search files...")|tojson }},
+            searchDisplayedFiles: {{ _("Search displayed files")|tojson }},
+            selectAllFiles: {{ _("Select All Files")|tojson }},
+            selectAll: {{ _("Select All")|tojson }},
+            deselectAllFiles: {{ _("Deselect All Files")|tojson }},
+            deselectAll: {{ _("Deselect All")|tojson }},
+            exportSelectedFiles: {{ _("Export Selected Files")|tojson }},
+            exportSelected: {{ _("Export Selected")|tojson }},
+            selected: {{ _("selected")|tojson }},
+            noFilesFound: {{ _("No files found")|tojson }},
+            showing: {{ _("Showing")|tojson }},
+            of: {{ _("of")|tojson }},
+            next: {{ _("Next")|tojson }},
+            nextPage: {{ _("Next Page")|tojson }},
+            currentPage: {{ _("Current page")|tojson }},
+            category: {{ _("Category")|tojson }},
+            keywords: {{ _("Keywords")|tojson }},
+            titles: {{ _("Titles")|tojson }},
+            sources: {{ _("Sources")|tojson }},
+            sides: {{ _("Sides")|tojson }},
+            hash: {{ _("Hash")|tojson }},
+            invalidNavigation: {{ _("Invalid navigation parameters")|tojson }},
+            fileCount: {{ _("File Count")|tojson }},
+            topCategories: {{ _("Top Categories by File Count")|tojson }},
+            topSources: {{ _("Top Sources Distribution")|tojson }},
+            dataDistribution: {{ _("Data Distribution")|tojson }},
+            categories: {{ _("Categories")|tojson }},
+            hashes: {{ _("Hashes")|tojson }},
+            selectFile: {{ _("Select file")|tojson }},
+            viewDetails: {{ _("View Details")|tojson }},
+            viewDetailsFor: {{ _("View Details for")|tojson }},
+            openFullView: {{ _("Open Full View in New Tab")|tojson }},
+            openFullViewFor: {{ _("Open Full View in New Tab for")|tojson }},
+            fullView: {{ _("Full View")|tojson }},
+            exportFile: {{ _("Export File")|tojson }},
+            export: {{ _("Export")|tojson }},
+            errorLoadingItems: {{ _("Error loading items")|tojson }},
+            // Form field labels
+            sourceName: {{ _("Source Name")|tojson }},
+            jobType: {{ _("Job/Type")|tojson }},
+            importance: {{ _("Importance")|tojson }},
+            country: {{ _("Country")|tojson }},
+            city: {{ _("City")|tojson }},
+            description: {{ _("Description")|tojson }},
+            socialMediaAccounts: {{ _("Social Media Accounts")|tojson }},
+            attachments: {{ _("Attachments")|tojson }},
+            notes: {{ _("Notes")|tojson }},
+            ownership: {{ _("Ownership")|tojson }},
+            accessStatus: {{ _("Access Status")|tojson }},
+            dateSourceDiscovery: {{ _("Date of Source Discovery")|tojson }},
+            category: {{ _("Category")|tojson }},
+            sideName: {{ _("Side Name")|tojson }},
+            words: {{ _("Words (from Words table)")|tojson }},
+            categoryFromCategories: {{ _("Category (from Categories table)")|tojson }},
+            categoryName: {{ _("Category Name (from Words table)")|tojson }},
+            word: {{ _("Word")|tojson }},
+            
+            // Validation messages
+            sourceNameRequired: {{ _("Source name is required")|tojson }},
+            sideNameRequired: {{ _("Side name is required")|tojson }},
+            atLeastOneWordRequired: {{ _("At least one word is required")|tojson }},
+            categoryNameRequired: {{ _("Category name is required")|tojson }},
+            bothWordAndCategoryRequired: {{ _("Both word and category are required")|tojson }},
+            keywordRequiresMultipleWords: {{ _("Keywords must contain at least 2 words. Please select multiple words to create a keyword phrase.")|tojson }},
+            
+            // Success messages
+            successfullyAdded: {{ _("Successfully added")|tojson }},
+            sourceCreatedSuccessfully: {{ _("Source created successfully!")|tojson }},
+            sideCreatedSuccessfully: {{ _("Side created successfully!")|tojson }},
+            keywordCreatedSuccessfully: {{ _("Keyword created successfully!")|tojson }},
+            categoryCreatedSuccessfully: {{ _("Category created successfully!")|tojson }},
+            successfullyAddedWordCategory: {{ _("Successfully added word-category relationship")|tojson }},
+            
+            // Error messages
+            errorAdding: {{ _("Error adding")|tojson }},
+            errorAddingSource: {{ _("Error adding source")|tojson }},
+            errorAddingSide: {{ _("Error adding side")|tojson }},
+            errorAddingKeyword: {{ _("Error adding keyword")|tojson }},
+            errorAddingCategory: {{ _("Error adding category")|tojson }},
+            errorAddingWordCategory: {{ _("Error adding word-category relationship")|tojson }},
+            networkError: {{ _("Network error: Unable to connect to server. Please check your connection and try again.")|tojson }},
+            errorProcessingResponse: {{ _("Error processing server response. Please try again or refresh the page.")|tojson }},
+            csrfTokenError: {{ _("Unable to retrieve security token. Please refresh the page and try again.")|tojson }},
+            csrfTokenErrorShort: {{ _("Unable to obtain security token. Please refresh the page.")|tojson }},
+            
+            // Status messages
+            submitting: {{ _("Submitting...")|tojson }},
+            loadingContent: {{ _("Loading content...")|tojson }},
+            loadingAnalysis: {{ _("Loading analysis...")|tojson }},
+            loadingMetadata: {{ _("Loading metadata...")|tojson }},
+            fileDetails: {{ _("File Details")|tojson }},
+            filtersApplied: {{ _("Filters applied! (This will filter all sections)")|tojson }},
+            errorLoadingFileDetails: {{ _("Error loading file details")|tojson }},
+            contentTruncated: {{ _("(Content truncated for display)")|tojson }},
+            noContentAvailable: {{ _("No content available")|tojson }},
+            totalWords: {{ _("Total Words")|tojson }},
+            noCategoriesAssigned: {{ _("No categories assigned")|tojson }},
+            analytics: {{ _("Analytics")|tojson }},
+            wordCount: {{ _("Word Count")|tojson }},
+            words: {{ _("Words")|tojson }},
+            totalFiles: {{ _("Total Files")|tojson }},
+            country: {{ _("Country")|tojson }},
+            importance: {{ _("Importance")|tojson }},
+            
+            // Placeholder texts
+            placeholderSearchWord: {{ _("Type to search for a word...")|tojson }},
+            placeholderSearchAndSelectWords: {{ _("Type to search and select words...")|tojson }},
+            placeholderSearchCategory: {{ _("Type to search for a category...")|tojson }},
+            
+            // Update Keywords translations
+            updateKeywords: {{ _("Update Keywords")|tojson }},
+            updateKeywordAssociations: {{ _("Update keyword associations for all files")|tojson }},
+            updateKeywordAssociationsConfirm: {{ _("This will scan all files in the database and update keyword associations. This may take a while. Continue?")|tojson }},
+            updating: {{ _("Updating...")|tojson }},
+            keywordAssociationsUpdated: {{ _("Keyword associations updated successfully!")|tojson }},
+            filesProcessed: {{ _("Files processed")|tojson }},
+            newAssociations: {{ _("New associations")|tojson }},
+            keywordsChecked: {{ _("Keywords checked")|tojson }},
+            errors: {{ _("Errors")|tojson }}
+        },
+        sectionLabels: {
+            category: {{ _("Category")|tojson }},
+            keywords: {{ _("Keywords")|tojson }},
+            titles: {{ _("Titles")|tojson }},
+            sources: {{ _("Sources")|tojson }},
+            sides: {{ _("Sides")|tojson }},
+            hash: {{ _("Hash")|tojson }}
+        },
+        data: {
+            // ✅ CURSOR PAGINATION: Data arrays are now optional (used only for filters/initial display)
+            // All section views now use cursor-based pagination APIs
+            category: {{ categories|tojson|default('[]') }},
+            keywords: {{ keywords|tojson|default('[]') }},
+            titles: {{ titles|tojson|default('[]') }},
+            sources: {{ sources|tojson|default('[]') }},
+            sides: {{ sides|tojson|default('[]') }},
+            hash: {{ hashs|tojson|default('[]') }}
+        },
+        // ✅ CURSOR PAGINATION: Enable cursor-based pagination for all sections
+        cursorPaginationEnabled: true,
+        stats: {
+            totalCategories: {{ stats.total_categories|default(0) }},
+            totalKeywords: {{ stats.total_keywords|default(0) }},
+            totalTitles: {{ stats.total_titles|default(0) }},
+            totalSources: {{ stats.total_sources|default(0) }},
+            totalSides: {{ stats.total_sides|default(0) }},
+            totalHashes: {{ stats.total_hashes|default(0) }}
+        },
+        charts: {
+            categoryDistribution: {{ category_distribution|tojson|default('[]') }},
+            topSources: {{ top_sources|tojson|default('[]') }}
+        }
+    };
+
+    // Wait for jQuery to be available before loading Select2
+    (function() {
+        function loadSelect2() {
+            if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 === 'undefined') {
+                const script = document.createElement('script');
+                script.src = "{{ url_for('static', filename='dist/js/select2.min.js') }}";
+                script.onerror = function() {
+                    console.error('Failed to load Select2 library');
+                };
+                document.head.appendChild(script);
+            } else if (typeof jQuery === 'undefined') {
+                // jQuery not ready yet, try again
+                setTimeout(loadSelect2, 50);
+            }
+        }
+        
+        // Start checking when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSelect2);
+        } else {
+            loadSelect2();
+        }
+    })();
+</script>
+
+<script src="{{ url_for('static', filename='js/file-management-system.js') }}"></script>
+{% endblock %}

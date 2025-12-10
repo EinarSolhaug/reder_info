@@ -1,0 +1,6878 @@
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-11-30 05:10-0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: templates/404.html:3
+msgid "404 - Page Not Found"
+msgstr ""
+
+#: templates/404.html:10
+msgid "404"
+msgstr ""
+
+#: templates/404.html:11
+msgid "Page Not Found"
+msgstr ""
+
+#: templates/404.html:13
+msgid "The page you're looking for doesn't exist or has been moved."
+msgstr ""
+
+#: templates/404.html:18 templates/500.html:28
+msgid "Go Home"
+msgstr ""
+
+#: templates/404.html:22 templates/base.html:239
+msgid "Go Back"
+msgstr ""
+
+#: templates/500.html:5
+msgid "500 - Internal Server Error"
+msgstr ""
+
+#: templates/500.html:13
+msgid "Internal Server Error"
+msgstr ""
+
+#: templates/500.html:15
+msgid "Something went wrong on our end. We're working to fix it."
+msgstr ""
+
+#: templates/500.html:18
+msgid "What you can do:"
+msgstr ""
+
+#: templates/500.html:20
+msgid "Try refreshing the page"
+msgstr ""
+
+#: templates/500.html:21
+msgid "Check back in a few minutes"
+msgstr ""
+
+#: templates/500.html:22
+msgid "Contact support if the problem persists"
+msgstr ""
+
+#: templates/500.html:32 templates/base.html:628
+msgid "Retry"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:3 templates/base.html:8
+#: templates/file/File_Management_Analysis_System.html:3
+msgid "File Analysis System"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:32
+#: templates/Analysis/file_classification.html:284
+#: templates/Analysis/file_classification.html:332
+#: templates/Analysis/path_analysis.html:145 templates/base.html:82
+#: templates/file/File_Management_Analysis_System.html:23
+msgid "File Analysis"
+msgstr ""
+
+#: templates/base.html:91 templates/base.html:263 templates/base.html:264
+#: templates/base.html:265
+msgid "Dashboard"
+msgstr ""
+
+#: templates/base.html:101 templates/base.html:266 templates/base.html:267
+#: templates/base.html:268 templates/file/file_detail.html:78
+msgid "Analysis"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:232 templates/Search/search.html:7
+#: templates/Search/search.html:21 templates/Search/search.html:42
+#: templates/Search/search_advanced.html:17
+#: templates/Search/search_advanced.html:26
+#: templates/Search/search_enhanced.html:63
+#: templates/Search/search_enhanced.html:106
+#: templates/Settings/settings.html:49 templates/base.html:111
+#: templates/base.html:272 templates/base.html:273 templates/base.html:274
+#: templates/base.html:736
+#: templates/file/File_Management_Analysis_System.html:104
+#: templates/file/file_detail.html:115
+msgid "Search"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:580
+#: templates/Analysis/comprehensive_dashboard.html:433
+#: templates/Analysis/comprehensive_dashboard.html:888
+#: templates/Search/saved_searches.html:73
+#: templates/Search/search_advanced.html:105 templates/Side/side_detail.html:31
+#: templates/Side/sides_list.html:68 templates/Sources/source_detail.html:13
+#: templates/Sources/sources_list.html:13 templates/base.html:121
+#: templates/base.html:269
+#: templates/file/File_Management_Analysis_System.html:166
+#: templates/file/File_Management_Analysis_System.html:171
+#: templates/file/File_Management_Analysis_System.html:660
+#: templates/file/File_Management_Analysis_System.html:766
+msgid "Sources"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:443
+#: templates/Search/search_advanced.html:116 templates/Side/sides_list.html:13
+#: templates/base.html:129 templates/base.html:270
+#: templates/file/File_Management_Analysis_System.html:175
+#: templates/file/File_Management_Analysis_System.html:180
+#: templates/file/File_Management_Analysis_System.html:661
+#: templates/file/File_Management_Analysis_System.html:767
+msgid "Sides"
+msgstr ""
+
+#: templates/base.html:137 templates/base.html:271
+msgid "Email Words"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:423
+#: templates/Analysis/dashboard.html:102
+#: templates/Analysis/path_analysis.html:468
+#: templates/Keyword/keywords_list.html:113
+#: templates/Search/saved_searches.html:69 templates/base.html:145
+#: templates/base.html:277
+#: templates/file/File_Management_Analysis_System.html:148
+#: templates/file/File_Management_Analysis_System.html:153
+#: templates/file/File_Management_Analysis_System.html:658
+#: templates/file/File_Management_Analysis_System.html:764
+msgid "Keywords"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:601
+#: templates/Analysis/comprehensive_dashboard.html:453
+#: templates/Analysis/comprehensive_dashboard.html:921
+#: templates/Analysis/path_analysis.html:506 templates/Word/Word_detail.html:13
+#: templates/Word/Word_list.html:101 templates/base.html:153
+#: templates/base.html:278
+#: templates/file/File_Management_Analysis_System.html:741
+#: templates/file/file_detail.html:286 templates/file/full_content.html:32
+msgid "Words"
+msgstr ""
+
+#: templates/base.html:163 templates/base.html:275
+#: templates/file/files_list.html:15
+msgid "Upload Files"
+msgstr ""
+
+#: templates/base.html:171 templates/base.html:276
+#: templates/file/files_list.html:3 templates/file/files_list.html:12
+msgid "File Library"
+msgstr ""
+
+#: templates/Notifications/notifications.html:3
+#: templates/Notifications/notifications.html:16
+#: templates/Settings/settings.html:67 templates/base.html:181
+#: templates/base.html:281 templates/base.html:296
+msgid "Notifications"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:121
+#: templates/Settings/settings.html:4 templates/Settings/settings.html:16
+#: templates/base.html:189 templates/base.html:280
+msgid "Settings"
+msgstr ""
+
+#: templates/Settings/settings.html:90 templates/base.html:198
+msgid "Language"
+msgstr ""
+
+#: templates/base.html:242
+msgid "Go Forward"
+msgstr ""
+
+#: templates/base.html:245
+msgid "Refresh Page"
+msgstr ""
+
+#: templates/Sources/source_detail.html:8 templates/Word/Word_detail.html:8
+#: templates/base.html:257
+#: templates/file/File_Management_Analysis_System.html:93
+#: templates/file/File_Management_Analysis_System.html:99
+#: templates/file/File_Management_Analysis_System.html:635
+msgid "Home"
+msgstr ""
+
+#: templates/Word/Word_detail.html:3 templates/Word/Word_detail.html:17
+#: templates/Word/Word_detail.html:26 templates/base.html:279
+msgid "Word Details"
+msgstr ""
+
+#: templates/base.html:575
+msgid "Are you sure you want to refresh? Unsaved changes may be lost."
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:477 templates/base.html:619
+msgid "Success"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:475
+#: templates/Analysis/path_analysis.html:436
+#: templates/ImportExport/import_export.html:226
+#: templates/ImportExport/import_export.html:289
+#: templates/ImportExport/import_export.html:346
+#: templates/Keyword/keyword_detail.html:79
+#: templates/Keyword/keywords_list.html:425
+#: templates/Search/saved_searches.html:200
+#: templates/Settings/settings.html:1591 templates/Side/side_detail.html:91
+#: templates/Side/sides_list.html:690 templates/Sources/source_detail.html:177
+#: templates/Sources/sources_list.html:971 templates/Word/Word_detail.html:105
+#: templates/Word/Word_list.html:332 templates/base.html:620
+#: templates/file/file_detail.html:537 web_file/routes/notifications.py:140
+#: web_file/routes/notifications.py:259 web_file/routes/notifications.py:379
+#: web_file/routes/notifications_page.py:291
+msgid "Error"
+msgstr ""
+
+#: templates/base.html:621 web_file/routes/notifications.py:150
+#: web_file/routes/notifications.py:268 web_file/routes/notifications.py:388
+#: web_file/routes/notifications_page.py:300
+msgid "Warning"
+msgstr ""
+
+#: templates/base.html:622 web_file/routes/notifications.py:156
+#: web_file/routes/notifications.py:273 web_file/routes/notifications.py:393
+#: web_file/routes/notifications_page.py:305
+msgid "Information"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:277
+#: templates/Settings/settings.html:55 templates/base.html:623
+msgid "Processing"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:330 templates/Side/sides_list.html:127
+#: templates/Side/sides_list.html:155 templates/Sources/sources_list.html:168
+#: templates/Sources/sources_list.html:196 templates/base.html:624
+#: templates/base.html:727
+#: templates/file/File_Management_Analysis_System.html:215
+#: templates/file/File_Management_Analysis_System.html:351
+#: templates/file/File_Management_Analysis_System.html:383
+#: templates/file/File_Management_Analysis_System.html:428
+#: templates/file/File_Management_Analysis_System.html:464
+#: templates/file/File_Management_Analysis_System.html:512
+msgid "Close"
+msgstr ""
+
+#: templates/base.html:625
+msgid "Action"
+msgstr ""
+
+#: templates/base.html:626
+msgid "Show Details"
+msgstr ""
+
+#: templates/base.html:627
+msgid "Error Code"
+msgstr ""
+
+#: templates/base.html:631
+msgid "An error occurred"
+msgstr ""
+
+#: templates/base.html:632
+msgid "Invalid request. Please check your input."
+msgstr ""
+
+#: templates/base.html:633
+msgid "Authentication required. Please log in."
+msgstr ""
+
+#: templates/base.html:634
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: templates/base.html:635
+msgid "The requested resource was not found."
+msgstr ""
+
+#: templates/base.html:636
+msgid "Too many requests. Please wait a moment and try again."
+msgstr ""
+
+#: templates/base.html:637
+msgid "Server error. Please try again later."
+msgstr ""
+
+#: templates/base.html:638
+msgid "Service temporarily unavailable. Please try again later."
+msgstr ""
+
+#: templates/base.html:639
+msgid "Network error. Please check your connection."
+msgstr ""
+
+#: templates/base.html:640
+msgid ""
+"The server did not respond. This may be due to network issues or the "
+"server being unavailable."
+msgstr ""
+
+#: templates/base.html:641
+msgid "An unexpected error occurred"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:431
+#: templates/Keyword/keywords_list.html:447 templates/Side/sides_list.html:422
+#: templates/Side/sides_list.html:449 templates/Side/sides_list.html:514
+#: templates/Side/sides_list.html:573 templates/Side/sides_list.html:690
+#: templates/Sources/sources_list.html:562
+#: templates/Sources/sources_list.html:588
+#: templates/Sources/sources_list.html:679
+#: templates/Sources/sources_list.html:788
+#: templates/Sources/sources_list.html:971 templates/base.html:642
+#: templates/file/upload.html:231
+msgid "Unknown error"
+msgstr ""
+
+#: templates/base.html:645
+#, python-brace-format
+msgid "{operation} completed successfully"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:254
+#: templates/Analysis/file_classification.html:258 templates/base.html:648
+#: templates/base.html:814
+msgid "Processing..."
+msgstr ""
+
+#: templates/base.html:651
+msgid "System ready"
+msgstr ""
+
+#: templates/base.html:652
+msgid "System is ready"
+msgstr ""
+
+#: templates/base.html:653
+msgid "All systems operational"
+msgstr ""
+
+#: templates/base.html:654
+msgid "Ready to process"
+msgstr ""
+
+#: templates/base.html:655
+msgid "Initialization complete"
+msgstr ""
+
+#: templates/base.html:658
+msgid "Please enter a folder path to analyze"
+msgstr ""
+
+#: templates/base.html:659
+msgid "Please enter a valid folder path"
+msgstr ""
+
+#: templates/base.html:660
+msgid "Please enter a file ID to analyze"
+msgstr ""
+
+#: templates/base.html:661
+msgid "Please enter text to classify"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:471 templates/base.html:662
+#: templates/file/files_list.html:425
+msgid "Please select files to analyze"
+msgstr ""
+
+#: templates/base.html:663 templates/file/files_list.html:429
+msgid "Please select files to export"
+msgstr ""
+
+#: templates/base.html:664 templates/file/files_list.html:430
+msgid "Please select files to delete"
+msgstr ""
+
+#: templates/base.html:665
+msgid "Please select at least one file to export"
+msgstr ""
+
+#: templates/Search/search_advanced.html:604 templates/base.html:666
+msgid "No results to export"
+msgstr ""
+
+#: templates/base.html:667
+msgid "Error performing search"
+msgstr ""
+
+#: templates/base.html:668
+msgid "Error exporting results"
+msgstr ""
+
+#: templates/base.html:669
+msgid "Error loading preview"
+msgstr ""
+
+#: templates/base.html:670
+msgid "Error loading search history"
+msgstr ""
+
+#: templates/base.html:671
+msgid "Error loading saved searches"
+msgstr ""
+
+#: templates/base.html:672
+msgid "Error loading saved search"
+msgstr ""
+
+#: templates/base.html:673
+msgid "Error deleting saved search"
+msgstr ""
+
+#: templates/base.html:674
+msgid "Please enter a search query first"
+msgstr ""
+
+#: templates/base.html:675
+msgid "Search saved successfully"
+msgstr ""
+
+#: templates/base.html:676
+msgid "Error saving search"
+msgstr ""
+
+#: templates/base.html:677 templates/file/file_detail.html:534
+msgid "Content copied to clipboard!"
+msgstr ""
+
+#: templates/base.html:678
+msgid "Failed to copy content to clipboard"
+msgstr ""
+
+#: templates/base.html:679
+msgid "No content available to copy"
+msgstr ""
+
+#: templates/base.html:680
+msgid "No content available to download"
+msgstr ""
+
+#: templates/base.html:681
+msgid "File ID not available for export"
+msgstr ""
+
+#: templates/base.html:682 templates/file/files_list.html:426
+msgid "Analysis started for"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:106
+#: templates/Analysis/analysis_batch.html:388
+#: templates/Analysis/analysis_batch.html:398
+#: templates/Analysis/analysis_batch.html:408
+#: templates/Analysis/charts_dashboard.html:598
+#: templates/Analysis/comprehensive_dashboard.html:913
+#: templates/Analysis/dashboard.html:384 templates/Word/Word_detail.html:53
+#: templates/base.html:683 templates/email_words/email_words.html:132
+#: templates/file/files_list.html:208 templates/file/files_list.html:427
+msgid "files"
+msgstr ""
+
+#: templates/base.html:684 templates/file/files_list.html:428
+msgid "Error starting analysis"
+msgstr ""
+
+#: templates/base.html:685 templates/file/files_list.html:432
+msgid "Deleted"
+msgstr ""
+
+#: templates/base.html:686 templates/file/files_list.html:433
+msgid "Error deleting files"
+msgstr ""
+
+#: templates/base.html:687 templates/file/files_list.html:436
+msgid "Error deleting file"
+msgstr ""
+
+#: templates/base.html:688 templates/file/files_list.html:435
+msgid "File deleted"
+msgstr ""
+
+#: templates/base.html:689 templates/file/files_list.html:431
+msgid "Delete files? This cannot be undone."
+msgstr ""
+
+#: templates/base.html:690 templates/file/files_list.html:434
+msgid "Delete this file? This cannot be undone."
+msgstr ""
+
+#: templates/base.html:691
+msgid "Successfully analyzed"
+msgstr ""
+
+#: templates/base.html:692
+msgid "File analysis completed successfully"
+msgstr ""
+
+#: templates/base.html:693
+msgid "Error analyzing folder"
+msgstr ""
+
+#: templates/base.html:694
+msgid "Error analyzing file"
+msgstr ""
+
+#: templates/base.html:695
+msgid "Error analyzing database"
+msgstr ""
+
+#: templates/base.html:696
+msgid "Classification failed"
+msgstr ""
+
+#: templates/Notifications/notifications.html:538
+#: templates/Notifications/notifications.html:545 templates/base.html:697
+msgid "Error loading notifications"
+msgstr ""
+
+#: templates/base.html:698
+#: templates/file/File_Management_Analysis_System.html:663
+msgid "Invalid navigation parameters"
+msgstr ""
+
+#: templates/base.html:699
+msgid "Modal element not found. Please refresh the page."
+msgstr ""
+
+#: templates/base.html:700
+#: templates/file/File_Management_Analysis_System.html:734
+msgid "Error loading file details"
+msgstr ""
+
+#: templates/Settings/settings.html:1598 templates/base.html:701
+msgid "Error saving changes"
+msgstr ""
+
+#: templates/base.html:702
+msgid "OK"
+msgstr ""
+
+#: templates/base.html:703
+msgid "Yes"
+msgstr ""
+
+#: templates/base.html:704
+msgid "No"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:363
+#: templates/Search/saved_searches.html:171 templates/Side/sides_list.html:135
+#: templates/Side/sides_list.html:183 templates/Sources/sources_list.html:176
+#: templates/Sources/sources_list.html:318 templates/Word/Word_list.html:308
+#: templates/base.html:705 templates/base.html:726
+#: templates/file/File_Management_Analysis_System.html:336
+#: templates/file/File_Management_Analysis_System.html:371
+#: templates/file/File_Management_Analysis_System.html:416
+#: templates/file/File_Management_Analysis_System.html:452
+#: templates/file/File_Management_Analysis_System.html:488
+msgid "Cancel"
+msgstr ""
+
+#: templates/base.html:706
+msgid "Confirmation"
+msgstr ""
+
+#: templates/base.html:709
+msgid "Are you sure?"
+msgstr ""
+
+#: templates/base.html:710
+msgid "This action cannot be undone"
+msgstr ""
+
+#: templates/base.html:711
+msgid "Please confirm this action"
+msgstr ""
+
+#: templates/base.html:712
+msgid "Delete Confirmation"
+msgstr ""
+
+#: templates/base.html:713
+msgid "Save Confirmation"
+msgstr ""
+
+#: templates/base.html:714
+msgid "Exit Confirmation"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:117 templates/Side/sides_list.html:18
+#: templates/Sources/sources_list.html:18 templates/base.html:717
+msgid "Add"
+msgstr ""
+
+#: templates/base.html:718
+msgid "Update"
+msgstr ""
+
+#: templates/base.html:719
+msgid "Save"
+msgstr ""
+
+#: templates/Search/saved_searches.html:93 templates/Side/sides_list.html:139
+#: templates/Sources/sources_list.html:180 templates/base.html:720
+#: templates/file/files_list.html:185 templates/file/files_list.html:313
+msgid "Delete"
+msgstr ""
+
+#: templates/Search/saved_searches.html:85 templates/base.html:721
+msgid "Edit"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:364 templates/base.html:722
+msgid "Create"
+msgstr ""
+
+#: templates/base.html:723
+msgid "Remove"
+msgstr ""
+
+#: templates/base.html:724
+msgid "Submit"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:304
+#: templates/Analysis/charts_dashboard.html:346
+#: templates/Analysis/charts_dashboard.html:394
+#: templates/Analysis/charts_dashboard.html:442
+#: templates/Analysis/charts_dashboard.html:508
+#: templates/Analysis/charts_dashboard.html:544
+#: templates/Analysis/comprehensive_dashboard.html:506
+#: templates/Analysis/comprehensive_dashboard.html:557
+#: templates/Analysis/comprehensive_dashboard.html:614
+#: templates/Analysis/comprehensive_dashboard.html:671
+#: templates/Analysis/comprehensive_dashboard.html:748
+#: templates/Analysis/comprehensive_dashboard.html:793
+#: templates/Analysis/comprehensive_dashboard.html:852
+#: templates/Search/search_advanced.html:14 templates/base.html:725
+#: templates/file/File_Management_Analysis_System.html:78
+msgid "Reset"
+msgstr ""
+
+#: templates/base.html:728
+#: templates/file/File_Management_Analysis_System.html:87
+msgid "Back"
+msgstr ""
+
+#: templates/Notifications/notifications.html:650
+#: templates/Search/search.html:96 templates/base.html:729
+#: templates/components/cursor_pagination.html:37
+#: templates/email_words/email_words.html:208
+#: templates/file/File_Management_Analysis_System.html:578
+#: templates/file/File_Management_Analysis_System.html:654
+#: templates/file/file_detail.html:154 templates/file/file_detail.html:201
+msgid "Next"
+msgstr ""
+
+#: templates/Notifications/notifications.html:649
+#: templates/Search/search.html:80 templates/base.html:730
+#: templates/components/cursor_pagination.html:28
+#: templates/email_words/email_words.html:190
+#: templates/file/File_Management_Analysis_System.html:575
+#: templates/file/File_Management_Analysis_System.html:633
+#: templates/file/file_detail.html:151 templates/file/file_detail.html:192
+msgid "Previous"
+msgstr ""
+
+#: templates/base.html:731
+msgid "Finish"
+msgstr ""
+
+#: templates/base.html:732
+msgid "Continue"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:334
+#: templates/Analysis/analysis_batch.html:344
+#: templates/Analysis/analysis_batch.html:354 templates/base.html:733
+msgid "Apply"
+msgstr ""
+
+#: templates/base.html:734 templates/file/file_detail.html:118
+msgid "Clear"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:121
+#: templates/Notifications/notifications.html:27
+#: templates/Word/Word_list.html:105 templates/base.html:735
+#: templates/email_words/email_words.html:23
+#: templates/email_words/email_words.html:169
+#: templates/email_words/email_words.html:230 templates/file/files_list.html:16
+msgid "Refresh"
+msgstr ""
+
+#: templates/base.html:737
+msgid "Filter"
+msgstr ""
+
+#: templates/Search/search_advanced.html:213 templates/base.html:738
+#: templates/file/File_Management_Analysis_System.html:529
+#: templates/file/File_Management_Analysis_System.html:677
+#: templates/file/files_list.html:181
+msgid "Export"
+msgstr ""
+
+#: templates/base.html:739
+msgid "Import"
+msgstr ""
+
+#: templates/base.html:740
+msgid "Upload"
+msgstr ""
+
+#: templates/base.html:741
+#: templates/file/File_Management_Analysis_System.html:526
+#: templates/file/file_detail.html:173 templates/file/full_content.html:19
+msgid "Download"
+msgstr ""
+
+#: templates/base.html:742
+msgid "View"
+msgstr ""
+
+#: templates/base.html:743 templates/file/full_content.html:17
+msgid "Details"
+msgstr ""
+
+#: templates/base.html:744 templates/email_words/email_words.html:146
+#: templates/file/File_Management_Analysis_System.html:523
+#: templates/file/file_detail.html:170 templates/file/full_content.html:18
+msgid "Copy"
+msgstr ""
+
+#: templates/base.html:745
+msgid "Paste"
+msgstr ""
+
+#: templates/base.html:746
+msgid "Cut"
+msgstr ""
+
+#: templates/base.html:747
+msgid "Select"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:110
+#: templates/Keyword/keywords_list.html:235 templates/Word/Word_list.html:208
+#: templates/base.html:748
+#: templates/file/File_Management_Analysis_System.html:645
+#: templates/file/files_list.html:166
+msgid "Select All"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:113 templates/base.html:749
+#: templates/file/File_Management_Analysis_System.html:647
+msgid "Deselect All"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:239 templates/Word/Word_list.html:212
+#: templates/base.html:750 templates/file/files_list.html:170
+msgid "Select None"
+msgstr ""
+
+#: templates/base.html:753
+msgid "Added successfully"
+msgstr ""
+
+#: templates/base.html:754
+msgid "Updated successfully"
+msgstr ""
+
+#: templates/base.html:755
+msgid "Saved successfully"
+msgstr ""
+
+#: templates/base.html:756
+msgid "Deleted successfully"
+msgstr ""
+
+#: templates/base.html:757
+msgid "Created successfully"
+msgstr ""
+
+#: templates/base.html:758
+msgid "Removed successfully"
+msgstr ""
+
+#: templates/base.html:759
+msgid "Submitted successfully"
+msgstr ""
+
+#: templates/base.html:760
+msgid "Changes saved successfully"
+msgstr ""
+
+#: templates/base.html:761
+msgid "Item added successfully"
+msgstr ""
+
+#: templates/base.html:762
+msgid "Item updated successfully"
+msgstr ""
+
+#: templates/base.html:763
+msgid "Item deleted successfully"
+msgstr ""
+
+#: templates/base.html:764
+msgid "Item created successfully"
+msgstr ""
+
+#: templates/base.html:765
+msgid "Item removed successfully"
+msgstr ""
+
+#: templates/base.html:766
+msgid "File uploaded successfully"
+msgstr ""
+
+#: templates/base.html:767
+msgid "File downloaded successfully"
+msgstr ""
+
+#: templates/base.html:768
+msgid "Export completed successfully"
+msgstr ""
+
+#: templates/base.html:769
+msgid "Import completed successfully"
+msgstr ""
+
+#: templates/base.html:772
+msgid "Error adding item"
+msgstr ""
+
+#: templates/base.html:773
+msgid "Error updating item"
+msgstr ""
+
+#: templates/base.html:774
+msgid "Error saving item"
+msgstr ""
+
+#: templates/base.html:775
+msgid "Error deleting item"
+msgstr ""
+
+#: templates/base.html:776
+msgid "Error creating item"
+msgstr ""
+
+#: templates/base.html:777
+msgid "Error removing item"
+msgstr ""
+
+#: templates/base.html:778
+msgid "Error submitting form"
+msgstr ""
+
+#: templates/base.html:779
+msgid "Error uploading file"
+msgstr ""
+
+#: templates/base.html:780
+msgid "Error downloading file"
+msgstr ""
+
+#: templates/base.html:781
+msgid "Error exporting data"
+msgstr ""
+
+#: templates/base.html:782
+msgid "Error importing data"
+msgstr ""
+
+#: templates/base.html:783
+msgid "Failed to add item"
+msgstr ""
+
+#: templates/base.html:784
+msgid "Failed to update item"
+msgstr ""
+
+#: templates/base.html:785
+msgid "Failed to save changes"
+msgstr ""
+
+#: templates/base.html:786
+msgid "Failed to delete item"
+msgstr ""
+
+#: templates/base.html:787
+msgid "Failed to create item"
+msgstr ""
+
+#: templates/base.html:788
+msgid "Failed to remove item"
+msgstr ""
+
+#: templates/base.html:791
+msgid "Please fill in all required fields"
+msgstr ""
+
+#: templates/base.html:792
+msgid "Please enter a valid value"
+msgstr ""
+
+#: templates/base.html:793
+msgid "This field is required"
+msgstr ""
+
+#: templates/base.html:794
+msgid "Invalid input"
+msgstr ""
+
+#: templates/base.html:795
+msgid "Please select an item"
+msgstr ""
+
+#: templates/base.html:796
+msgid "Please select at least one item"
+msgstr ""
+
+#: templates/base.html:797
+msgid "No items selected"
+msgstr ""
+
+#: templates/Settings/settings.html:1656 templates/base.html:798
+msgid "No changes to save"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:589
+#: templates/Analysis/comprehensive_dashboard.html:899 templates/base.html:799
+#: templates/file/file_detail.html:530
+msgid "No data available"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:377 templates/base.html:800
+msgid "No results found"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:52 templates/Analysis/dashboard.html:368
+#: templates/Analysis/path_analysis.html:431
+#: templates/Keyword/keywords_list.html:266
+#: templates/Notifications/notifications.html:476
+#: templates/Search/search_enhanced.html:193
+#: templates/Search/search_enhanced.html:206
+#: templates/Search/search_enhanced.html:237
+#: templates/Settings/settings.html:1946 templates/Word/Word_list.html:232
+#: templates/base.html:803
+#: templates/file/File_Management_Analysis_System.html:203
+#: templates/file/File_Management_Analysis_System.html:637
+msgid "Loading..."
+msgstr ""
+
+#: templates/base.html:804
+msgid "Saving..."
+msgstr ""
+
+#: templates/base.html:805
+msgid "Deleting..."
+msgstr ""
+
+#: templates/base.html:806
+#: templates/file/File_Management_Analysis_System.html:755
+msgid "Updating..."
+msgstr ""
+
+#: templates/base.html:807
+msgid "Adding..."
+msgstr ""
+
+#: templates/base.html:808
+msgid "Creating..."
+msgstr ""
+
+#: templates/base.html:809
+msgid "Removing..."
+msgstr ""
+
+#: templates/base.html:810
+msgid "Uploading..."
+msgstr ""
+
+#: templates/base.html:811
+msgid "Downloading..."
+msgstr ""
+
+#: templates/base.html:812
+msgid "Exporting..."
+msgstr ""
+
+#: templates/base.html:813
+msgid "Importing..."
+msgstr ""
+
+#: templates/base.html:815
+msgid "Please wait..."
+msgstr ""
+
+#: templates/base.html:818
+msgid "Error exporting chart as PNG"
+msgstr ""
+
+#: templates/base.html:819
+msgid "Error exporting chart as JPG"
+msgstr ""
+
+#: templates/base.html:820
+msgid "Error exporting chart as SVG"
+msgstr ""
+
+#: templates/base.html:821
+msgid "Error exporting PDF. Downloading as PNG instead."
+msgstr ""
+
+#: templates/base.html:822
+msgid "PDF export requires jsPDF library. Downloading as PNG instead."
+msgstr ""
+
+#: templates/base.html:823
+msgid "Export Chart"
+msgstr ""
+
+#: templates/base.html:824
+msgid "Export as PNG"
+msgstr ""
+
+#: templates/base.html:825
+msgid "Export as JPG"
+msgstr ""
+
+#: templates/base.html:826
+msgid "Export as SVG"
+msgstr ""
+
+#: templates/base.html:827
+msgid "Export as PDF"
+msgstr ""
+
+#: templates/base.html:828
+msgid "Chart exported successfully"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:4
+#: templates/Analysis/analysis_batch.html:14
+#: templates/Analysis/analysis_batch.html:38
+#: templates/Analysis/path_analysis.html:151
+#: templates/file/File_Management_Analysis_System.html:29
+msgid "Batch Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:19
+msgid "Templates"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:23
+msgid "History"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:35
+#: templates/Analysis/path_analysis.html:3
+#: templates/Analysis/path_analysis.html:137
+#: templates/Analysis/path_analysis.html:148
+#: templates/file/File_Management_Analysis_System.html:26
+msgid "Path Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:51
+msgid "Avg Speed"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:65
+msgid "Success Rate"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:79
+msgid "Est. Time"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:93
+msgid "Queue Size"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:106
+msgid "Pending Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:116
+msgid "High Priority"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:124
+msgid "Priority Level"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:126
+msgid "All Priorities"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:127
+#: templates/Side/sides_list.html:175 templates/Sources/sources_list.html:223
+#: templates/file/File_Management_Analysis_System.html:243
+msgid "High"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:128
+#: templates/Analysis/analysis_batch.html:228
+msgid "Medium"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:129
+#: templates/Side/sides_list.html:173 templates/Sources/sources_list.html:221
+#: templates/file/File_Management_Analysis_System.html:241
+msgid "Low"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:133
+msgid "Schedule"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:135
+msgid "Run Now"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:136
+msgid "Off-Hours (11 PM)"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:137
+msgid "Custom Time"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:141
+msgid "Error Handling"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:143
+msgid "Retry Failed"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:144
+msgid "Skip Failed"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:145
+msgid "Stop on Error"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:149
+msgid "Resource Limit"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:151
+msgid "Unlimited"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:152
+#: templates/Analysis/analysis_batch.html:153
+msgid "CPU"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:161
+msgid "Source Filter"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:163
+#: templates/Analysis/charts_dashboard.html:283
+#: templates/Analysis/charts_dashboard.html:331
+#: templates/Analysis/charts_dashboard.html:379
+#: templates/Analysis/comprehensive_dashboard.html:485
+#: templates/Analysis/comprehensive_dashboard.html:542
+#: templates/Analysis/comprehensive_dashboard.html:599
+#: templates/Analysis/path_analysis.html:191
+#: templates/Search/search_enhanced.html:146
+#: templates/Sources/sources_list.html:26
+#: templates/file/File_Management_Analysis_System.html:55
+#: templates/file/files_list.html:91
+msgid "All Sources"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:170
+msgid "Side Filter"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:172
+#: templates/Analysis/charts_dashboard.html:289
+#: templates/Analysis/charts_dashboard.html:337
+#: templates/Analysis/charts_dashboard.html:385
+#: templates/Analysis/charts_dashboard.html:427
+#: templates/Analysis/comprehensive_dashboard.html:491
+#: templates/Analysis/comprehensive_dashboard.html:548
+#: templates/Analysis/comprehensive_dashboard.html:605
+#: templates/Analysis/comprehensive_dashboard.html:656
+#: templates/Analysis/path_analysis.html:201
+#: templates/Search/search_enhanced.html:156 templates/Side/sides_list.html:26
+#: templates/file/File_Management_Analysis_System.html:64
+#: templates/file/files_list.html:106
+msgid "All Sides"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:179
+#: templates/Analysis/charts_dashboard.html:419
+#: templates/Analysis/charts_dashboard.html:485
+#: templates/Analysis/charts_dashboard.html:566
+#: templates/Analysis/comprehensive_dashboard.html:648
+#: templates/Analysis/comprehensive_dashboard.html:725
+#: templates/Analysis/comprehensive_dashboard.html:874
+#: templates/Search/search_advanced.html:146
+#: templates/Search/search_enhanced.html:131
+#: templates/Settings/settings.html:331 templates/file/file_detail.html:448
+#: templates/file/files_list.html:118
+msgid "File Type"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:181
+#: templates/Analysis/comprehensive_dashboard.html:841
+#: templates/Analysis/dashboard.html:229
+#: templates/Search/search_advanced.html:149
+#: templates/Search/search_enhanced.html:133 templates/file/files_list.html:121
+msgid "All Types"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:183
+#: templates/Analysis/charts_dashboard.html:609
+#: templates/Analysis/comprehensive_dashboard.html:928
+#: templates/Word/Word_list.html:185 templates/Word/Word_list.html:256
+#: templates/Word/Word_list.html:301
+#: templates/file/File_Management_Analysis_System.html:469
+#: templates/file/File_Management_Analysis_System.html:697
+msgid "Word"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:184
+#: templates/Search/search_advanced.html:152
+msgid "Excel"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:185
+#: templates/Keyword/keywords_list.html:211
+#: templates/Search/search_advanced.html:153
+msgid "Text"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:189
+msgid "Size Range"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:191
+msgid "All Sizes"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:206
+#: templates/Analysis/comprehensive_dashboard.html:904
+#: templates/Analysis/dashboard.html:347
+#: templates/Search/search_advanced.html:81
+#: templates/Settings/settings.html:329 templates/file/file_detail.html:444
+#: templates/file/files_list.html:237
+msgid "File Name"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:207
+#: templates/Analysis/dashboard.html:348
+#: templates/Notifications/notifications.html:939
+#: templates/Search/search_enhanced.html:117 templates/file/files_list.html:238
+msgid "Type"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:208
+#: templates/Analysis/dashboard.html:349
+#: templates/Search/search_enhanced.html:118
+#: templates/Settings/settings.html:1958 templates/file/files_list.html:239
+msgid "Size"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:209
+#: templates/Analysis/charts_dashboard.html:281
+#: templates/Analysis/charts_dashboard.html:329
+#: templates/Analysis/charts_dashboard.html:377
+#: templates/Analysis/charts_dashboard.html:607
+#: templates/Analysis/comprehensive_dashboard.html:483
+#: templates/Analysis/comprehensive_dashboard.html:540
+#: templates/Analysis/comprehensive_dashboard.html:597
+#: templates/Analysis/comprehensive_dashboard.html:926
+#: templates/Analysis/dashboard.html:350 templates/Analysis/dashboard.html:401
+#: templates/Analysis/path_analysis.html:188
+#: templates/Notifications/notifications.html:84
+#: templates/Notifications/notifications.html:171
+#: templates/Notifications/notifications.html:258
+#: templates/Notifications/notifications.html:944
+#: templates/Search/search_enhanced.html:144
+#: templates/file/File_Management_Analysis_System.html:53
+#: templates/file/file_detail.html:452 templates/file/files_list.html:88
+#: templates/file/files_list.html:240
+msgid "Source"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:210
+#: templates/Notifications/notifications.html:940
+msgid "Priority"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:240
+msgid "files selected"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:245
+msgid "Start Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:259
+msgid "Overall Progress"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:271
+#: templates/Analysis/analysis_batch.html:385
+#: templates/Analysis/analysis_batch.html:395
+#: templates/Analysis/analysis_batch.html:405
+msgid "Completed"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:283
+msgid "Remaining"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:289
+#: templates/file/File_Management_Analysis_System.html:760
+msgid "Errors"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:296
+msgid "Per-File Progress"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:303
+msgid "Current"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:309
+msgid "Pause"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:313
+msgid "Stop"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:323
+msgid "Batch Templates"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:330
+msgid "Quick Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:331
+msgid "Fast processing, standard settings"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:340
+msgid "Deep Analysis"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:341
+msgid "Thorough processing, all features"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:350
+msgid "Off-Hours"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:351
+msgid "Scheduled for 11 PM"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:360
+msgid "Save New Template"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:361
+msgid "Create custom template"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:379
+msgid "Batch Analysis History"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:385
+#: templates/Analysis/analysis_batch.html:395
+#: templates/Analysis/analysis_batch.html:405
+msgid "Batch"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:386
+msgid "Today at 2:30 PM"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:389
+#: templates/Analysis/analysis_batch.html:399
+#: templates/Analysis/analysis_batch.html:409
+msgid "success"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:390
+#: templates/Analysis/analysis_batch.html:400
+#: templates/Analysis/analysis_batch.html:410
+msgid "avg"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:396
+msgid "Yesterday at 11:00 PM"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:406
+msgid "2 days ago at 3:15 PM"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:423
+msgid "Resource Optimization"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:430
+msgid "CPU Usage"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:442
+msgid "Memory Usage"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:454
+msgid "Disk I/O"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:472
+msgid "Analysis paused"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:473
+msgid "Stop analysis? Progress will be lost."
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:474
+msgid "Analysis Complete!"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:476
+#: templates/Notifications/notifications.html:943
+msgid "File"
+msgstr ""
+
+#: templates/Analysis/analysis_batch.html:478
+msgid "Template applied"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:3
+#: templates/Analysis/charts_dashboard.html:248
+#: templates/Analysis/charts_dashboard.html:262
+#: templates/Analysis/comprehensive_dashboard.html:390
+#: templates/Analysis/dashboard.html:27
+msgid "Charts Dashboard"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:249
+msgid "Visual analytics with filters - all sections in one view"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:256
+#: templates/Analysis/comprehensive_dashboard.html:384
+#: templates/Analysis/dashboard.html:21 templates/Analysis/dashboard.html:96
+msgid "Overview"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:259
+#: templates/Analysis/comprehensive_dashboard.html:3
+#: templates/Analysis/comprehensive_dashboard.html:376
+#: templates/Analysis/comprehensive_dashboard.html:387
+#: templates/Analysis/dashboard.html:24
+msgid "Comprehensive Dashboard"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:270
+#: templates/Analysis/comprehensive_dashboard.html:472
+msgid "Files Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:272
+#: templates/Analysis/comprehensive_dashboard.html:474
+msgid "Files filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:275
+#: templates/Analysis/charts_dashboard.html:371
+#: templates/Analysis/charts_dashboard.html:491
+#: templates/Analysis/charts_dashboard.html:570
+#: templates/Analysis/comprehensive_dashboard.html:477
+#: templates/Analysis/comprehensive_dashboard.html:591
+#: templates/Analysis/comprehensive_dashboard.html:731
+#: templates/Analysis/comprehensive_dashboard.html:878
+#: templates/Analysis/path_analysis.html:467
+#: templates/Keyword/keywords_list.html:197
+#: templates/Keyword/keywords_list.html:312
+#: templates/Search/search_enhanced.html:174
+#: templates/Sources/source_detail.html:149
+#: templates/Sources/sources_list.html:103
+#: templates/Sources/sources_list.html:307
+#: templates/file/File_Management_Analysis_System.html:44
+#: templates/file/File_Management_Analysis_System.html:139
+#: templates/file/File_Management_Analysis_System.html:144
+#: templates/file/File_Management_Analysis_System.html:321
+#: templates/file/File_Management_Analysis_System.html:478
+#: templates/file/File_Management_Analysis_System.html:657
+#: templates/file/File_Management_Analysis_System.html:692
+#: templates/file/File_Management_Analysis_System.html:763
+msgid "Category"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:276
+#: templates/Analysis/charts_dashboard.html:372
+#: templates/Analysis/charts_dashboard.html:492
+#: templates/Analysis/charts_dashboard.html:534
+#: templates/Analysis/comprehensive_dashboard.html:478
+#: templates/Analysis/comprehensive_dashboard.html:592
+#: templates/Analysis/comprehensive_dashboard.html:732
+#: templates/Analysis/comprehensive_dashboard.html:783
+msgid "Filter by category"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:277
+#: templates/Analysis/charts_dashboard.html:373
+#: templates/Analysis/charts_dashboard.html:493
+#: templates/Analysis/charts_dashboard.html:535
+#: templates/Analysis/comprehensive_dashboard.html:479
+#: templates/Analysis/comprehensive_dashboard.html:593
+#: templates/Analysis/comprehensive_dashboard.html:733
+#: templates/Analysis/comprehensive_dashboard.html:784
+#: templates/Keyword/keywords_list.html:200
+#: templates/Keyword/keywords_list.html:434
+#: templates/Search/search_enhanced.html:176
+#: templates/file/File_Management_Analysis_System.html:46
+msgid "All Categories"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:282
+#: templates/Analysis/charts_dashboard.html:330
+#: templates/Analysis/charts_dashboard.html:378
+#: templates/Analysis/comprehensive_dashboard.html:484
+#: templates/Analysis/comprehensive_dashboard.html:541
+#: templates/Analysis/comprehensive_dashboard.html:598
+msgid "Filter by source"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:287
+#: templates/Analysis/charts_dashboard.html:335
+#: templates/Analysis/charts_dashboard.html:383
+#: templates/Analysis/charts_dashboard.html:425
+#: templates/Analysis/charts_dashboard.html:608
+#: templates/Analysis/comprehensive_dashboard.html:489
+#: templates/Analysis/comprehensive_dashboard.html:546
+#: templates/Analysis/comprehensive_dashboard.html:603
+#: templates/Analysis/comprehensive_dashboard.html:654
+#: templates/Analysis/comprehensive_dashboard.html:927
+#: templates/Analysis/path_analysis.html:198
+#: templates/Notifications/notifications.html:945
+#: templates/Search/search_enhanced.html:154
+#: templates/file/File_Management_Analysis_System.html:62
+#: templates/file/file_detail.html:456 templates/file/files_list.html:103
+#: templates/file/files_list.html:241
+msgid "Side"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:288
+#: templates/Analysis/charts_dashboard.html:336
+#: templates/Analysis/charts_dashboard.html:384
+#: templates/Analysis/charts_dashboard.html:426
+#: templates/Analysis/comprehensive_dashboard.html:490
+#: templates/Analysis/comprehensive_dashboard.html:547
+#: templates/Analysis/comprehensive_dashboard.html:604
+#: templates/Analysis/comprehensive_dashboard.html:655
+msgid "Filter by side"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:293
+#: templates/Analysis/charts_dashboard.html:431
+#: templates/Analysis/charts_dashboard.html:497
+#: templates/Analysis/charts_dashboard.html:573
+#: templates/Analysis/comprehensive_dashboard.html:495
+#: templates/Analysis/comprehensive_dashboard.html:660
+#: templates/Analysis/comprehensive_dashboard.html:737
+#: templates/Analysis/comprehensive_dashboard.html:881
+#: templates/Keyword/keywords_list.html:290 templates/file/file_detail.html:395
+msgid "Keyword"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:294
+#: templates/Analysis/charts_dashboard.html:432
+#: templates/Analysis/charts_dashboard.html:498
+#: templates/Analysis/comprehensive_dashboard.html:496
+#: templates/Analysis/comprehensive_dashboard.html:661
+#: templates/Analysis/comprehensive_dashboard.html:738
+msgid "Filter by keyword"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:295
+#: templates/Analysis/charts_dashboard.html:433
+#: templates/Analysis/charts_dashboard.html:499
+#: templates/Analysis/comprehensive_dashboard.html:497
+#: templates/Analysis/comprehensive_dashboard.html:662
+#: templates/Analysis/comprehensive_dashboard.html:739
+msgid "All Keywords"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:300
+#: templates/Analysis/charts_dashboard.html:342
+#: templates/Analysis/charts_dashboard.html:390
+#: templates/Analysis/charts_dashboard.html:438
+#: templates/Analysis/charts_dashboard.html:504
+#: templates/Analysis/comprehensive_dashboard.html:502
+#: templates/Analysis/comprehensive_dashboard.html:553
+#: templates/Analysis/comprehensive_dashboard.html:610
+#: templates/Analysis/comprehensive_dashboard.html:667
+#: templates/Analysis/comprehensive_dashboard.html:744
+#: templates/Analysis/comprehensive_dashboard.html:848
+msgid "Apply filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:301
+#: templates/Analysis/charts_dashboard.html:343
+#: templates/Analysis/charts_dashboard.html:391
+#: templates/Analysis/charts_dashboard.html:439
+#: templates/Analysis/charts_dashboard.html:505
+#: templates/Analysis/comprehensive_dashboard.html:503
+#: templates/Analysis/comprehensive_dashboard.html:554
+#: templates/Analysis/comprehensive_dashboard.html:611
+#: templates/Analysis/comprehensive_dashboard.html:668
+#: templates/Analysis/comprehensive_dashboard.html:745
+#: templates/file/File_Management_Analysis_System.html:77
+msgid "Apply Filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:303
+#: templates/Analysis/charts_dashboard.html:345
+#: templates/Analysis/charts_dashboard.html:393
+#: templates/Analysis/charts_dashboard.html:441
+#: templates/Analysis/charts_dashboard.html:507
+#: templates/Analysis/charts_dashboard.html:543
+#: templates/Analysis/comprehensive_dashboard.html:505
+#: templates/Analysis/comprehensive_dashboard.html:556
+#: templates/Analysis/comprehensive_dashboard.html:613
+#: templates/Analysis/comprehensive_dashboard.html:670
+#: templates/Analysis/comprehensive_dashboard.html:747
+#: templates/Analysis/comprehensive_dashboard.html:792
+#: templates/Analysis/comprehensive_dashboard.html:851
+msgid "Reset filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:311
+msgid "File Types Distribution"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:314
+#: templates/Analysis/comprehensive_dashboard.html:525
+msgid "File types distribution chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:324
+#: templates/Analysis/comprehensive_dashboard.html:535
+msgid "Categories Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:326
+#: templates/Analysis/comprehensive_dashboard.html:537
+msgid "Categories filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:353
+msgid "Categories Distribution"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:356
+#: templates/Analysis/comprehensive_dashboard.html:576
+msgid "Categories distribution chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:366
+#: templates/Analysis/comprehensive_dashboard.html:586
+msgid "Keywords Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:368
+#: templates/Analysis/comprehensive_dashboard.html:588
+msgid "Keywords filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:401
+msgid "Keywords Distribution"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:404
+#: templates/Analysis/comprehensive_dashboard.html:633
+msgid "Keywords distribution chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:414
+#: templates/Analysis/comprehensive_dashboard.html:643
+msgid "Sources Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:416
+#: templates/Analysis/comprehensive_dashboard.html:645
+msgid "Sources filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:420
+#: templates/Analysis/charts_dashboard.html:486
+#: templates/Analysis/comprehensive_dashboard.html:649
+#: templates/Analysis/comprehensive_dashboard.html:726
+msgid "Filter by file type"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:421
+#: templates/Analysis/charts_dashboard.html:487
+#: templates/Analysis/comprehensive_dashboard.html:650
+#: templates/Analysis/comprehensive_dashboard.html:727
+msgid "All File Types"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:449
+msgid "File Count by Source"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:452
+#: templates/Analysis/comprehensive_dashboard.html:690
+msgid "Sources file count chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:458
+msgid "Size Distribution by Source"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:461
+#: templates/Analysis/comprehensive_dashboard.html:701
+msgid "Sources size distribution chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:467
+msgid "Processing Rate by Source"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:470
+#: templates/Analysis/comprehensive_dashboard.html:710
+msgid "Sources processing rate chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:480
+#: templates/Analysis/comprehensive_dashboard.html:720
+msgid "Sides Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:482
+#: templates/Analysis/comprehensive_dashboard.html:722
+msgid "Sides filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:515
+msgid "Sides Distribution"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:518
+#: templates/Analysis/comprehensive_dashboard.html:767
+msgid "Sides statistics chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:528
+msgid "Words Analysis"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:530
+#: templates/Analysis/comprehensive_dashboard.html:779
+msgid "Words filters"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:533
+#: templates/Analysis/comprehensive_dashboard.html:782
+msgid "Category (Optional)"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:540
+#: templates/Analysis/comprehensive_dashboard.html:789
+msgid "Load words"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:541
+#: templates/Analysis/comprehensive_dashboard.html:790
+msgid "Load Words"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:551
+#: templates/Analysis/charts_dashboard.html:602
+msgid "Words Distribution"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:554
+#: templates/Analysis/comprehensive_dashboard.html:807
+msgid "Words distribution chart"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:567
+#: templates/Analysis/comprehensive_dashboard.html:875
+#: templates/Analysis/path_analysis.html:514
+#: templates/file/File_Management_Analysis_System.html:664
+msgid "File Count"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:568
+#: templates/Analysis/charts_dashboard.html:604
+#: templates/Analysis/comprehensive_dashboard.html:876
+#: templates/Analysis/comprehensive_dashboard.html:923
+#: templates/Analysis/path_analysis.html:242 templates/Side/side_detail.html:47
+#: templates/Sources/source_detail.html:59
+msgid "Total Size"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:569
+#: templates/Analysis/charts_dashboard.html:605
+#: templates/Analysis/comprehensive_dashboard.html:877
+#: templates/Analysis/comprehensive_dashboard.html:924
+msgid "Avg Size"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:571
+#: templates/Analysis/comprehensive_dashboard.html:879
+#: templates/file/File_Management_Analysis_System.html:740
+msgid "Word Count"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:572
+#: templates/Analysis/comprehensive_dashboard.html:880
+msgid "File Density"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:574
+#: templates/Analysis/comprehensive_dashboard.html:882
+#: templates/Sources/source_detail.html:72
+#: templates/Sources/sources_list.html:203
+#: templates/file/File_Management_Analysis_System.html:228
+#: templates/file/File_Management_Analysis_System.html:680
+msgid "Source Name"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:575
+#: templates/Analysis/charts_dashboard.html:611
+#: templates/Analysis/comprehensive_dashboard.html:883
+#: templates/Analysis/comprehensive_dashboard.html:930
+#: templates/Analysis/dashboard.html:64
+#: templates/Keyword/keyword_detail.html:38
+#: templates/Sources/source_detail.html:43
+msgid "File Types"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:576
+#: templates/Analysis/comprehensive_dashboard.html:884
+#: templates/Analysis/path_analysis.html:238
+msgid "Processed"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:577
+#: templates/Analysis/charts_dashboard.html:606
+#: templates/Analysis/comprehensive_dashboard.html:885
+#: templates/Analysis/comprehensive_dashboard.html:925
+#: templates/Analysis/path_analysis.html:246
+msgid "Processing Rate"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:578
+#: templates/Analysis/comprehensive_dashboard.html:886
+#: templates/Side/side_detail.html:58 templates/Side/sides_list.html:161
+#: templates/file/File_Management_Analysis_System.html:356
+#: templates/file/File_Management_Analysis_System.html:693
+msgid "Side Name"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:579
+#: templates/Analysis/comprehensive_dashboard.html:887
+#: templates/Side/side_detail.html:53 templates/Side/sides_list.html:52
+#: templates/Side/sides_list.html:167 templates/Sources/source_detail.html:65
+#: templates/Sources/sources_list.html:64
+#: templates/Sources/sources_list.html:215
+#: templates/file/File_Management_Analysis_System.html:238
+#: templates/file/File_Management_Analysis_System.html:360
+#: templates/file/File_Management_Analysis_System.html:682
+#: templates/file/File_Management_Analysis_System.html:744
+msgid "Importance"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:582
+#: templates/Analysis/comprehensive_dashboard.html:891
+msgid "No file types found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:583
+#: templates/Analysis/comprehensive_dashboard.html:892
+msgid "No categories found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:584
+#: templates/Analysis/comprehensive_dashboard.html:893
+#: templates/Analysis/path_analysis.html:454
+msgid "No keywords found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:585
+#: templates/Analysis/comprehensive_dashboard.html:894
+msgid "No sources found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:586
+#: templates/Analysis/comprehensive_dashboard.html:895
+msgid "No sides found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:587
+#: templates/Analysis/comprehensive_dashboard.html:896
+msgid "No words found"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:588
+#: templates/Analysis/comprehensive_dashboard.html:898
+#: templates/Analysis/dashboard.html:374
+#: templates/Keyword/keywords_list.html:436
+msgid "Error loading data"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:590
+#: templates/Analysis/comprehensive_dashboard.html:900
+#: templates/Analysis/dashboard.html:400
+#: templates/Analysis/path_analysis.html:515
+#: templates/Analysis/path_analysis.html:522
+msgid "Unknown"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:592
+#: templates/Analysis/comprehensive_dashboard.html:907
+msgid "file types"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:593
+#: templates/Analysis/comprehensive_dashboard.html:908
+msgid "categories"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:594
+#: templates/Analysis/comprehensive_dashboard.html:909
+#: templates/Keyword/keywords_list.html:445
+msgid "keywords"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:595
+#: templates/Analysis/comprehensive_dashboard.html:910
+msgid "sources"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:596
+#: templates/Analysis/comprehensive_dashboard.html:911
+msgid "sides"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:597
+#: templates/Analysis/comprehensive_dashboard.html:912
+#: templates/Settings/settings.html:296 templates/Settings/settings.html:297
+#: templates/Settings/settings.html:298 templates/Settings/settings.html:299
+#: templates/Settings/settings.html:312 templates/Settings/settings.html:313
+#: templates/Settings/settings.html:314 templates/Settings/settings.html:315
+#: templates/file/File_Management_Analysis_System.html:145
+#: templates/file/File_Management_Analysis_System.html:154
+#: templates/file/File_Management_Analysis_System.html:163
+#: templates/file/File_Management_Analysis_System.html:172
+#: templates/file/File_Management_Analysis_System.html:181
+#: templates/file/File_Management_Analysis_System.html:190
+#: templates/file/File_Management_Analysis_System.html:636
+msgid "items"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:600
+#: templates/Analysis/comprehensive_dashboard.html:403
+#: templates/Analysis/comprehensive_dashboard.html:920
+#: templates/Analysis/path_analysis.html:234
+#: templates/Analysis/path_analysis.html:450
+#: templates/Analysis/path_analysis.html:505
+#: templates/file/File_Management_Analysis_System.html:641
+msgid "Files"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:603
+#: templates/Analysis/comprehensive_dashboard.html:922
+msgid "Density"
+msgstr ""
+
+#: templates/Analysis/charts_dashboard.html:610
+#: templates/Analysis/comprehensive_dashboard.html:929
+#: templates/Analysis/dashboard.html:50 templates/Analysis/dashboard.html:380
+#: templates/Analysis/file_classification.html:266
+#: templates/Analysis/path_analysis.html:278
+#: templates/file/File_Management_Analysis_System.html:742
+#: templates/file/files_list.html:30
+msgid "Total Files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:377
+msgid ""
+"Advanced filtering and analysis across files, categories, keywords, "
+"sources, and words"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:395
+msgid "Dashboard views"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:413
+#: templates/Analysis/dashboard.html:78 templates/Analysis/dashboard.html:99
+#: templates/Analysis/file_classification.html:274
+#: templates/Search/saved_searches.html:65
+#: templates/Search/search_advanced.html:91
+#: templates/file/File_Management_Analysis_System.html:668
+msgid "Categories"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:463
+msgid "Similar Files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:513
+msgid "File Types Table"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:522
+msgid "File Types Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:564
+msgid "Categories Table"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:573
+msgid "Categories Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:621
+msgid "Keywords Table"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:630
+msgid "Keywords Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:678
+msgid "Sources Table"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:687
+msgid "File Count Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:698
+msgid "Size Distribution Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:707
+msgid "Processing Rate Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:755
+msgid "Sides Table"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:764
+msgid "Sides Chart"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:777
+msgid "Words Layout"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:799
+msgid "Words by Category"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:800
+msgid "Toggle view mode"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:801
+#: templates/Analysis/comprehensive_dashboard.html:917
+msgid "Chart View"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:816
+msgid "Similar Files Analysis"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:818
+msgid "Similar files filters"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:821
+msgid "Similarity Threshold"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:822
+msgid "Filter by similarity threshold"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:823
+msgid "Very High (90%+)"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:824
+msgid "High (80%+)"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:825
+msgid "Medium (70%+)"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:826
+msgid "Low (60%+)"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:830
+msgid "Min Group Size"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:831
+msgid "Minimum files per group"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:832
+msgid "2+ files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:833
+msgid "3+ files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:834
+msgid "5+ files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:835
+msgid "10+ files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:839
+msgid "Group Type"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:840
+msgid "Filter by group type"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:842
+msgid "Hash Duplicates"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:843
+msgid "Similar Titles"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:849
+msgid "Load Similar Files"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:858
+msgid "Similar Files Groups"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:897
+msgid "No similar files found"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:901
+msgid "groups"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:902
+msgid "Hash Duplicate"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:903
+msgid "Similar Title"
+msgstr ""
+
+#: templates/Analysis/comprehensive_dashboard.html:916
+#: templates/file/File_Management_Analysis_System.html:124
+#: templates/file/files_list.html:194
+msgid "Grid View"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:3 templates/Analysis/dashboard.html:13
+msgid "Comprehensive File Analytics"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:14
+msgid ""
+"Deep insights into your file collection with advanced visualizations and "
+"analysis"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:38 templates/file/upload.html:41
+msgid "Active Processing Tasks"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:57 templates/Analysis/dashboard.html:381
+msgid "Processed Files"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:59
+msgid "% processed"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:66
+msgid "Different formats"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:71
+#: templates/Analysis/path_analysis.html:305 templates/Word/Word_list.html:115
+#: templates/file/File_Management_Analysis_System.html:737
+msgid "Total Words"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:73
+msgid "Unique words extracted"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:80
+msgid "Classification groups"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:85
+msgid "Storage Used"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:87
+msgid "Total data size"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:106
+msgid "File Reports"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:109
+msgid "Search & Filter"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:112
+msgid "Storage & Analytics"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:121
+msgid "File Timeline"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:124
+msgid "Week"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:125
+msgid "Month"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:126
+msgid "Year"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:138
+#: templates/Analysis/path_analysis.html:257
+msgid "File Type Distribution"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:147
+msgid "Processing Statistics"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:160
+msgid "Category Distribution"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:177
+msgid "Word Frequency Analysis"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:179
+msgid "Top 25"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:180
+msgid "Top 50"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:181
+msgid "Top 100"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:187 templates/Analysis/dashboard.html:369
+msgid "Loading word frequency data..."
+msgstr ""
+
+#: templates/Analysis/dashboard.html:197
+msgid "Path Level Analysis"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:202 templates/Analysis/dashboard.html:370
+msgid "Loading path hierarchy..."
+msgstr ""
+
+#: templates/Analysis/dashboard.html:212
+msgid "Detailed File Reports"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:217 templates/Analysis/dashboard.html:371
+msgid "Loading file reports..."
+msgstr ""
+
+#: templates/Analysis/dashboard.html:227
+msgid "Search files by keyword, category, or path..."
+msgstr ""
+
+#: templates/Analysis/dashboard.html:242 templates/Search/search.html:51
+msgid "Search Results"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:243
+#: templates/file/File_Management_Analysis_System.html:570
+#: templates/file/file_detail.html:146
+msgid "0 results"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:248
+msgid "Enter search criteria"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:249
+msgid "Use the search bar above to find specific files"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:260
+msgid "Storage Distribution"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:262
+msgid "By Type"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:263
+msgid "By Status"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:264
+msgid "By Size"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:272
+msgid "Storage Details"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:283
+msgid "Storage Growth Over Time"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:293
+msgid "Processing Performance"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:297
+msgid "Success Rate by File Type"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:301
+msgid "Processing Speed (Last 30 Days)"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:310
+msgid "Content Analysis"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:314
+msgid "Content Coverage"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:320
+msgid "Top Categories"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:331
+msgid "Most Frequent Words"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:341
+msgid "Largest Files"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:351
+msgid "Path"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:372
+#: templates/Search/search_advanced.html:186
+msgid "Searching..."
+msgstr ""
+
+#: templates/Analysis/dashboard.html:373
+msgid "No word data available"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:375
+msgid "No path data available"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:376
+msgid "No files available"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:378
+msgid "Try different search criteria"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:379
+#: templates/Search/search_advanced.html:429
+msgid "Search error"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:382
+msgid "this week"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:383
+msgid "results"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:385
+msgid "processed"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:386
+msgid "Files analyzed"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:387
+msgid "Total instances"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:388
+msgid "Files classified"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:389
+msgid "Success Rate (%)"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:390
+msgid "Files Processed"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:391
+msgid "Storage (MB)"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:392
+msgid "Files Added"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:393
+msgid "Storage Added (MB)"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:394
+msgid "Number of Files"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:395
+msgid "Files per Category"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:396
+msgid "Category Distribution (Pie Chart)"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:397
+msgid "With Content"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:398
+msgid "With Words"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:399
+msgid "No Content"
+msgstr ""
+
+#: templates/Analysis/dashboard.html:402
+#: templates/Keyword/keywords_list.html:185
+#: templates/Keyword/keywords_list.html:306
+#: templates/Search/search_advanced.html:162 templates/Word/Word_detail.html:59
+#: templates/Word/Word_list.html:169 templates/Word/Word_list.html:272
+#: templates/file/files_list.html:135 templates/file/files_list.html:242
+msgid "Status"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:3
+#: templates/Analysis/file_classification.html:251
+msgid "File Classification Analysis"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:270
+msgid "Analyzed Files"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:281
+#: templates/Analysis/file_classification.html:294
+msgid "Folder Analysis"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:287
+#: templates/Analysis/file_classification.html:364
+msgid "Database Analysis"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:295
+msgid "Analyze and classify all files in a specific folder"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:298
+msgid "Folder Path:"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:300
+msgid ""
+"Enter full folder path (e.g., C:\\Users\\Documents or "
+"/home/user/documents)"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:302
+msgid "Enter the complete path to the folder you want to analyze"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:306
+#: templates/Analysis/file_classification.html:341
+#: templates/Analysis/file_classification.html:374
+msgid "Classification Method:"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:308
+#: templates/Analysis/file_classification.html:343
+#: templates/Analysis/file_classification.html:376
+msgid "Rule-Based"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:311
+#: templates/Analysis/file_classification.html:346
+#: templates/Analysis/file_classification.html:379
+msgid "Machine Learning"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:314
+#: templates/Analysis/file_classification.html:349
+#: templates/Analysis/file_classification.html:382
+msgid "Deep Learning"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:317
+msgid "Ensemble"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:322
+msgid "Analyze Folder"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:333
+msgid "Analyze and classify a single file by content and title"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:336
+msgid "File ID:"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:337
+msgid "Enter file ID"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:354
+msgid "Analyze File"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:365
+msgid "Analyze and classify files across the entire database"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:368
+msgid "Limit:"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:370
+msgid "Maximum number of files to analyze (1-10000)"
+msgstr ""
+
+#: templates/Analysis/file_classification.html:387
+msgid "Analyze Database"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:138
+msgid ""
+"Explore files organized by directory structure with detailed metrics and "
+"analytics"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:161
+msgid "Directory Structure"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:163
+msgid "Expand All"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:164
+msgid "Expand"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:166
+msgid "Collapse All"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:167
+msgid "Collapse"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:177
+#: templates/Search/search_enhanced.html:128
+msgid "Filters"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:180
+msgid "active"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:207
+msgid "Clear Filters"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:215
+#: templates/Analysis/path_analysis.html:432
+msgid "Loading paths..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:225
+msgid "Select a path"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:252
+msgid "Folder Analytics"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:265
+msgid "Processing Status"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:274
+msgid "Classification Distribution"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:282
+msgid "Categorized"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:286
+#: templates/Keyword/keywords_list.html:435
+msgid "Uncategorized"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:297
+#: templates/Analysis/path_analysis.html:510
+msgid "Category Words Breakdown"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:301
+msgid "Total Categories"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:309
+msgid "Files Analyzed"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:318
+msgid "Top Keywords (Bar Chart)"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:324
+msgid "Word Cloud"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:328
+#: templates/Analysis/path_analysis.html:434
+msgid "Loading keywords..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:336
+msgid "File Creation Timeline (Last 30 Days)"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:346
+msgid "Files in This Folder"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:348
+msgid "Scroll horizontally for more"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:354
+#: templates/Analysis/path_analysis.html:398
+#: templates/Analysis/path_analysis.html:433
+#: templates/file/File_Management_Analysis_System.html:638
+msgid "Loading files..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:364
+msgid "Select a Directory to Begin"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:366
+msgid "Click on any folder name in the directory tree on the left to view:"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:369
+msgid "File statistics and metrics"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:370
+msgid "File type distribution charts"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:371
+msgid "Top keywords from folder contents"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:372
+msgid "File creation timeline"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:373
+msgid "All files in the folder"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:376
+msgid "Tip:"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:376
+msgid "Click the"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:376
+msgid "button to expand folders and see subfolders"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:389
+#: templates/Analysis/path_analysis.html:482
+msgid "Category Files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:410
+#: templates/Analysis/path_analysis.html:483
+msgid "Category Words"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:419
+#: templates/Analysis/path_analysis.html:435
+msgid "Loading words..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:439
+msgid "No paths found"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:440
+msgid "Add files to see directory structure"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:441
+msgid "Error loading paths"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:442
+msgid "Please try refreshing the page"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:445
+msgid "No file type data available"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:446
+msgid "No status data available"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:447
+msgid "No timeline data available for the last 30 days"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:448
+msgid "Error loading chart data"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:449
+msgid "Files Created"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:451
+#, python-brace-format
+msgid "Appears in {count} files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:455
+msgid "This folder contains no extractable keywords"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:456
+#: templates/Keyword/keywords_list.html:413
+msgid "Error loading keywords"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:457
+msgid "No word frequency data available"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:460
+msgid "No files in this path"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:461
+msgid ""
+"This folder appears to be empty or the path pattern doesn't match any "
+"files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:462
+#: templates/file/File_Management_Analysis_System.html:640
+msgid "Error loading files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:465
+#: templates/file/file_detail.html:350
+msgid "No classification data available"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:466
+msgid "Error loading classification data"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:469
+msgid "Percentage"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:472
+msgid "No category data available for this folder"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:473
+msgid "Error loading category analysis"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:474
+msgid "No Words Found"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:475
+#, python-brace-format
+msgid "No words found in the \"{category}\" category."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:476
+msgid "Error Loading Words"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:477
+msgid "Click any word to see files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:478
+#, python-brace-format
+msgid "word{s} in this category"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:479
+#, python-brace-format
+msgid "Found in {count} file{s}"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:484
+#, python-brace-format
+msgid "Files in \"{category}\" Category"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:485
+#, python-brace-format
+msgid "Words in \"{category}\" Category"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:486
+#, python-brace-format
+msgid "Files containing \"{word}\""
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:487
+#, python-brace-format
+msgid "Loading files for {category}..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:488
+#, python-brace-format
+msgid "Loading words for {category}..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:489
+#, python-brace-format
+msgid "Loading files containing \"{word}\"..."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:490
+msgid "No Files Found"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:491
+#, python-brace-format
+msgid "No files found in the \"{category}\" category for this folder."
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:492
+msgid "Error Loading Files"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:493
+#, python-brace-format
+msgid "file{s} found"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:494
+#, python-brace-format
+msgid "file{s} contain \"{word}\""
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:495
+msgid "Sorted by word frequency"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:496
+#, python-brace-format
+msgid "Appears {count} time{s} in file"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:497
+msgid "Words in file"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:498
+msgid "No words found in this file"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:499
+msgid "No specific keywords found"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:500
+msgid "These files have no assigned keywords"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:501
+msgid "Classification based on keywords below"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:504
+msgid "Category Name"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:507
+msgid "Distribution"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:508
+msgid "Detailed Classification Breakdown"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:509
+msgid "(Click on any row to see files)"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:511
+msgid "(Click on any row to see words, then click word to see files)"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:518
+#: templates/Notifications/notifications.html:59
+#: templates/Notifications/notifications.html:118
+#: templates/Notifications/notifications.html:146
+#: templates/Notifications/notifications.html:205
+#: templates/Notifications/notifications.html:233
+#: templates/Notifications/notifications.html:292
+#: templates/file/files_list.html:288
+msgid "Read"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:519
+#: templates/Notifications/notifications.html:56
+#: templates/Notifications/notifications.html:113
+#: templates/Notifications/notifications.html:143
+#: templates/Notifications/notifications.html:200
+#: templates/Notifications/notifications.html:230
+#: templates/Notifications/notifications.html:287
+#: templates/file/files_list.html:293
+msgid "Unread"
+msgstr ""
+
+#: templates/Analysis/path_analysis.html:525 templates/Search/search.html:66
+#: templates/email_words/email_words.html:142
+msgid "N/A"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:3
+#: templates/ImportExport/import_export.html:21
+msgid "Import/Export"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:23
+msgid "Batch file import, database backup, and settings management"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:32
+msgid "Batch File Import"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:36
+msgid "Import Method"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:38
+msgid "File Paths List"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:39
+#: templates/ImportExport/import_export.html:55
+msgid "CSV File"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:46
+msgid "File Paths (one per line)"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:57
+msgid "CSV should have a file_path column"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:63
+msgid "Source ID"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:67
+msgid "Side ID"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:73
+msgid "Import Files"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:92
+msgid "Database Backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:97
+msgid "Export Backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:100
+msgid "Import Backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:108
+msgid "Include data in backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:126
+msgid "Export Settings"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:129
+msgid "Import Settings"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:157
+msgid "Please enter Source ID and Side ID"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:173
+msgid "Please enter at least one file path"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:192
+msgid "Please select a CSV file"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:214
+msgid "Import Complete"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:215
+#: templates/Notifications/notifications.html:53
+#: templates/Notifications/notifications.html:140
+#: templates/Notifications/notifications.html:227
+msgid "Total"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:216
+msgid "Successful"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:217
+msgid "Failed"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:221
+msgid "Import failed"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:249
+msgid "Error exporting backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:277
+msgid "Backup Valid"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:278
+msgid "Tables"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:284
+msgid "Invalid backup"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:308
+msgid "Error exporting settings"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:336
+msgid "Settings Valid"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:337
+msgid "Note: Use Settings page to apply imported settings"
+msgstr ""
+
+#: templates/ImportExport/import_export.html:341
+msgid "Invalid settings file"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:3
+#: templates/Keyword/keyword_detail.html:9
+msgid "Keyword Details"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:13
+msgid "Back to Keywords"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:20
+msgid "Keyword Information"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:24
+msgid "Keyword ID"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:30
+#: templates/Keyword/keywords_list.html:210 templates/Word/Word_detail.html:50
+#: templates/Word/Word_list.html:184 templates/email_words/email_words.html:111
+msgid "Usage Count"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:46
+msgid "Keyword Text"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:51
+msgid "Last Used"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:59
+#: templates/Keyword/keywords_list.html:313 templates/Side/side_detail.html:71
+#: templates/Sources/source_detail.html:157 templates/Word/Word_detail.html:84
+#: templates/Word/Word_list.html:278 templates/email_words/email_words.html:114
+#: templates/file/files_list.html:244
+msgid "Actions"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:62
+msgid "Edit Keyword"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:65
+#: templates/Keyword/keywords_list.html:411
+msgid "Delete Keyword"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:77
+msgid "Are you sure you want to delete this keyword?"
+msgstr ""
+
+#: templates/Keyword/keyword_detail.html:78
+#: templates/Keyword/keywords_list.html:423
+msgid "Keyword deleted successfully!"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:3
+msgid "Keywords Management"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:118
+#: templates/file/File_Management_Analysis_System.html:753
+msgid "Update keyword associations for all files"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:119
+#: templates/file/File_Management_Analysis_System.html:752
+msgid "Update Keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:131
+msgid "Total Keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:142
+#: templates/Keyword/keywords_list.html:189
+#: templates/Keyword/keywords_list.html:420 templates/Word/Word_detail.html:63
+#: templates/Word/Word_list.html:126 templates/Word/Word_list.html:173
+#: templates/Word/Word_list.html:327
+msgid "Active"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:153
+msgid "Duplicates"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:168
+msgid "Search Keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:174
+#: templates/Keyword/keywords_list.html:335
+#: templates/file/File_Management_Analysis_System.html:388
+msgid "Search keywords..."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:176 templates/Word/Word_list.html:160
+#: templates/file/files_list.html:79
+msgid "Clear search"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:188 templates/Word/Word_list.html:172
+#: templates/file/files_list.html:138
+msgid "All Status"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:190
+#: templates/Keyword/keywords_list.html:421 templates/Word/Word_detail.html:67
+#: templates/Word/Word_list.html:137 templates/Word/Word_list.html:174
+#: templates/Word/Word_list.html:328
+msgid "Unused"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:207
+#: templates/Search/search_enhanced.html:112 templates/Word/Word_list.html:181
+#: templates/file/File_Management_Analysis_System.html:113
+#: templates/file/File_Management_Analysis_System.html:114
+#: templates/file/files_list.html:147
+msgid "Sort By"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:212 templates/Word/Word_list.html:186
+#: templates/file/full_content.html:13
+msgid "ID"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:213 templates/file/file_detail.html:464
+msgid "Date Created"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:220 templates/Word/Word_list.html:193
+msgid "Order"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:223
+#: templates/Search/search_enhanced.html:121
+#: templates/Settings/settings.html:344 templates/Word/Word_list.html:196
+msgid "Descending"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:224
+#: templates/Search/search_enhanced.html:122
+#: templates/Settings/settings.html:345 templates/Word/Word_list.html:197
+msgid "Ascending"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:232 templates/Word/Word_list.html:205
+#: templates/file/files_list.html:163
+msgid "Selection:"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:243 templates/Word/Word_list.html:216
+#: templates/file/files_list.html:174
+msgid "Bulk Actions:"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:246 templates/Word/Word_list.html:219
+msgid "Edit Selected"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:250 templates/Word/Word_list.html:223
+msgid "Delete Selected"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:254
+msgid "Actions:"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:255
+msgid "Merge all duplicate keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:257
+msgid "Merge Duplicates"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:269 templates/Word/Word_list.html:235
+#: templates/file/files_list.html:214
+msgid "Per Page:"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:271 templates/Word/Word_list.html:237
+msgid "10"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:272 templates/Word/Word_list.html:238
+msgid "25"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:273 templates/Word/Word_list.html:239
+msgid "50"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:274 templates/Word/Word_list.html:240
+msgid "100"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:291
+msgid "Sort by text"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:298 templates/Word/Word_list.html:264
+msgid "Usage"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:299 templates/Word/Word_list.html:265
+msgid "Sort by usage"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:307 templates/Word/Word_list.html:273
+msgid "Sort by status"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:329
+#: templates/Keyword/keywords_list.html:364
+#: templates/file/File_Management_Analysis_System.html:382
+#: templates/file/File_Management_Analysis_System.html:417
+#: templates/file/File_Management_Analysis_System.html:628
+msgid "Add Keyword"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:339
+#: templates/file/File_Management_Analysis_System.html:392
+#: templates/file/File_Management_Analysis_System.html:694
+msgid "Words (from Words table)"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:341
+#: templates/file/File_Management_Analysis_System.html:394
+#: templates/file/File_Management_Analysis_System.html:748
+msgid "Type to search and select words..."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:344
+#: templates/file/File_Management_Analysis_System.html:397
+msgid ""
+"Type at least 2 characters to search for words from the words table. You "
+"must select at least 2 words to create a keyword phrase."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:348
+#: templates/file/File_Management_Analysis_System.html:401
+#: templates/file/File_Management_Analysis_System.html:695
+msgid "Category (from Categories table)"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:350
+#: templates/file/File_Management_Analysis_System.html:403
+#: templates/file/File_Management_Analysis_System.html:480
+#: templates/file/File_Management_Analysis_System.html:749
+msgid "Type to search for a category..."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:353
+#: templates/file/File_Management_Analysis_System.html:406
+msgid "Type to search for categories from the categories table."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:409
+msgid "Edit inline"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:410 templates/Side/sides_list.html:88
+#: templates/Sources/sources_list.html:126 templates/Word/Word_list.html:486
+#: templates/file/File_Management_Analysis_System.html:671
+#: templates/file/files_list.html:308
+msgid "View Details"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:412
+msgid "Merge duplicates"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:414
+msgid "Check browser console for details"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:415
+msgid "Failed to load keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:416
+msgid "Check browser console and server logs for details"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:417
+msgid "No keywords found matching"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:418
+msgid "No keywords yet — add your first keyword."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:419
+msgid "Duplicate"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:422
+msgid "Delete keyword #"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:424 templates/Word/Word_list.html:331
+msgid "Failed to delete"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:426
+msgid "Merge all duplicates of"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:427
+msgid "Successfully merged"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:428
+msgid "duplicate keywords for"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:429
+msgid "Total usage"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:430
+#: templates/Keyword/keywords_list.html:455
+msgid "Error merging duplicates"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:432
+msgid "Try a different search term."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:433
+msgid "add your first keyword"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:437
+#: templates/Notifications/notifications.html:645
+#: templates/Word/Word_list.html:333 templates/email_words/email_words.html:166
+#: templates/file/File_Management_Analysis_System.html:652
+msgid "Showing"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:438 templates/Side/sides_list.html:26
+#: templates/Sources/sources_list.html:26 templates/Word/Word_list.html:334
+#: templates/email_words/email_words.html:166
+#: templates/file/file_detail.html:196 templates/file/files_list.html:390
+msgid "Page"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:439
+#: templates/Notifications/notifications.html:647
+#: templates/Word/Word_list.html:335 templates/email_words/email_words.html:166
+#: templates/file/File_Management_Analysis_System.html:653
+#: templates/file/file_detail.html:196 templates/file/files_list.html:208
+#: templates/file/files_list.html:390 templates/file/full_content.html:49
+msgid "of"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:440
+msgid "Error updating keyword"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:441
+msgid "Error deleting keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:442
+msgid "Error updating keywords"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:443
+msgid "Delete selected keywords?"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:444 templates/Word/Word_list.html:340
+msgid "Successfully deleted"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:446 templates/Word/Word_list.html:341
+msgid "Successfully updated"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:448
+msgid "Merge ALL duplicate keywords in the database?"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:449
+msgid ""
+"This will:\n"
+"- Find all keywords with the same text\n"
+"- Keep the first occurrence (lowest ID)\n"
+"- Transfer all usage statistics to the first\n"
+"- Delete duplicates\n"
+"\n"
+"This may take a few moments..."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:450
+msgid "Merging..."
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:451
+msgid "Successfully merged all duplicates!"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:452
+msgid "Merged"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:453
+msgid "Duplicate sets"
+msgstr ""
+
+#: templates/Keyword/keywords_list.html:454
+msgid "Refreshing page..."
+msgstr ""
+
+#: templates/Notifications/notifications.html:18
+msgid "System alerts and notifications"
+msgstr ""
+
+#: templates/Notifications/notifications.html:23
+msgid "Mark All Read"
+msgstr ""
+
+#: templates/Notifications/notifications.html:36
+#: templates/Notifications/notifications.html:108
+#: templates/Notifications/notifications.html:195
+#: templates/Notifications/notifications.html:282
+msgid "All Notifications"
+msgstr ""
+
+#: templates/Notifications/notifications.html:40
+msgid "Duplicate Files"
+msgstr ""
+
+#: templates/Notifications/notifications.html:44
+msgid "Future Files"
+msgstr ""
+
+#: templates/Notifications/notifications.html:67
+msgid "Search notifications..."
+msgstr ""
+
+#: templates/Notifications/notifications.html:71
+#: templates/Notifications/notifications.html:158
+#: templates/Notifications/notifications.html:245
+msgid "Sort by"
+msgstr ""
+
+#: templates/Notifications/notifications.html:73
+#: templates/Notifications/notifications.html:160
+#: templates/Notifications/notifications.html:247
+#: templates/file/files_list.html:150
+msgid "Newest First"
+msgstr ""
+
+#: templates/Notifications/notifications.html:74
+#: templates/Notifications/notifications.html:161
+#: templates/Notifications/notifications.html:248
+#: templates/file/files_list.html:151
+msgid "Oldest First"
+msgstr ""
+
+#: templates/Notifications/notifications.html:75
+#: templates/Notifications/notifications.html:162
+#: templates/Notifications/notifications.html:249
+msgid "Priority: High to Low"
+msgstr ""
+
+#: templates/Notifications/notifications.html:76
+#: templates/Notifications/notifications.html:163
+#: templates/Notifications/notifications.html:250
+msgid "Priority: Low to High"
+msgstr ""
+
+#: templates/Notifications/notifications.html:77
+#: templates/Notifications/notifications.html:164
+#: templates/Notifications/notifications.html:251
+msgid "Title: A-Z"
+msgstr ""
+
+#: templates/Notifications/notifications.html:78
+#: templates/Notifications/notifications.html:165
+#: templates/Notifications/notifications.html:252
+msgid "Title: Z-A"
+msgstr ""
+
+#: templates/Notifications/notifications.html:86
+#: templates/Notifications/notifications.html:95
+#: templates/Notifications/notifications.html:173
+#: templates/Notifications/notifications.html:182
+#: templates/Notifications/notifications.html:260
+#: templates/Notifications/notifications.html:269
+msgid "All"
+msgstr ""
+
+#: templates/Notifications/notifications.html:93
+#: templates/Notifications/notifications.html:180
+#: templates/Notifications/notifications.html:267
+msgid "Destination"
+msgstr ""
+
+#: templates/Notifications/notifications.html:154
+msgid "Search duplicate files..."
+msgstr ""
+
+#: templates/Notifications/notifications.html:241
+msgid "Search future files..."
+msgstr ""
+
+#: templates/Notifications/notifications.html:314
+msgid "Notification Details"
+msgstr ""
+
+#: templates/Notifications/notifications.html:325
+#: templates/Notifications/notifications.html:559
+msgid "Mark as Read"
+msgstr ""
+
+#: templates/Notifications/notifications.html:329
+#: templates/Notifications/notifications.html:560
+msgid "Dismiss"
+msgstr ""
+
+#: templates/Notifications/notifications.html:571
+msgid "No Notifications"
+msgstr ""
+
+#: templates/Notifications/notifications.html:572
+msgid "No notifications found matching your criteria."
+msgstr ""
+
+#: templates/Notifications/notifications.html:646
+msgid "to"
+msgstr ""
+
+#: templates/Notifications/notifications.html:648
+msgid "notifications"
+msgstr ""
+
+#: templates/Notifications/notifications.html:794
+msgid "Just now"
+msgstr ""
+
+#: templates/Notifications/notifications.html:795
+msgid "m ago"
+msgstr ""
+
+#: templates/Notifications/notifications.html:796
+msgid "h ago"
+msgstr ""
+
+#: templates/Notifications/notifications.html:797
+msgid "d ago"
+msgstr ""
+
+#: templates/Notifications/notifications.html:834
+msgid "Mark all notifications as read?"
+msgstr ""
+
+#: templates/Notifications/notifications.html:861
+msgid "Dismiss this notification?"
+msgstr ""
+
+#: templates/Notifications/notifications.html:938
+msgid "Message"
+msgstr ""
+
+#: templates/Notifications/notifications.html:941
+#: templates/Side/side_detail.html:63 templates/Side/sides_list.html:80
+#: templates/Sources/source_detail.html:123
+msgid "Created"
+msgstr ""
+
+#: templates/Notifications/notifications.html:942
+msgid "Event Date"
+msgstr ""
+
+#: templates/Notifications/notifications.html:946
+msgid "File Path"
+msgstr ""
+
+#: templates/Notifications/notifications.html:947
+msgid "Additional Information"
+msgstr ""
+
+#: templates/Search/saved_searches.html:4
+#: templates/Search/saved_searches.html:10
+#: templates/Search/search_enhanced.html:200
+msgid "Saved Searches"
+msgstr ""
+
+#: templates/Search/saved_searches.html:14
+msgid "New Search"
+msgstr ""
+
+#: templates/Search/saved_searches.html:25
+msgid "Search saved searches..."
+msgstr ""
+
+#: templates/Search/saved_searches.html:41
+#: templates/Search/saved_searches.html:89
+msgid "Alert"
+msgstr ""
+
+#: templates/Search/saved_searches.html:49
+msgid "Last Run:"
+msgstr ""
+
+#: templates/Search/saved_searches.html:53
+msgid "Results:"
+msgstr ""
+
+#: templates/Search/saved_searches.html:53
+msgid "documents"
+msgstr ""
+
+#: templates/Search/saved_searches.html:82
+msgid "Run"
+msgstr ""
+
+#: templates/Search/saved_searches.html:102
+msgid "No Saved Searches"
+msgstr ""
+
+#: templates/Search/saved_searches.html:103
+msgid "Create your first saved search to quickly access common queries"
+msgstr ""
+
+#: templates/Search/saved_searches.html:106
+msgid "Create Saved Search"
+msgstr ""
+
+#: templates/Search/saved_searches.html:120
+msgid "Configure Alert"
+msgstr ""
+
+#: templates/Search/saved_searches.html:129
+msgid "Alert Frequency"
+msgstr ""
+
+#: templates/Search/saved_searches.html:131
+msgid "Real-time (when new matches found)"
+msgstr ""
+
+#: templates/Search/saved_searches.html:132
+msgid "Hourly"
+msgstr ""
+
+#: templates/Search/saved_searches.html:133
+msgid "Daily"
+msgstr ""
+
+#: templates/Search/saved_searches.html:134
+msgid "Weekly"
+msgstr ""
+
+#: templates/Search/saved_searches.html:135
+msgid "Monthly"
+msgstr ""
+
+#: templates/Search/saved_searches.html:140
+msgid "Notification Method"
+msgstr ""
+
+#: templates/Search/saved_searches.html:144
+msgid "Email Notification"
+msgstr ""
+
+#: templates/Search/saved_searches.html:150
+msgid "In-App Notification"
+msgstr ""
+
+#: templates/Search/saved_searches.html:156
+msgid "Minimum New Documents"
+msgstr ""
+
+#: templates/Search/saved_searches.html:159
+msgid "Only send alert if at least this many new documents match"
+msgstr ""
+
+#: templates/Search/saved_searches.html:165
+msgid "Alert Active"
+msgstr ""
+
+#: templates/Search/saved_searches.html:174
+msgid "Save Alert"
+msgstr ""
+
+#: templates/Search/saved_searches.html:198
+msgid "Error running search"
+msgstr ""
+
+#: templates/Search/saved_searches.html:199
+msgid "Alert configuration saved!"
+msgstr ""
+
+#: templates/Search/saved_searches.html:201
+msgid "Are you sure you want to delete this saved search?"
+msgstr ""
+
+#: templates/Search/saved_searches.html:202
+msgid "Search deleted successfully"
+msgstr ""
+
+#: templates/Search/search.html:13 templates/file/files_list.html:70
+msgid "Search Files"
+msgstr ""
+
+#: templates/Search/search.html:24 templates/Search/search_advanced.html:4
+#: templates/Search/search_advanced.html:10
+#: templates/Search/search_advanced.html:29
+#: templates/Search/search_enhanced.html:66
+#: templates/Settings/settings.html:920
+msgid "Advanced Search"
+msgstr ""
+
+#: templates/Search/search.html:27 templates/Search/search_advanced.html:32
+#: templates/Search/search_enhanced.html:3
+#: templates/Search/search_enhanced.html:54
+#: templates/Search/search_enhanced.html:69
+msgid "Enhanced Search"
+msgstr ""
+
+#: templates/Search/search.html:37
+#: templates/file/File_Management_Analysis_System.html:642
+msgid "Search files..."
+msgstr ""
+
+#: templates/Search/search.html:51 templates/Search/search_advanced.html:202
+msgid "found"
+msgstr ""
+
+#: templates/Search/search.html:65 templates/file/file_detail.html:267
+msgid "Source:"
+msgstr ""
+
+#: templates/Search/search.html:65 templates/file/file_detail.html:268
+msgid "Side:"
+msgstr ""
+
+#: templates/Search/search.html:66
+msgid "Date:"
+msgstr ""
+
+#: templates/Search/search.html:76
+msgid "Search pagination"
+msgstr ""
+
+#: templates/Search/search.html:105
+msgid "No results found for"
+msgstr ""
+
+#: templates/Search/search_advanced.html:41
+msgid "Search Criteria"
+msgstr ""
+
+#: templates/Search/search_advanced.html:51
+#: templates/Settings/settings.html:964
+msgid "Search in Content"
+msgstr ""
+
+#: templates/Search/search_advanced.html:55
+msgid "Keywords..."
+msgstr ""
+
+#: templates/Search/search_advanced.html:65
+msgid "Case"
+msgstr ""
+
+#: templates/Search/search_advanced.html:71
+msgid "Whole word"
+msgstr ""
+
+#: templates/Search/search_advanced.html:84
+msgid "File name..."
+msgstr ""
+
+#: templates/Search/search_advanced.html:97
+msgid "Ctrl/Cmd"
+msgstr ""
+
+#: templates/Search/search_advanced.html:127
+#: templates/file/File_Management_Analysis_System.html:71
+msgid "Date Range"
+msgstr ""
+
+#: templates/Search/search_advanced.html:130
+msgid "From"
+msgstr ""
+
+#: templates/Search/search_advanced.html:134
+msgid "To"
+msgstr ""
+
+#: templates/Search/search_advanced.html:150
+msgid "PDF"
+msgstr ""
+
+#: templates/Search/search_advanced.html:151
+msgid "Word Document"
+msgstr ""
+
+#: templates/Search/search_advanced.html:154
+msgid "HTML"
+msgstr ""
+
+#: templates/Search/search_advanced.html:167 templates/file/files_list.html:39
+#: templates/file/files_list.html:139
+msgid "Analyzed"
+msgstr ""
+
+#: templates/Search/search_advanced.html:171 templates/file/files_list.html:48
+#: templates/file/files_list.html:140
+msgid "Pending"
+msgstr ""
+
+#: templates/Search/search_advanced.html:193
+msgid "Scanning:"
+msgstr ""
+
+#: templates/Search/search_advanced.html:202
+msgid "Results"
+msgstr ""
+
+#: templates/Search/search_advanced.html:206
+msgid "Sort: Relevance"
+msgstr ""
+
+#: templates/Search/search_advanced.html:207
+msgid "Date (Newest)"
+msgstr ""
+
+#: templates/Search/search_advanced.html:208
+msgid "Date (Oldest)"
+msgstr ""
+
+#: templates/Search/search_advanced.html:209
+#: templates/file/File_Management_Analysis_System.html:117
+#: templates/file/files_list.html:152
+msgid "Name (A-Z)"
+msgstr ""
+
+#: templates/Search/search_advanced.html:210
+msgid "Size (Largest)"
+msgstr ""
+
+#: templates/Search/search_advanced.html:458
+msgid "No results found matching your criteria"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:56
+msgid "Full-text search with advanced filters, sorting, and export"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:82
+msgid "Search Query"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:87
+msgid "Enter search terms..."
+msgstr ""
+
+#: templates/Search/search_enhanced.html:97
+msgid "Search All Data"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:99
+msgid "Search files, categories, keywords, sources, sides, words, and titles"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:114
+msgid "Relevance"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:115 templates/file/files_list.html:243
+msgid "Date"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:116
+msgid "Name"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:164
+msgid "Date From"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:169
+msgid "Date To"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:187
+msgid "Recent Searches"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:218
+msgid "Enter a search query to get started"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:231
+msgid "File Preview"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:252
+msgid "Clear all search history?"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:263
+msgid "No search history"
+msgstr ""
+
+#: templates/Search/search_enhanced.html:267
+msgid "Error clearing history"
+msgstr ""
+
+#: templates/Settings/settings.html:18
+msgid "Configure and customize your system preferences"
+msgstr ""
+
+#: templates/Settings/settings.html:22
+msgid "Back to Dashboard"
+msgstr ""
+
+#: templates/Settings/settings.html:31
+msgid "General"
+msgstr ""
+
+#: templates/Settings/settings.html:37
+msgid "Display"
+msgstr ""
+
+#: templates/Settings/settings.html:43
+msgid "Themes"
+msgstr ""
+
+#: templates/Settings/settings.html:61
+msgid "Interfaces"
+msgstr ""
+
+#: templates/Settings/settings.html:73
+msgid "System"
+msgstr ""
+
+#: templates/Settings/settings.html:85
+msgid "User Preferences"
+msgstr ""
+
+#: templates/Settings/settings.html:98
+msgid "Select your preferred language for the interface"
+msgstr ""
+
+#: templates/Settings/settings.html:104
+msgid "Timezone"
+msgstr ""
+
+#: templates/Settings/settings.html:114
+msgid "Set your timezone for date and time display"
+msgstr ""
+
+#: templates/Settings/settings.html:120
+msgid "Date Format"
+msgstr ""
+
+#: templates/Settings/settings.html:129
+msgid "Choose how dates are displayed throughout the system"
+msgstr ""
+
+#: templates/Settings/settings.html:135
+msgid "Time Format"
+msgstr ""
+
+#: templates/Settings/settings.html:143
+msgid "Select 12-hour or 24-hour time format"
+msgstr ""
+
+#: templates/Settings/settings.html:151
+msgid "Behavior & Actions"
+msgstr ""
+
+#: templates/Settings/settings.html:158
+msgid "Auto Save"
+msgstr ""
+
+#: templates/Settings/settings.html:161
+msgid "Automatically save changes without confirmation dialogs"
+msgstr ""
+
+#: templates/Settings/settings.html:176
+msgid "Confirm Actions"
+msgstr ""
+
+#: templates/Settings/settings.html:179
+msgid "Show confirmation dialogs for important or destructive actions"
+msgstr ""
+
+#: templates/Settings/settings.html:197
+msgid "Visual Preferences"
+msgstr ""
+
+#: templates/Settings/settings.html:204
+msgid "Animations"
+msgstr ""
+
+#: templates/Settings/settings.html:207
+msgid "Enable smooth animations and transitions throughout the interface"
+msgstr ""
+
+#: templates/Settings/settings.html:222
+msgid "Breadcrumbs"
+msgstr ""
+
+#: templates/Settings/settings.html:225
+msgid "Show breadcrumb navigation at the top of pages"
+msgstr ""
+
+#: templates/Settings/settings.html:240
+msgid "Compact Mode"
+msgstr ""
+
+#: templates/Settings/settings.html:243
+msgid "Use compact layout with reduced spacing for more content on screen"
+msgstr ""
+
+#: templates/Settings/settings.html:258
+msgid "Compact View"
+msgstr ""
+
+#: templates/Settings/settings.html:261
+msgid "Use compact view for file lists and tables"
+msgstr ""
+
+#: templates/Settings/settings.html:274
+msgid "Theme"
+msgstr ""
+
+#: templates/Settings/settings.html:277
+msgid "Select the application theme"
+msgstr ""
+
+#: templates/Settings/settings.html:281
+msgid "Light"
+msgstr ""
+
+#: templates/Settings/settings.html:282 templates/file/full_content.html:25
+msgid "Dark"
+msgstr ""
+
+#: templates/Settings/settings.html:283
+msgid "Auto"
+msgstr ""
+
+#: templates/Settings/settings.html:283
+msgid "System Preference"
+msgstr ""
+
+#: templates/Settings/settings.html:289
+msgid "Items Per Page"
+msgstr ""
+
+#: templates/Settings/settings.html:292
+msgid "Number of items to display per page in lists and tables (System-wide)"
+msgstr ""
+
+#: templates/Settings/settings.html:305
+msgid "Display Results Per Page"
+msgstr ""
+
+#: templates/Settings/settings.html:308
+msgid "Number of results per page for search and file lists (Display-specific)"
+msgstr ""
+
+#: templates/Settings/settings.html:321
+msgid "Default Sort"
+msgstr ""
+
+#: templates/Settings/settings.html:324
+msgid "Default sorting method for file lists"
+msgstr ""
+
+#: templates/Settings/settings.html:328
+msgid "Creation Date"
+msgstr ""
+
+#: templates/Settings/settings.html:330
+msgid "File Size"
+msgstr ""
+
+#: templates/Settings/settings.html:337
+msgid "Sort Direction"
+msgstr ""
+
+#: templates/Settings/settings.html:340
+msgid "Default sort order (ascending or descending)"
+msgstr ""
+
+#: templates/Settings/settings.html:344
+msgid "Newest first"
+msgstr ""
+
+#: templates/Settings/settings.html:345
+msgid "Oldest first"
+msgstr ""
+
+#: templates/Settings/settings.html:356
+msgid "Page Colors & Theme Customization"
+msgstr ""
+
+#: templates/Settings/settings.html:361
+msgid ""
+"Customize all page colors, buttons, sections, and formatting. Changes are"
+" applied immediately and saved automatically."
+msgstr ""
+
+#: templates/Settings/settings.html:367
+msgid "Primary Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:371
+msgid "Primary Color"
+msgstr ""
+
+#: templates/Settings/settings.html:384 templates/Settings/settings.html:406
+#: templates/Settings/settings.html:433 templates/Settings/settings.html:455
+#: templates/Settings/settings.html:477 templates/Settings/settings.html:506
+#: templates/Settings/settings.html:528 templates/Settings/settings.html:555
+#: templates/Settings/settings.html:592 templates/Settings/settings.html:615
+msgid "Reset to default"
+msgstr ""
+
+#: templates/Settings/settings.html:388
+msgid "Main brand color for buttons, links, and highlights"
+msgstr ""
+
+#: templates/Settings/settings.html:393
+msgid "Secondary Color"
+msgstr ""
+
+#: templates/Settings/settings.html:410
+msgid "Secondary accent color for gradients and highlights"
+msgstr ""
+
+#: templates/Settings/settings.html:416
+msgid "Status Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:420
+msgid "Success Color"
+msgstr ""
+
+#: templates/Settings/settings.html:437
+msgid "Color for success messages and positive actions"
+msgstr ""
+
+#: templates/Settings/settings.html:442
+msgid "Danger Color"
+msgstr ""
+
+#: templates/Settings/settings.html:459
+msgid "Color for errors, warnings, and destructive actions"
+msgstr ""
+
+#: templates/Settings/settings.html:464
+msgid "Warning Color"
+msgstr ""
+
+#: templates/Settings/settings.html:481
+msgid "Color for warning messages and alerts"
+msgstr ""
+
+#: templates/Settings/settings.html:489
+msgid "Background & Text"
+msgstr ""
+
+#: templates/Settings/settings.html:493
+msgid "Background Color"
+msgstr ""
+
+#: templates/Settings/settings.html:510
+msgid "Main page background color"
+msgstr ""
+
+#: templates/Settings/settings.html:515
+msgid "Text Color"
+msgstr ""
+
+#: templates/Settings/settings.html:532
+msgid "Main text color for content"
+msgstr ""
+
+#: templates/Settings/settings.html:538
+msgid "Borders & UI Elements"
+msgstr ""
+
+#: templates/Settings/settings.html:542
+msgid "Border Color"
+msgstr ""
+
+#: templates/Settings/settings.html:559
+msgid "Color for borders, dividers, and separators"
+msgstr ""
+
+#: templates/Settings/settings.html:568
+msgid "Gradient Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:572
+msgid ""
+"Configure gradient backgrounds that can be applied to sections, cards, "
+"and other elements."
+msgstr ""
+
+#: templates/Settings/settings.html:579
+msgid "Gradient Start Color"
+msgstr ""
+
+#: templates/Settings/settings.html:602
+msgid "Gradient End Color"
+msgstr ""
+
+#: templates/Settings/settings.html:625
+msgid "Gradient Direction"
+msgstr ""
+
+#: templates/Settings/settings.html:640
+msgid "Gradient Preview"
+msgstr ""
+
+#: templates/Settings/settings.html:649
+msgid "Sidebar Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:655
+msgid "Sidebar Background"
+msgstr ""
+
+#: templates/Settings/settings.html:673
+msgid "Sidebar Text"
+msgstr ""
+
+#: templates/Settings/settings.html:692
+msgid "Sidebar Active"
+msgstr ""
+
+#: templates/Settings/settings.html:710
+msgid "Sidebar Hover"
+msgstr ""
+
+#: templates/Settings/settings.html:732
+msgid "Button Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:738
+msgid "Primary Button"
+msgstr ""
+
+#: templates/Settings/settings.html:756
+msgid "Primary Button Hover"
+msgstr ""
+
+#: templates/Settings/settings.html:775
+msgid "Secondary Button"
+msgstr ""
+
+#: templates/Settings/settings.html:793
+msgid "Secondary Button Hover"
+msgstr ""
+
+#: templates/Settings/settings.html:815
+msgid "Chart Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:817
+msgid ""
+"Customize the color palette used in charts and graphs throughout the "
+"application."
+msgstr ""
+
+#: templates/Settings/settings.html:823
+msgid "Chart Color"
+msgstr ""
+
+#: templates/Settings/settings.html:845
+msgid "Save All Colors"
+msgstr ""
+
+#: templates/Settings/settings.html:849
+msgid "Reset All to Defaults"
+msgstr ""
+
+#: templates/Settings/settings.html:853
+msgid "Preview Changes"
+msgstr ""
+
+#: templates/Settings/settings.html:868
+msgid "Show File Preview"
+msgstr ""
+
+#: templates/Settings/settings.html:871
+msgid "Display file previews in file lists"
+msgstr ""
+
+#: templates/Settings/settings.html:886
+msgid "Show Metadata"
+msgstr ""
+
+#: templates/Settings/settings.html:889
+msgid "Display file metadata in file lists"
+msgstr ""
+
+#: templates/Settings/settings.html:907
+msgid "Search Preferences"
+msgstr ""
+
+#: templates/Settings/settings.html:912
+msgid "Default Search Type"
+msgstr ""
+
+#: templates/Settings/settings.html:915
+msgid "Default search interface to use"
+msgstr ""
+
+#: templates/Settings/settings.html:919
+msgid "Basic Search"
+msgstr ""
+
+#: templates/Settings/settings.html:928
+msgid "Case Sensitive Search"
+msgstr ""
+
+#: templates/Settings/settings.html:931
+msgid "Make search queries case-sensitive by default"
+msgstr ""
+
+#: templates/Settings/settings.html:946
+msgid "Highlight Results"
+msgstr ""
+
+#: templates/Settings/settings.html:949
+msgid "Highlight matching terms in search results"
+msgstr ""
+
+#: templates/Settings/settings.html:967
+msgid "Include file content in search by default"
+msgstr ""
+
+#: templates/Settings/settings.html:982
+msgid "Search in Filename"
+msgstr ""
+
+#: templates/Settings/settings.html:985
+msgid "Include file names in search by default"
+msgstr ""
+
+#: templates/Settings/settings.html:1000
+msgid "Search in Metadata"
+msgstr ""
+
+#: templates/Settings/settings.html:1003
+msgid "Include file metadata in search by default"
+msgstr ""
+
+#: templates/Settings/settings.html:1016
+msgid "Maximum Results"
+msgstr ""
+
+#: templates/Settings/settings.html:1019
+msgid "Maximum number of search results to return"
+msgstr ""
+
+#: templates/Settings/settings.html:1034
+msgid "File Processing"
+msgstr ""
+
+#: templates/Settings/settings.html:1041
+msgid "Auto Process Uploads"
+msgstr ""
+
+#: templates/Settings/settings.html:1044
+msgid "Automatically process files immediately after upload"
+msgstr ""
+
+#: templates/Settings/settings.html:1059
+msgid "Extract Archives"
+msgstr ""
+
+#: templates/Settings/settings.html:1062
+msgid "Automatically extract files from archives (ZIP, RAR, etc.)"
+msgstr ""
+
+#: templates/Settings/settings.html:1077
+msgid "Extract Email Attachments"
+msgstr ""
+
+#: templates/Settings/settings.html:1080
+msgid "Automatically extract attachments from email files"
+msgstr ""
+
+#: templates/Settings/settings.html:1095
+msgid "Process Nested Files"
+msgstr ""
+
+#: templates/Settings/settings.html:1098
+msgid "Process files found inside extracted archives and attachments"
+msgstr ""
+
+#: templates/Settings/settings.html:1113
+msgid "Calculate File Hashes"
+msgstr ""
+
+#: templates/Settings/settings.html:1116
+msgid "Calculate and store file hash values (MD5, SHA256) for duplicate detection"
+msgstr ""
+
+#: templates/Settings/settings.html:1131
+msgid "Extract Text"
+msgstr ""
+
+#: templates/Settings/settings.html:1134
+msgid "Extract text content from documents for search and analysis"
+msgstr ""
+
+#: templates/Settings/settings.html:1149
+msgid "Extract Metadata"
+msgstr ""
+
+#: templates/Settings/settings.html:1152
+msgid "Extract file metadata (author, creation date, etc.) from documents"
+msgstr ""
+
+#: templates/Settings/settings.html:1170
+msgid "Interface Visibility"
+msgstr ""
+
+#: templates/Settings/settings.html:1175
+msgid ""
+"Enable or disable interfaces to customize your navigation menu. All "
+"interfaces remain visible but disabled ones are marked."
+msgstr ""
+
+#: templates/Settings/settings.html:1205
+msgid "This interface cannot be disabled"
+msgstr ""
+
+#: templates/Settings/settings.html:1227
+msgid "Reset to Defaults"
+msgstr ""
+
+#: templates/Settings/settings.html:1231 templates/file/file_detail.html:475
+msgid "Save Changes"
+msgstr ""
+
+#: templates/Settings/settings.html:1244
+msgid "Notification Preferences"
+msgstr ""
+
+#: templates/Settings/settings.html:1251
+msgid "Enable Notifications"
+msgstr ""
+
+#: templates/Settings/settings.html:1254
+msgid "Show system notifications and alerts"
+msgstr ""
+
+#: templates/Settings/settings.html:1269
+msgid "Email Notifications"
+msgstr ""
+
+#: templates/Settings/settings.html:1272
+msgid "Send email notifications for important events"
+msgstr ""
+
+#: templates/Settings/settings.html:1287 web_file/routes/notifications.py:122
+#: web_file/routes/notifications.py:243 web_file/routes/notifications.py:363
+#: web_file/routes/notifications_page.py:275
+msgid "Processing Complete"
+msgstr ""
+
+#: templates/Settings/settings.html:1290
+msgid "Notify when file processing is complete"
+msgstr ""
+
+#: templates/Settings/settings.html:1305
+msgid "Batch Complete"
+msgstr ""
+
+#: templates/Settings/settings.html:1308
+msgid "Notify when batch processing operations complete"
+msgstr ""
+
+#: templates/Settings/settings.html:1323
+msgid "Errors Only"
+msgstr ""
+
+#: templates/Settings/settings.html:1326
+msgid "Only show notifications for errors and warnings"
+msgstr ""
+
+#: templates/Settings/settings.html:1341
+msgid "Future Events & Alerts"
+msgstr ""
+
+#: templates/Settings/settings.html:1348
+msgid "Similar Files Notifications"
+msgstr ""
+
+#: templates/Settings/settings.html:1351
+msgid "Notify when similar files are detected"
+msgstr ""
+
+#: templates/Settings/settings.html:1366
+msgid "Future Dates Detection"
+msgstr ""
+
+#: templates/Settings/settings.html:1369
+msgid "Detect and alert on future dates found in files"
+msgstr ""
+
+#: templates/Settings/settings.html:1384
+msgid "Future Events Detection"
+msgstr ""
+
+#: templates/Settings/settings.html:1387
+msgid "Analyze verb tenses to detect future-focused content"
+msgstr ""
+
+#: templates/Settings/settings.html:1402
+msgid "Auto-Analyze Files"
+msgstr ""
+
+#: templates/Settings/settings.html:1405
+msgid "Automatically analyze files for future events during processing"
+msgstr ""
+
+#: templates/Settings/settings.html:1418
+msgid "Upcoming Events Window"
+msgstr ""
+
+#: templates/Settings/settings.html:1421
+msgid "Number of days ahead to show upcoming events"
+msgstr ""
+
+#: templates/Settings/settings.html:1436
+msgid "System Information"
+msgstr ""
+
+#: templates/Settings/settings.html:1441
+msgid "Application Version"
+msgstr ""
+
+#: templates/Settings/settings.html:1443
+msgid "Modernized"
+msgstr ""
+
+#: templates/Settings/settings.html:1446
+msgid "Database"
+msgstr ""
+
+#: templates/Settings/settings.html:1448
+msgid "Production Ready"
+msgstr ""
+
+#: templates/Settings/settings.html:1451
+msgid "Processing Engine"
+msgstr ""
+
+#: templates/Settings/settings.html:1452
+msgid "Modern"
+msgstr ""
+
+#: templates/Settings/settings.html:1453
+msgid "File Processor"
+msgstr ""
+
+#: templates/Settings/settings.html:1456
+msgid "Performance Monitoring"
+msgstr ""
+
+#: templates/Settings/settings.html:1457
+msgid "Enabled"
+msgstr ""
+
+#: templates/Settings/settings.html:1458
+msgid "Real-time"
+msgstr ""
+
+#: templates/Settings/settings.html:1466
+msgid "System Configuration"
+msgstr ""
+
+#: templates/Settings/settings.html:1471
+msgid ""
+"Configuration is managed via environment variables. Changes require "
+"application restart."
+msgstr ""
+
+#: templates/Settings/settings.html:1476
+msgid "Processing Settings"
+msgstr ""
+
+#: templates/Settings/settings.html:1478
+msgid "Max Workers"
+msgstr ""
+
+#: templates/Settings/settings.html:1483
+msgid "Chunk Size"
+msgstr ""
+
+#: templates/Settings/settings.html:1488
+msgid "Max Depth"
+msgstr ""
+
+#: templates/Settings/settings.html:1494
+msgid "Feature Flags"
+msgstr ""
+
+#: templates/Settings/settings.html:1497
+msgid "Parallel Processing"
+msgstr ""
+
+#: templates/Settings/settings.html:1501
+msgid "Archive Extraction"
+msgstr ""
+
+#: templates/Settings/settings.html:1505
+msgid "Email Attachments"
+msgstr ""
+
+#: templates/Settings/settings.html:1509
+msgid "Hash Calculation"
+msgstr ""
+
+#: templates/Settings/settings.html:1518
+msgid "Cache Management"
+msgstr ""
+
+#: templates/Settings/settings.html:1521
+msgid "Manage search result caching for improved performance."
+msgstr ""
+
+#: templates/Settings/settings.html:1526
+msgid "Clear Cache"
+msgstr ""
+
+#: templates/Settings/settings.html:1530
+msgid "View Statistics"
+msgstr ""
+
+#: templates/Settings/settings.html:1542
+msgid "API Endpoints"
+msgstr ""
+
+#: templates/Settings/settings.html:1549
+msgid "Endpoint"
+msgstr ""
+
+#: templates/Settings/settings.html:1550
+msgid "Method"
+msgstr ""
+
+#: templates/Settings/settings.html:1551
+#: templates/Sources/source_detail.html:99
+#: templates/Sources/sources_list.html:252
+#: templates/file/File_Management_Analysis_System.html:270
+#: templates/file/File_Management_Analysis_System.html:685
+msgid "Description"
+msgstr ""
+
+#: templates/Settings/settings.html:1558
+msgid "Current performance metrics"
+msgstr ""
+
+#: templates/Settings/settings.html:1563
+msgid "Performance summary report"
+msgstr ""
+
+#: templates/Settings/settings.html:1568
+msgid "Clear search cache"
+msgstr ""
+
+#: templates/Settings/settings.html:1573
+msgid "Cache statistics"
+msgstr ""
+
+#: templates/Settings/settings.html:1588
+msgid "Are you sure you want to clear the search cache?"
+msgstr ""
+
+#: templates/Settings/settings.html:1589
+msgid "Cache cleared successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:1590
+msgid "Error clearing cache"
+msgstr ""
+
+#: templates/Settings/settings.html:1592
+msgid "Interface visibility updated successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:1593
+msgid "Error updating interface visibility"
+msgstr ""
+
+#: templates/Settings/settings.html:1594
+msgid "Are you sure you want to reset all interface settings to defaults?"
+msgstr ""
+
+#: templates/Settings/settings.html:1595
+msgid "Interface settings reset successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:1596
+msgid "Error resetting interface settings"
+msgstr ""
+
+#: templates/Settings/settings.html:1597
+msgid "All changes saved successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:1599
+msgid "Please reload the page to see changes"
+msgstr ""
+
+#: templates/Settings/settings.html:1675
+msgid "Reload now?"
+msgstr ""
+
+#: templates/Settings/settings.html:1753 templates/Settings/settings.html:1757
+#: templates/Settings/settings.html:1806 templates/Settings/settings.html:1810
+msgid "Setting updated successfully and applied system-wide"
+msgstr ""
+
+#: templates/Settings/settings.html:1767
+msgid "This setting requires a page reload to take effect. Reload now?"
+msgstr ""
+
+#: templates/Settings/settings.html:1778 templates/Settings/settings.html:1819
+#: templates/Settings/settings.html:1823
+msgid "Error updating setting"
+msgstr ""
+
+#: templates/Settings/settings.html:1846
+msgid "Language changed. Reload page to apply system-wide?"
+msgstr ""
+
+#: templates/Settings/settings.html:1955
+msgid "Cache Statistics"
+msgstr ""
+
+#: templates/Settings/settings.html:1958
+msgid "entries"
+msgstr ""
+
+#: templates/Settings/settings.html:1959
+msgid "TTL"
+msgstr ""
+
+#: templates/Settings/settings.html:1959 templates/Settings/settings.html:1962
+msgid "seconds"
+msgstr ""
+
+#: templates/Settings/settings.html:1962
+msgid "Average Age"
+msgstr ""
+
+#: templates/Settings/settings.html:1963
+msgid "Hit Rate"
+msgstr ""
+
+#: templates/Settings/settings.html:1966
+msgid "Last updated"
+msgstr ""
+
+#: templates/Settings/settings.html:1975
+msgid "Error loading cache stats"
+msgstr ""
+
+#: templates/Settings/settings.html:2119
+msgid "Are you sure you want to reset all colors to defaults?"
+msgstr ""
+
+#: templates/Settings/settings.html:2156
+msgid "All colors reset to defaults"
+msgstr ""
+
+#: templates/Settings/settings.html:2208
+msgid "All colors saved successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:2212
+msgid "Theme colors saved successfully"
+msgstr ""
+
+#: templates/Settings/settings.html:2219
+msgid "Error saving colors"
+msgstr ""
+
+#: templates/Settings/settings.html:2225
+msgid ""
+"Colors are applied in real-time. Scroll to see changes throughout the "
+"page."
+msgstr ""
+
+#: templates/Side/side_detail.html:3 templates/Side/side_detail.html:9
+msgid "Side Details"
+msgstr ""
+
+#: templates/Side/side_detail.html:13
+msgid "Back to Sides"
+msgstr ""
+
+#: templates/Side/side_detail.html:20
+msgid "Side Information"
+msgstr ""
+
+#: templates/Side/side_detail.html:25 templates/Side/sides_list.html:74
+#: templates/Sources/source_detail.html:37
+#: templates/Sources/sources_list.html:80
+msgid "Documents"
+msgstr ""
+
+#: templates/Side/side_detail.html:39 templates/Sources/source_detail.html:51
+msgid "GB"
+msgstr ""
+
+#: templates/Side/side_detail.html:41 templates/Side/side_detail.html:44
+#: templates/Sources/source_detail.html:53
+#: templates/Sources/source_detail.html:56
+msgid "MB"
+msgstr ""
+
+#: templates/Side/side_detail.html:74 templates/Side/sides_list.html:91
+#: templates/Side/sides_list.html:549
+msgid "Edit Side"
+msgstr ""
+
+#: templates/Side/side_detail.html:77 templates/Side/sides_list.html:100
+msgid "Delete Side"
+msgstr ""
+
+#: templates/Side/side_detail.html:89
+msgid "Are you sure you want to delete this side?"
+msgstr ""
+
+#: templates/Side/side_detail.html:90 templates/Side/sides_list.html:501
+msgid "Side deleted successfully!"
+msgstr ""
+
+#: templates/Side/sides_list.html:6
+msgid "Sides Management"
+msgstr ""
+
+#: templates/Side/sides_list.html:29
+msgid "Search sides..."
+msgstr ""
+
+#: templates/Side/sides_list.html:94
+msgid "Duplicate Side"
+msgstr ""
+
+#: templates/Side/sides_list.html:97 templates/Sources/sources_list.html:135
+msgid "Toggle Status"
+msgstr ""
+
+#: templates/Side/sides_list.html:111
+msgid "No sides yet."
+msgstr ""
+
+#: templates/Side/sides_list.html:111
+msgid "Add your first side"
+msgstr ""
+
+#: templates/Side/sides_list.html:125 templates/Sources/sources_list.html:166
+msgid "Confirm Deletion"
+msgstr ""
+
+#: templates/Side/sides_list.html:153 templates/Side/sides_list.html:584
+msgid "Add New Side"
+msgstr ""
+
+#: templates/Side/sides_list.html:163
+msgid "e.g., Government, Opposition Party"
+msgstr ""
+
+#: templates/Side/sides_list.html:187 templates/Side/sides_list.html:585
+msgid "Create Side"
+msgstr ""
+
+#: templates/Side/sides_list.html:400
+msgid "Create a copy of this side?"
+msgstr ""
+
+#: templates/Side/sides_list.html:401
+msgid "Are you sure you want to delete this side? This action cannot be undone."
+msgstr ""
+
+#: templates/Side/sides_list.html:417
+msgid "Side duplicated successfully!"
+msgstr ""
+
+#: templates/Side/sides_list.html:422 templates/Side/sides_list.html:427
+msgid "Error duplicating side"
+msgstr ""
+
+#: templates/Side/sides_list.html:444
+msgid "Side status updated!"
+msgstr ""
+
+#: templates/Side/sides_list.html:449 templates/Sources/sources_list.html:588
+msgid "Error updating status"
+msgstr ""
+
+#: templates/Side/sides_list.html:454
+msgid "Error updating side status"
+msgstr ""
+
+#: templates/Side/sides_list.html:460
+msgid "Are you sure you want to delete the side"
+msgstr ""
+
+#: templates/Side/sides_list.html:460 templates/Sources/sources_list.html:626
+msgid "This action cannot be undone."
+msgstr ""
+
+#: templates/Side/sides_list.html:497
+msgid "Side Deleted"
+msgstr ""
+
+#: templates/Side/sides_list.html:510 templates/Sources/sources_list.html:675
+msgid "Delete Failed"
+msgstr ""
+
+#: templates/Side/sides_list.html:514 templates/Side/sides_list.html:526
+msgid "Error deleting side"
+msgstr ""
+
+#: templates/Side/sides_list.html:522 templates/Sources/sources_list.html:687
+msgid "Delete Error"
+msgstr ""
+
+#: templates/Side/sides_list.html:550
+msgid "Update Side"
+msgstr ""
+
+#: templates/Side/sides_list.html:573
+msgid "Error loading side"
+msgstr ""
+
+#: templates/Side/sides_list.html:579
+msgid "Error loading side data"
+msgstr ""
+
+#: templates/Side/sides_list.html:599
+msgid "Please fill in the side name"
+msgstr ""
+
+#: templates/Side/sides_list.html:658 templates/Side/sides_list.html:711
+msgid "Side updated successfully!"
+msgstr ""
+
+#: templates/Side/sides_list.html:658 templates/Side/sides_list.html:711
+#: templates/file/File_Management_Analysis_System.html:710
+msgid "Side created successfully!"
+msgstr ""
+
+#: templates/Side/sides_list.html:741
+msgid "Error saving side"
+msgstr ""
+
+#: templates/Sources/source_detail.html:3
+#: templates/Sources/source_detail.html:17
+#: templates/Sources/source_detail.html:25
+msgid "Source Details"
+msgstr ""
+
+#: templates/Sources/source_detail.html:32
+msgid "Source Information"
+msgstr ""
+
+#: templates/Sources/source_detail.html:78
+#: templates/Sources/sources_list.html:52
+#: templates/Sources/sources_list.html:209
+#: templates/file/File_Management_Analysis_System.html:233
+#: templates/file/File_Management_Analysis_System.html:681
+msgid "Job/Type"
+msgstr ""
+
+#: templates/Sources/source_detail.html:86
+#: templates/Sources/sources_list.html:228
+#: templates/file/File_Management_Analysis_System.html:248
+#: templates/file/File_Management_Analysis_System.html:683
+#: templates/file/File_Management_Analysis_System.html:743
+msgid "Country"
+msgstr ""
+
+#: templates/Sources/source_detail.html:92
+#: templates/Sources/sources_list.html:234
+#: templates/file/File_Management_Analysis_System.html:253
+#: templates/file/File_Management_Analysis_System.html:684
+msgid "City"
+msgstr ""
+
+#: templates/Sources/source_detail.html:105
+#: templates/Sources/sources_list.html:258
+#: templates/file/File_Management_Analysis_System.html:275
+#: templates/file/File_Management_Analysis_System.html:686
+msgid "Social Media Accounts"
+msgstr ""
+
+#: templates/Sources/source_detail.html:111
+#: templates/Sources/sources_list.html:264
+#: templates/file/File_Management_Analysis_System.html:280
+#: templates/file/File_Management_Analysis_System.html:687
+msgid "Attachments"
+msgstr ""
+
+#: templates/Sources/source_detail.html:117
+#: templates/Sources/sources_list.html:270
+#: templates/file/File_Management_Analysis_System.html:285
+#: templates/file/File_Management_Analysis_System.html:688
+#: templates/file/file_detail.html:468
+msgid "Notes"
+msgstr ""
+
+#: templates/Sources/source_detail.html:130
+#: templates/Sources/sources_list.html:87
+#: templates/Sources/sources_list.html:276
+#: templates/file/File_Management_Analysis_System.html:290
+#: templates/file/File_Management_Analysis_System.html:689
+msgid "Ownership"
+msgstr ""
+
+#: templates/Sources/source_detail.html:136
+#: templates/Sources/sources_list.html:95
+#: templates/Sources/sources_list.html:289
+#: templates/file/File_Management_Analysis_System.html:303
+#: templates/file/File_Management_Analysis_System.html:690
+msgid "Access Status"
+msgstr ""
+
+#: templates/Sources/source_detail.html:143
+#: templates/Sources/sources_list.html:302
+#: templates/file/File_Management_Analysis_System.html:316
+#: templates/file/File_Management_Analysis_System.html:691
+msgid "Date of Source Discovery"
+msgstr ""
+
+#: templates/Sources/source_detail.html:160
+#: templates/Sources/sources_list.html:129
+#: templates/Sources/sources_list.html:716
+msgid "Edit Source"
+msgstr ""
+
+#: templates/Sources/source_detail.html:163
+#: templates/Sources/sources_list.html:141
+msgid "Delete Source"
+msgstr ""
+
+#: templates/Sources/source_detail.html:175
+msgid "Are you sure you want to delete this source?"
+msgstr ""
+
+#: templates/Sources/source_detail.html:176
+#: templates/Sources/sources_list.html:666
+msgid "Source deleted successfully!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:6
+msgid "Sources Management"
+msgstr ""
+
+#: templates/Sources/sources_list.html:29
+#: templates/file/File_Management_Analysis_System.html:221
+msgid "Search sources..."
+msgstr ""
+
+#: templates/Sources/sources_list.html:58
+msgid "Location"
+msgstr ""
+
+#: templates/Sources/sources_list.html:111
+msgid "Discovery Date"
+msgstr ""
+
+#: templates/Sources/sources_list.html:132
+msgid "Duplicate Source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:138
+msgid "Export Data"
+msgstr ""
+
+#: templates/Sources/sources_list.html:152
+msgid "No sources yet."
+msgstr ""
+
+#: templates/Sources/sources_list.html:152
+msgid "Add your first source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:194
+#: templates/Sources/sources_list.html:799
+#: templates/file/File_Management_Analysis_System.html:214
+msgid "Add New Source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:205
+#: templates/file/File_Management_Analysis_System.html:229
+msgid "e.g., International News Agency"
+msgstr ""
+
+#: templates/Sources/sources_list.html:211
+#: templates/file/File_Management_Analysis_System.html:234
+msgid "e.g., International News Job"
+msgstr ""
+
+#: templates/Sources/sources_list.html:236
+#: templates/file/File_Management_Analysis_System.html:254
+msgid "e.g., Washington DC"
+msgstr ""
+
+#: templates/Sources/sources_list.html:254
+#: templates/file/File_Management_Analysis_System.html:271
+msgid "Brief description of the source..."
+msgstr ""
+
+#: templates/Sources/sources_list.html:260
+#: templates/file/File_Management_Analysis_System.html:276
+msgid "e.g., @twitter_handle, facebook.com/page"
+msgstr ""
+
+#: templates/Sources/sources_list.html:266
+#: templates/file/File_Management_Analysis_System.html:281
+msgid "e.g., document.pdf, image.jpg"
+msgstr ""
+
+#: templates/Sources/sources_list.html:272
+#: templates/file/File_Management_Analysis_System.html:286
+msgid "Additional notes..."
+msgstr ""
+
+#: templates/Sources/sources_list.html:278
+#: templates/file/File_Management_Analysis_System.html:292
+msgid "Select Ownership"
+msgstr ""
+
+#: templates/Sources/sources_list.html:291
+#: templates/file/File_Management_Analysis_System.html:305
+msgid "Select Access Status"
+msgstr ""
+
+#: templates/Sources/sources_list.html:309
+#: templates/Sources/sources_list.html:832
+#: templates/file/File_Management_Analysis_System.html:323
+msgid "Select Category"
+msgstr ""
+
+#: templates/Sources/sources_list.html:322
+#: templates/Sources/sources_list.html:800
+#: templates/file/File_Management_Analysis_System.html:339
+msgid "Create Source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:535
+msgid "Create a copy of this source?"
+msgstr ""
+
+#: templates/Sources/sources_list.html:536
+msgid "Are you sure you want to delete this source? This action cannot be undone."
+msgstr ""
+
+#: templates/Sources/sources_list.html:557
+msgid "Source duplicated successfully!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:562
+#: templates/Sources/sources_list.html:567
+msgid "Error duplicating source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:583
+msgid "Source status updated!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:593
+msgid "Error updating source status"
+msgstr ""
+
+#: templates/Sources/sources_list.html:616
+msgid "Source data exported successfully!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:620
+msgid "Error exporting source data"
+msgstr ""
+
+#: templates/Sources/sources_list.html:626
+msgid "Are you sure you want to delete the source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:662
+msgid "Source Deleted"
+msgstr ""
+
+#: templates/Sources/sources_list.html:679
+#: templates/Sources/sources_list.html:691
+msgid "Error deleting source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:717
+msgid "Update Source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:788
+msgid "Error loading source"
+msgstr ""
+
+#: templates/Sources/sources_list.html:794
+msgid "Error loading source data"
+msgstr ""
+
+#: templates/Sources/sources_list.html:854
+msgid "Please fill in all required fields (Name, Job/Type, Country)"
+msgstr ""
+
+#: templates/Sources/sources_list.html:939
+#: templates/Sources/sources_list.html:992
+msgid "Source updated successfully!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:939
+#: templates/Sources/sources_list.html:992
+#: templates/file/File_Management_Analysis_System.html:709
+msgid "Source created successfully!"
+msgstr ""
+
+#: templates/Sources/sources_list.html:1022
+msgid "Error saving source"
+msgstr ""
+
+#: templates/Word/Word_detail.html:32
+msgid "Back to Words"
+msgstr ""
+
+#: templates/Word/Word_detail.html:40
+msgid "Word Information"
+msgstr ""
+
+#: templates/Word/Word_detail.html:44
+msgid "Word ID"
+msgstr ""
+
+#: templates/Word/Word_detail.html:75
+msgid "Word Text"
+msgstr ""
+
+#: templates/Word/Word_detail.html:87 templates/Word/Word_detail.html:106
+#: templates/Word/Word_list.html:321
+msgid "Edit Word"
+msgstr ""
+
+#: templates/Word/Word_detail.html:90 templates/Word/Word_list.html:323
+msgid "Delete Word"
+msgstr ""
+
+#: templates/Word/Word_detail.html:103
+msgid "Are you sure you want to delete this word?"
+msgstr ""
+
+#: templates/Word/Word_detail.html:104 templates/Word/Word_list.html:330
+msgid "Word deleted successfully!"
+msgstr ""
+
+#: templates/Word/Word_detail.html:107
+msgid "Error loading word"
+msgstr ""
+
+#: templates/Word/Word_list.html:3
+msgid "Words Management"
+msgstr ""
+
+#: templates/Word/Word_list.html:104 templates/Word/Word_list.html:295
+#: templates/Word/Word_list.html:322
+msgid "Add Word"
+msgstr ""
+
+#: templates/Word/Word_list.html:152
+msgid "Search Words"
+msgstr ""
+
+#: templates/Word/Word_list.html:158
+msgid "Search words..."
+msgstr ""
+
+#: templates/Word/Word_list.html:257
+msgid "Sort by word"
+msgstr ""
+
+#: templates/Word/Word_list.html:303
+msgid "Enter a single word. Words must be unique."
+msgstr ""
+
+#: templates/Word/Word_list.html:309
+msgid "Save Word"
+msgstr ""
+
+#: templates/Word/Word_list.html:324
+msgid "Error loading words"
+msgstr ""
+
+#: templates/Word/Word_list.html:325
+msgid "No words found matching"
+msgstr ""
+
+#: templates/Word/Word_list.html:326
+msgid "No words yet — add your first word."
+msgstr ""
+
+#: templates/Word/Word_list.html:329
+msgid "Delete word #"
+msgstr ""
+
+#: templates/Word/Word_list.html:336
+msgid "words"
+msgstr ""
+
+#: templates/Word/Word_list.html:337
+msgid "Error updating word"
+msgstr ""
+
+#: templates/Word/Word_list.html:338
+msgid "Error deleting words"
+msgstr ""
+
+#: templates/Word/Word_list.html:339
+msgid "Delete selected words?"
+msgstr ""
+
+#: templates/Word/Word_list.html:342
+msgid "Word updated successfully"
+msgstr ""
+
+#: templates/Word/Word_list.html:343
+msgid "Word added successfully"
+msgstr ""
+
+#: templates/Word/Word_list.html:344
+msgid "Word already exists"
+msgstr ""
+
+#: templates/Word/Word_list.html:345
+msgid "Word is required"
+msgstr ""
+
+#: templates/email_words/email_words.html:4
+msgid "Email-like Words"
+msgstr ""
+
+#: templates/email_words/email_words.html:11
+msgid "Email Addresses"
+msgstr ""
+
+#: templates/email_words/email_words.html:16
+msgid "Export all"
+msgstr ""
+
+#: templates/email_words/email_words.html:16
+msgid "emails from database"
+msgstr ""
+
+#: templates/email_words/email_words.html:17
+msgid "Export All"
+msgstr ""
+
+#: templates/email_words/email_words.html:19
+msgid "Copy all"
+msgstr ""
+
+#: templates/email_words/email_words.html:19
+msgid "emails from database to clipboard"
+msgstr ""
+
+#: templates/email_words/email_words.html:20
+msgid "Copy All"
+msgstr ""
+
+#: templates/email_words/email_words.html:22
+msgid "Refresh data"
+msgstr ""
+
+#: templates/email_words/email_words.html:36
+msgid "Unique Email-like Words"
+msgstr ""
+
+#: templates/email_words/email_words.html:51
+msgid "Words on This Page"
+msgstr ""
+
+#: templates/email_words/email_words.html:66
+msgid "Current Page"
+msgstr ""
+
+#: templates/email_words/email_words.html:81
+msgid "Total Pages"
+msgstr ""
+
+#: templates/email_words/email_words.html:94
+msgid "Email-like Words Found"
+msgstr ""
+
+#: templates/email_words/email_words.html:97
+msgid "Search email addresses..."
+msgstr ""
+
+#: templates/email_words/email_words.html:110
+msgid "Email Address"
+msgstr ""
+
+#: templates/email_words/email_words.html:112
+msgid "Validation"
+msgstr ""
+
+#: templates/email_words/email_words.html:113
+msgid "Domain"
+msgstr ""
+
+#: templates/email_words/email_words.html:138
+msgid "Valid"
+msgstr ""
+
+#: templates/email_words/email_words.html:149
+msgid "Search in Files"
+msgstr ""
+
+#: templates/email_words/email_words.html:152
+msgid "Add to Contacts"
+msgstr ""
+
+#: templates/email_words/email_words.html:166
+msgid "email-like words"
+msgstr ""
+
+#: templates/email_words/email_words.html:172
+msgid "Help"
+msgstr ""
+
+#: templates/email_words/email_words.html:181
+msgid "Page navigation"
+msgstr ""
+
+#: templates/email_words/email_words.html:185
+msgid "First"
+msgstr ""
+
+#: templates/email_words/email_words.html:213
+msgid "Last"
+msgstr ""
+
+#: templates/email_words/email_words.html:226
+msgid "No Email-like Words Found"
+msgstr ""
+
+#: templates/email_words/email_words.html:227
+msgid "No words matching the email pattern (@ and .) were found in the database."
+msgstr ""
+
+#: templates/email_words/email_words.html:233
+msgid "Go to Dashboard"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:3
+msgid "Archives"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:14
+msgid "File Management and Analysis"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:15
+msgid "Comprehensive analysis, classification, and insights"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:39
+msgid "Advanced Filters"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:40
+msgid "Close Filters"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:45
+msgid "Filter by Category"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:54
+msgid "Filter by Source"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:63
+msgid "Filter by Side"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:72
+msgid "Filter from date"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:72
+msgid "From date"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:73
+msgid "Filter to date"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:73
+msgid "To date"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:78
+msgid "Reset Filters"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:90
+msgid "Forward"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:105
+msgid ""
+"Search all data: files, categories, keywords, sources, sides, words, "
+"titles..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:105
+msgid "Search all data in database"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:115
+msgid "ID (Ascending)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:116
+msgid "ID (Descending)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:118
+#: templates/file/files_list.html:153
+msgid "Name (Z-A)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:119
+msgid "File Count (High to Low)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:120
+msgid "File Count (Low to High)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:124
+msgid "Switch to Grid View"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:127
+#: templates/file/files_list.html:191
+msgid "List View"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:127
+msgid "Switch to List View"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:157
+#: templates/file/File_Management_Analysis_System.html:162
+#: templates/file/File_Management_Analysis_System.html:659
+#: templates/file/File_Management_Analysis_System.html:765
+msgid "Titles"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:184
+#: templates/file/File_Management_Analysis_System.html:189
+#: templates/file/File_Management_Analysis_System.html:662
+#: templates/file/File_Management_Analysis_System.html:768
+msgid "Hash"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:350
+#: templates/file/File_Management_Analysis_System.html:372
+#: templates/file/File_Management_Analysis_System.html:627
+msgid "Add Side"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:427
+#: templates/file/File_Management_Analysis_System.html:453
+#: templates/file/File_Management_Analysis_System.html:629
+msgid "Add Category"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:433
+msgid "Search words from words table..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:437
+#: templates/file/File_Management_Analysis_System.html:696
+msgid "Category Name (from Words table)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:439
+#: templates/file/File_Management_Analysis_System.html:471
+#: templates/file/File_Management_Analysis_System.html:747
+msgid "Type to search for a word..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:442
+msgid ""
+"Type at least 2 characters to search for existing words from the words "
+"table. You can also type a completely new word."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:463
+msgid "Add Word-Category Relationship"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:474
+msgid "Select a word from the words table."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:483
+msgid "Select a category from the categories table."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:489
+msgid "Add Relationship"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:500
+#: templates/file/File_Management_Analysis_System.html:502
+msgid "Previous File"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:504
+#: templates/file/File_Management_Analysis_System.html:506
+msgid "Next File"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:509
+#: templates/file/File_Management_Analysis_System.html:732
+#: templates/file/file_detail.html:3 templates/file/file_detail.html:487
+msgid "File Details"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:512
+msgid "Close File Details"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:520
+msgid "File Content"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:522
+msgid "Copy Content"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:525
+msgid "Download Content"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:528
+#: templates/file/File_Management_Analysis_System.html:676
+msgid "Export File"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:540
+msgid "Search in document..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:554
+#: templates/file/file_detail.html:128
+msgid "Case Sensitive"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:560
+#: templates/file/file_detail.html:135
+msgid "Whole Word"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:571
+#: templates/file/file_detail.html:147
+msgid "Match 0 of 0"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:586
+#: templates/file/File_Management_Analysis_System.html:729
+msgid "Loading content..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:593
+msgid "Classification & Analysis"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:596
+#: templates/file/File_Management_Analysis_System.html:730
+msgid "Loading analysis..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:603
+#: templates/file/file_detail.html:83
+msgid "Metadata"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:606
+#: templates/file/File_Management_Analysis_System.html:731
+msgid "Loading metadata..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:626
+msgid "Add Source"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:630
+msgid "Add Word-Category"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:631
+msgid "Page Navigation"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:632
+msgid "Previous Page"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:634
+msgid "Go to page"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:639
+msgid "No items found in this section"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:643
+msgid "Search displayed files"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:644
+msgid "Select All Files"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:646
+msgid "Deselect All Files"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:648
+msgid "Export Selected Files"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:649
+msgid "Export Selected"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:650
+msgid "selected"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:651
+#: templates/file/files_list.html:210
+msgid "No files found"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:655
+msgid "Next Page"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:656
+msgid "Current page"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:665
+msgid "Top Categories by File Count"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:666
+msgid "Top Sources Distribution"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:667
+msgid "Data Distribution"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:669
+msgid "Hashes"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:670
+msgid "Select file"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:672
+msgid "View Details for"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:673
+msgid "Open Full View in New Tab"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:674
+msgid "Open Full View in New Tab for"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:675
+msgid "Full View"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:678
+msgid "Error loading items"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:700
+msgid "Source name is required"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:701
+msgid "Side name is required"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:702
+msgid "At least one word is required"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:703
+msgid "Category name is required"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:704
+msgid "Both word and category are required"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:705
+msgid ""
+"Keywords must contain at least 2 words. Please select multiple words to "
+"create a keyword phrase."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:708
+msgid "Successfully added"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:711
+msgid "Keyword created successfully!"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:712
+msgid "Category created successfully!"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:713
+msgid "Successfully added word-category relationship"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:716
+msgid "Error adding"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:717
+msgid "Error adding source"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:718
+msgid "Error adding side"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:719
+msgid "Error adding keyword"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:720
+msgid "Error adding category"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:721
+msgid "Error adding word-category relationship"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:722
+msgid ""
+"Network error: Unable to connect to server. Please check your connection "
+"and try again."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:723
+msgid "Error processing server response. Please try again or refresh the page."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:724
+msgid "Unable to retrieve security token. Please refresh the page and try again."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:725
+msgid "Unable to obtain security token. Please refresh the page."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:728
+msgid "Submitting..."
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:733
+msgid "Filters applied! (This will filter all sections)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:735
+msgid "(Content truncated for display)"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:736
+#: templates/file/file_detail.html:238
+msgid "No content available"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:738
+msgid "No categories assigned"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:739
+msgid "Analytics"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:754
+msgid ""
+"This will scan all files in the database and update keyword associations."
+" This may take a while. Continue?"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:756
+msgid "Keyword associations updated successfully!"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:757
+msgid "Files processed"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:758
+msgid "New associations"
+msgstr ""
+
+#: templates/file/File_Management_Analysis_System.html:759
+msgid "Keywords checked"
+msgstr ""
+
+#: templates/file/file_detail.html:73
+msgid "Content"
+msgstr ""
+
+#: templates/file/file_detail.html:100
+msgid "Search in Document"
+msgstr ""
+
+#: templates/file/file_detail.html:111
+msgid "Search within this document..."
+msgstr ""
+
+#: templates/file/file_detail.html:166
+msgid "Document Content"
+msgstr ""
+
+#: templates/file/file_detail.html:206
+msgid "Page size:"
+msgstr ""
+
+#: templates/file/file_detail.html:214
+msgid "Go to:"
+msgstr ""
+
+#: templates/file/file_detail.html:218
+msgid "Go"
+msgstr ""
+
+#: templates/file/file_detail.html:228
+msgid "View Full Content"
+msgstr ""
+
+#: templates/file/file_detail.html:231
+msgid "Reprocess this file? This may take a moment."
+msgstr ""
+
+#: templates/file/file_detail.html:232
+msgid "Reprocess"
+msgstr ""
+
+#: templates/file/file_detail.html:239
+msgid ""
+"This file may not have been processed yet, or the content could not be "
+"loaded."
+msgstr ""
+
+#: templates/file/file_detail.html:242
+msgid "Reprocess this file? This will extract and store the content again."
+msgstr ""
+
+#: templates/file/file_detail.html:243
+msgid "Reprocess File"
+msgstr ""
+
+#: templates/file/file_detail.html:258
+msgid "File Information"
+msgstr ""
+
+#: templates/file/file_detail.html:263
+msgid "Type:"
+msgstr ""
+
+#: templates/file/file_detail.html:264 templates/file/file_detail.html:494
+msgid "Size:"
+msgstr ""
+
+#: templates/file/file_detail.html:265 templates/file/file_detail.html:496
+msgid "Created:"
+msgstr ""
+
+#: templates/file/file_detail.html:266 templates/file/file_detail.html:497
+msgid "Status:"
+msgstr ""
+
+#: templates/file/file_detail.html:278
+msgid "Quick Stats"
+msgstr ""
+
+#: templates/file/file_detail.html:292
+msgid "Sentences"
+msgstr ""
+
+#: templates/file/file_detail.html:298
+msgid "Paragraphs"
+msgstr ""
+
+#: templates/file/file_detail.html:304 templates/file/full_content.html:41
+msgid "Characters"
+msgstr ""
+
+#: templates/file/file_detail.html:323
+msgid "Classification Analysis"
+msgstr ""
+
+#: templates/file/file_detail.html:362
+msgid "Word Frequency"
+msgstr ""
+
+#: templates/file/file_detail.html:373 templates/file/file_detail.html:531
+msgid "No frequency data available"
+msgstr ""
+
+#: templates/file/file_detail.html:385
+msgid "Top Keywords"
+msgstr ""
+
+#: templates/file/file_detail.html:396
+msgid "Frequency"
+msgstr ""
+
+#: templates/file/file_detail.html:421
+msgid "No keywords available"
+msgstr ""
+
+#: templates/file/file_detail.html:437
+msgid "Document Metadata"
+msgstr ""
+
+#: templates/file/file_detail.html:460
+msgid "File Date"
+msgstr ""
+
+#: templates/file/file_detail.html:470
+msgid "Add your notes about this document..."
+msgstr ""
+
+#: templates/file/file_detail.html:492
+msgid "ID:"
+msgstr ""
+
+#: templates/file/file_detail.html:493
+msgid "Path:"
+msgstr ""
+
+#: templates/file/file_detail.html:495
+msgid "File Date:"
+msgstr ""
+
+#: templates/file/file_detail.html:498
+msgid "Hash ID:"
+msgstr ""
+
+#: templates/file/file_detail.html:506
+msgid "Security & Hash"
+msgstr ""
+
+#: templates/file/file_detail.html:511
+msgid "Hash:"
+msgstr ""
+
+#: templates/file/file_detail.html:528
+msgid "No matches"
+msgstr ""
+
+#: templates/file/file_detail.html:529
+msgid "Chart library not loaded"
+msgstr ""
+
+#: templates/file/file_detail.html:532
+msgid "Invalid data format"
+msgstr ""
+
+#: templates/file/file_detail.html:533
+msgid "No valid frequency data"
+msgstr ""
+
+#: templates/file/file_detail.html:535
+msgid "Metadata saved successfully!"
+msgstr ""
+
+#: templates/file/file_detail.html:536
+msgid "Share link copied to clipboard!"
+msgstr ""
+
+#: templates/file/files_list.html:57
+msgid "Selected"
+msgstr ""
+
+#: templates/file/files_list.html:76
+msgid "Search by name, content..."
+msgstr ""
+
+#: templates/file/files_list.html:154
+msgid "Largest First"
+msgstr ""
+
+#: templates/file/files_list.html:155
+msgid "Smallest First"
+msgstr ""
+
+#: templates/file/files_list.html:177
+msgid "Analyze"
+msgstr ""
+
+#: templates/file/files_list.html:189
+msgid "View:"
+msgstr ""
+
+#: templates/file/files_list.html:208
+msgid "Showing records"
+msgstr ""
+
+#: templates/file/files_list.html:324
+msgid "No files found."
+msgstr ""
+
+#: templates/file/files_list.html:326
+msgid "Upload your first file"
+msgstr ""
+
+#: templates/file/files_list.html:392
+msgid "No records"
+msgstr ""
+
+#: templates/file/full_content.html:3 templates/file/full_content.html:9
+msgid "Reader"
+msgstr ""
+
+#: templates/file/full_content.html:16
+msgid "Toolbar"
+msgstr ""
+
+#: templates/file/full_content.html:20
+msgid "Print"
+msgstr ""
+
+#: templates/file/full_content.html:22
+msgid "Wrap"
+msgstr ""
+
+#: templates/file/full_content.html:23
+msgid "Smaller"
+msgstr ""
+
+#: templates/file/full_content.html:24
+msgid "Larger"
+msgstr ""
+
+#: templates/file/full_content.html:35
+msgid "Bytes Stored"
+msgstr ""
+
+#: templates/file/full_content.html:38
+msgid "Chunks"
+msgstr ""
+
+#: templates/file/full_content.html:57
+msgid "Search... (supports whole word, case)"
+msgstr ""
+
+#: templates/file/full_content.html:62
+msgid "Aa"
+msgstr ""
+
+#: templates/file/full_content.html:63
+msgid "Whole"
+msgstr ""
+
+#: templates/file/full_content.html:70
+msgid "Loading…"
+msgstr ""
+
+#: templates/file/full_content.html:74 templates/file/upload.html:212
+msgid "Ready"
+msgstr ""
+
+#: templates/file/full_content.html:76
+msgid "Chunk size"
+msgstr ""
+
+#: templates/file/upload.html:4 templates/file/upload.html:17
+msgid "CLI File Processor"
+msgstr ""
+
+#: templates/file/upload.html:20
+msgid "Command-line interface for processing files"
+msgstr ""
+
+#: templates/file/upload.html:30
+msgid "Large File Upload"
+msgstr ""
+
+#: templates/file/upload.html:31
+msgid "For files over 100MB"
+msgstr ""
+
+#: templates/file/upload.html:56
+msgid "File Processor CLI"
+msgstr ""
+
+#: templates/file/upload.html:57
+msgid "IDLE"
+msgstr ""
+
+#: templates/file/upload.html:62
+msgid "Enter File Path or Select File/Folder"
+msgstr ""
+
+#: templates/file/upload.html:68
+msgid "C:/Users/Documents/file.pdf or /home/user/file.pdf"
+msgstr ""
+
+#: templates/file/upload.html:73
+msgid "Browse"
+msgstr ""
+
+#: templates/file/upload.html:79
+msgid "Enter full path to file or directory, or click Browse to select"
+msgstr ""
+
+#: templates/file/upload.html:86
+msgid "Select Source"
+msgstr ""
+
+#: templates/file/upload.html:88
+msgid "-- Select Source --"
+msgstr ""
+
+#: templates/file/upload.html:96
+msgid "Select Side"
+msgstr ""
+
+#: templates/file/upload.html:98
+msgid "-- Select Side --"
+msgstr ""
+
+#: templates/file/upload.html:108
+msgid "Run Process"
+msgstr ""
+
+#: templates/file/upload.html:112
+msgid "Clear Log"
+msgstr ""
+
+#: templates/file/upload.html:118
+msgid "Welcome to File Processor CLI"
+msgstr ""
+
+#: templates/file/upload.html:119
+msgid "Enter file path, select source and side, then click \"Run Process\""
+msgstr ""
+
+#: templates/file/upload.html:129
+msgid "Instructions"
+msgstr ""
+
+#: templates/file/upload.html:132
+msgid "For large files (>100MB), use the \"Large File Upload\" section above"
+msgstr ""
+
+#: templates/file/upload.html:133
+msgid "Or enter the full file or directory path"
+msgstr ""
+
+#: templates/file/upload.html:134
+msgid "Select a source from the dropdown"
+msgstr ""
+
+#: templates/file/upload.html:135
+msgid "Select a side from the dropdown"
+msgstr ""
+
+#: templates/file/upload.html:136
+msgid "Click \"Run Process\" to start"
+msgstr ""
+
+#: templates/file/upload.html:137
+msgid "Monitor progress in the log window"
+msgstr ""
+
+#: templates/file/upload.html:144
+msgid "Tips"
+msgstr ""
+
+#: templates/file/upload.html:149
+msgid "Supports files and directories"
+msgstr ""
+
+#: templates/file/upload.html:153
+msgid "Real-time processing logs"
+msgstr ""
+
+#: templates/file/upload.html:157
+msgid "Automatic duplicate detection"
+msgstr ""
+
+#: templates/file/upload.html:161
+msgid "Chunked upload for files over 100MB"
+msgstr ""
+
+#: templates/file/upload.html:165
+msgid "Hash verification for data integrity"
+msgstr ""
+
+#: templates/file/upload.html:180
+msgid "Cannot change file selection while processing"
+msgstr ""
+
+#: templates/file/upload.html:181
+msgid "Select File(s)"
+msgstr ""
+
+#: templates/file/upload.html:182
+msgid "Full Path"
+msgstr ""
+
+#: templates/file/upload.html:183
+msgid "Select Folder"
+msgstr ""
+
+#: templates/file/upload.html:184
+msgid "File System Access API selected, but path not directly available."
+msgstr ""
+
+#: templates/file/upload.html:185
+msgid "Falling back to regular file input..."
+msgstr ""
+
+#: templates/file/upload.html:186
+msgid "Full path selected:"
+msgstr ""
+
+#: templates/file/upload.html:187
+#, python-brace-format
+msgid "Selected {count} files from:"
+msgstr ""
+
+#: templates/file/upload.html:188
+msgid "Full folder path selected:"
+msgstr ""
+
+#: templates/file/upload.html:189
+msgid "Selected folder:"
+msgstr ""
+
+#: templates/file/upload.html:190
+msgid "Could not extract full path. Please enter the full absolute path manually."
+msgstr ""
+
+#: templates/file/upload.html:191
+msgid "Example:"
+msgstr ""
+
+#: templates/file/upload.html:192
+msgid "Selected file:"
+msgstr ""
+
+#: templates/file/upload.html:193
+msgid "Full path extracted:"
+msgstr ""
+
+#: templates/file/upload.html:194
+msgid "File selected:"
+msgstr ""
+
+#: templates/file/upload.html:195
+msgid ""
+"Full absolute path could not be extracted due to browser security "
+"restrictions."
+msgstr ""
+
+#: templates/file/upload.html:196
+msgid "Please enter the complete absolute path manually in the input field above."
+msgstr ""
+
+#: templates/file/upload.html:197
+msgid "Example paths:"
+msgstr ""
+
+#: templates/file/upload.html:198
+msgid "Windows:"
+msgstr ""
+
+#: templates/file/upload.html:199
+msgid "Linux/Mac:"
+msgstr ""
+
+#: templates/file/upload.html:200
+#, python-brace-format
+msgid "Enter full path (e.g., C:\\Users\\...\\{filename})"
+msgstr ""
+
+#: templates/file/upload.html:201
+#, python-brace-format
+msgid "Selected {count} files"
+msgstr ""
+
+#: templates/file/upload.html:202
+msgid ""
+"Could not determine common directory path. Please enter the full "
+"directory path manually."
+msgstr ""
+
+#: templates/file/upload.html:203
+#, python-brace-format
+msgid "Selected folder with {count} files"
+msgstr ""
+
+#: templates/file/upload.html:204
+msgid "Checking files for path information..."
+msgstr ""
+
+#: templates/file/upload.html:205
+msgid "Folder name detected:"
+msgstr ""
+
+#: templates/file/upload.html:206
+msgid "Could not extract any folder path information."
+msgstr ""
+
+#: templates/file/upload.html:207
+msgid "Please enter the full absolute path manually."
+msgstr ""
+
+#: templates/file/upload.html:208
+msgid "Example: C:\\Users\\Documents\\MyFolder or /home/user/documents/MyFolder"
+msgstr ""
+
+#: templates/file/upload.html:209
+msgid "Processing:"
+msgstr ""
+
+#: templates/file/upload.html:210
+#, python-brace-format
+msgid "Processing: {current} of {total} files"
+msgstr ""
+
+#: templates/file/upload.html:211
+#, python-brace-format
+msgid "Processing: {current} files..."
+msgstr ""
+
+#: templates/file/upload.html:213
+msgid "Starting..."
+msgstr ""
+
+#: templates/file/upload.html:214
+msgid "Process already running. Please wait..."
+msgstr ""
+
+#: templates/file/upload.html:215
+msgid "Please enter a file path"
+msgstr ""
+
+#: templates/file/upload.html:216
+msgid "Please select both Source and Side"
+msgstr ""
+
+#: templates/file/upload.html:217
+msgid "PROCESSING"
+msgstr ""
+
+#: templates/file/upload.html:218
+msgid "Source ID:"
+msgstr ""
+
+#: templates/file/upload.html:219
+msgid "Side ID:"
+msgstr ""
+
+#: templates/file/upload.html:220
+msgid "Processing failed"
+msgstr ""
+
+#: templates/file/upload.html:221
+msgid "Scanning directory..."
+msgstr ""
+
+#: templates/file/upload.html:222
+msgid "Processing file..."
+msgstr ""
+
+#: templates/file/upload.html:223
+msgid "Completed processing"
+msgstr ""
+
+#: templates/file/upload.html:224
+msgid "Process completed successfully!"
+msgstr ""
+
+#: templates/file/upload.html:225
+msgid "SUCCESS"
+msgstr ""
+
+#: templates/file/upload.html:226
+msgid "Completed successfully"
+msgstr ""
+
+#: templates/file/upload.html:227
+msgid "Unknown error occurred"
+msgstr ""
+
+#: templates/file/upload.html:228
+msgid ""
+"Network error: Connection interrupted. This may be due to a server "
+"timeout or database connection issue. Check server logs for details."
+msgstr ""
+
+#: templates/file/upload.html:229
+msgid "Request was cancelled"
+msgstr ""
+
+#: templates/file/upload.html:230
+msgid "Error:"
+msgstr ""
+
+#: templates/file/upload.html:232
+msgid "ERROR"
+msgstr ""
+
+#: templates/file/upload.html:233
+msgid "Cannot clear log while processing"
+msgstr ""
+
+#: templates/file/upload.html:234
+msgid "Log cleared"
+msgstr ""
+
+#: web_file/routes/common.py:47 web_file/routes/common.py:49
+#, python-format
+msgid "Language changed to %(lang)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:78 web_file/routes/notifications.py:202
+#: web_file/routes/notifications.py:322
+#: web_file/routes/notifications_page.py:234
+#, python-format
+msgid "Similar Files Detected: %(file_name)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:80 web_file/routes/notifications.py:204
+#: web_file/routes/notifications.py:324
+#: web_file/routes/notifications_page.py:236
+msgid "Similar Files Detected"
+msgstr ""
+
+#: web_file/routes/notifications.py:84 web_file/routes/notifications.py:208
+#: web_file/routes/notifications.py:328
+#: web_file/routes/notifications_page.py:240
+#, python-format
+msgid "Found %(count)s similar file(s) with similarity ≥ %(threshold)s%%"
+msgstr ""
+
+#: web_file/routes/notifications.py:91 web_file/routes/notifications.py:214
+#: web_file/routes/notifications.py:334
+#: web_file/routes/notifications_page.py:246
+#, python-format
+msgid "Future Event Detected: %(date)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:93 web_file/routes/notifications.py:216
+#: web_file/routes/notifications.py:336
+#: web_file/routes/notifications_page.py:248
+msgid "Future Event Detected"
+msgstr ""
+
+#: web_file/routes/notifications.py:95 web_file/routes/notifications.py:218
+#: web_file/routes/notifications.py:338
+#: web_file/routes/notifications_page.py:250
+#, python-format
+msgid "Future-focused content found in %(file_name)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:97 web_file/routes/notifications.py:220
+#: web_file/routes/notifications.py:340
+#: web_file/routes/notifications_page.py:252
+msgid "Future-focused content found"
+msgstr ""
+
+#: web_file/routes/notifications.py:103 web_file/routes/notifications.py:225
+#: web_file/routes/notifications.py:345
+#: web_file/routes/notifications_page.py:257
+#, python-format
+msgid "Future Date Detected: %(date)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:107 web_file/routes/notifications.py:229
+#: web_file/routes/notifications.py:349
+#: web_file/routes/notifications_page.py:261
+#, python-format
+msgid "Future date found in %(file_name)s (%(days)s days away)"
+msgstr ""
+
+#: web_file/routes/notifications.py:110 web_file/routes/notifications.py:232
+#: web_file/routes/notifications.py:352
+#: web_file/routes/notifications_page.py:264
+#, python-format
+msgid "Future date found in %(file_name)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:113 web_file/routes/notifications.py:235
+#: web_file/routes/notifications.py:355
+#: web_file/routes/notifications_page.py:267
+#, python-format
+msgid "Future date found (%(days)s days away)"
+msgstr ""
+
+#: web_file/routes/notifications.py:115 web_file/routes/notifications.py:118
+#: web_file/routes/notifications.py:237 web_file/routes/notifications.py:240
+#: web_file/routes/notifications.py:357 web_file/routes/notifications.py:360
+#: web_file/routes/notifications_page.py:269
+#: web_file/routes/notifications_page.py:272
+msgid "Future date found"
+msgstr ""
+
+#: web_file/routes/notifications.py:117 web_file/routes/notifications.py:239
+#: web_file/routes/notifications.py:359
+#: web_file/routes/notifications_page.py:271
+msgid "Future Date Detected"
+msgstr ""
+
+#: web_file/routes/notifications.py:124 web_file/routes/notifications.py:245
+#: web_file/routes/notifications.py:365
+#: web_file/routes/notifications_page.py:277
+#, python-format
+msgid "File processing completed: %(file_name)s"
+msgstr ""
+
+#: web_file/routes/notifications.py:126 web_file/routes/notifications.py:247
+#: web_file/routes/notifications.py:367
+#: web_file/routes/notifications_page.py:279
+msgid "File processing completed"
+msgstr ""
+
+#: web_file/routes/notifications.py:130 web_file/routes/notifications.py:250
+#: web_file/routes/notifications.py:370
+#: web_file/routes/notifications_page.py:282
+msgid "Batch Processing Complete"
+msgstr ""
+
+#: web_file/routes/notifications.py:133 web_file/routes/notifications.py:253
+#: web_file/routes/notifications.py:373
+#: web_file/routes/notifications_page.py:285
+#, python-format
+msgid "Batch processing completed: %(count)s file(s) processed"
+msgstr ""
+
+#: web_file/routes/notifications.py:135 web_file/routes/notifications.py:255
+#: web_file/routes/notifications.py:375
+#: web_file/routes/notifications_page.py:287
+msgid "Batch processing completed"
+msgstr ""
+
+#: web_file/routes/notifications.py:142 web_file/routes/notifications.py:261
+#: web_file/routes/notifications.py:381
+#: web_file/routes/notifications_page.py:293
+#, python-format
+msgid "Error in %(file_name)s: %(error)s"
+msgstr ""
+

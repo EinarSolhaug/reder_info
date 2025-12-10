@@ -1,0 +1,1561 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Keywords Management') }}{% endblock %}
+
+{% block extra_css %}
+<!-- Select2 CSS for searchable selects -->
+<link href="{{ url_for('static', filename='dist/css/select2.min.css') }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/file-manger.css') }}" rel="stylesheet" />
+<link href="{{ url_for('static', filename='css/fmas.css') }}" rel="stylesheet" />
+<style>
+    /* Ensure table spans full width */
+    #keywordsTable {
+        width: 100% !important;
+        table-layout: auto;
+    }
+    
+    /* Table wrapper with scrollbar */
+    .stat-card .table-wrapper {
+        overflow-x: auto;
+        overflow-y: auto;
+        width: 100%;
+        max-height: 70vh;
+        position: relative;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 0.5rem;
+        background: white;
+    }
+    
+    /* Custom Scrollbar Styling */
+    .stat-card .table-wrapper::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+    }
+    
+    .stat-card .table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+    
+    /* Firefox scrollbar */
+    .stat-card .table-wrapper {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+    
+    /* Sticky table header */
+    #keywordsTable thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f8fafc;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Ensure pagination is visible and properly positioned below the table */
+    .pagination-container {
+        display: flex !important;
+        width: 100% !important;
+        padding: 1rem 0;
+        clear: both;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .stat-card .table-wrapper {
+            max-height: 50vh;
+        }
+        
+        .filter-controls-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+    }
+    
+    /* Ensure stat-card with table displays as block */
+    .stat-card:has(#keywordsTable) {
+        display: block !important;
+    }
+    
+    /* Ensure table-responsive is block level */
+    .stat-card:has(#keywordsTable) .table-responsive {
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    /* Make stat-card full width */
+    .stat-card:has(#keywordsTable) {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><i class="bi bi-key me-2"></i> {{ _('Keywords') }} ({{ total_keywords|default(0) }})</h1>
+
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" onclick="resetKeywordModalToAdd(); if(typeof window.openAddItemModal === 'function') window.openAddItemModal('addKeywordModal', 'keyword');"><i class="bi bi-plus-circle me-2"></i> {{ _('Add') }}</button>
+        <button class="btn btn-success" onclick="updateKeywordAssociations()" id="updateKeywordsBtn" title="{{ _('Update keyword associations for all files') }}">
+            <i class="bi bi-arrow-repeat me-2"></i> {{ _('Update Keywords') }}
+        </button>
+        <button class="btn btn-outline-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise me-1"></i> {{ _('Refresh') }}</button>
+    </div>
+</div>
+
+<div class="row g-4 mb-2">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-info-bg); color: var(--primary-color);"><i class="bi bi-key"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Total Keywords') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ total_keywords or (keywords|length) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-success-bg); color: var(--success-color);"><i class="bi bi-check-circle"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Active') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ keywords|selectattr('usage_count','gt',0)|list|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon me-3" style="background: var(--alert-danger-bg); color: var(--danger-color);"><i class="bi bi-exclamation-triangle"></i></div>
+                <div>
+                    <div class="stat-card-title">{{ _('Duplicates') }}</div>
+                    <h3 class="stat-card-value mb-0" id="duplicateCount">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="file-filters-section">
+    <!-- Search and Main Filters -->
+    <div class="filter-controls-grid">
+        <div class="filter-group filter-group-search">
+            <label for="searchKeywords" class="filter-label">
+                <i class="bi bi-search"></i>
+                {{ _('Search Keywords') }}
+            </label>
+            <div class="search-input-wrapper">
+                <input type="text" 
+                       id="searchKeywords" 
+                       class="form-control search-input" 
+                       placeholder="{{ _('Search keywords...') }}" 
+                       autocomplete="off">
+                <button class="btn-clear-search" onclick="clearSearch()" title="{{ _('Clear search') }}">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label for="statusFilter" class="filter-label">
+                <i class="bi bi-check-circle"></i>
+                {{ _('Status') }}
+            </label>
+            <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                <option value="">{{ _('All Status') }}</option>
+                <option value="active">{{ _('Active') }}</option>
+                <option value="unused">{{ _('Unused') }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="categoryFilter" class="filter-label">
+                <i class="bi bi-tags"></i>
+                {{ _('Category') }}
+            </label>
+            <select class="form-select" id="categoryFilter" onchange="applyFilters()">
+                <option value="">{{ _('All Categories') }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sortBy" class="filter-label">
+                <i class="bi bi-sort-alpha-down"></i>
+                {{ _('Sort By') }}
+            </label>
+            <select class="form-select" id="sortBy" onchange="applySorting()">
+                <option value="usage_count">{{ _('Usage Count') }}</option>
+                <option value="text">{{ _('Text') }}</option>
+                <option value="id">{{ _('ID') }}</option>
+                <option value="date_creation">{{ _('Date Created') }}</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sortOrder" class="filter-label">
+                <i class="bi bi-arrow-down-up"></i>
+                {{ _('Order') }}
+            </label>
+            <select class="form-select" id="sortOrder" onchange="applySorting()">
+                <option value="desc">{{ _('Descending') }}</option>
+                <option value="asc">{{ _('Ascending') }}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="action-group">
+            <span class="action-label">{{ _('Selection:') }}</span>
+            <button class="btn-action" onclick="selectAll()">
+                <i class="bi bi-check-square"></i>
+                {{ _('Select All') }}
+            </button>
+            <button class="btn-action" onclick="selectNone()">
+                <i class="bi bi-square"></i>
+                {{ _('Select None') }}
+            </button>
+        </div>
+        <div class="action-group">
+            <span class="action-label">{{ _('Bulk Actions:') }}</span>
+            <button class="btn-action btn-outline-warning" onclick="bulkUpdate()" id="bulkUpdateBtn" disabled>
+                <i class="bi bi-pencil"></i>
+                {{ _('Edit Selected') }}
+            </button>
+            <button class="btn-action btn-outline-danger" onclick="bulkDelete()" id="bulkDeleteBtn" disabled>
+                <i class="bi bi-trash"></i>
+                {{ _('Delete Selected') }}
+            </button>
+        </div>
+        <div class="action-group">
+            <span class="action-label">{{ _('Actions:') }}</span>
+            <button class="btn-action btn-warning" onclick="mergeAllDuplicates()" title="{{ _('Merge all duplicate keywords') }}">
+                <i class="bi bi-arrow-down-up"></i>
+                {{ _('Merge Duplicates') }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination info above table -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <small class="text-muted" id="searchResultsInfo" aria-live="polite">{{ _('Loading...') }}</small>
+    </div>
+    <div class="d-flex align-items-center">
+        <label for="perPage" class="form-label me-2 mb-0">{{ _('Per Page:') }}</label>
+        <select class="form-select form-select-sm" id="perPage" style="width: auto;" onchange="changePageSize()">
+            <option value="10">{{ _('10') }}</option>
+            <option value="25">{{ _('25') }}</option>
+            <option value="50">{{ _('50') }}</option>
+            <option value="100">{{ _('100') }}</option>
+        </select>
+    </div>
+</div>
+
+<div class="stat-card">
+    <div class="table-wrapper">
+        <table class="table table-hover align-middle" id="keywordsTable" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th style="width:50px">
+                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                    </th>
+                    <th style="width:70px">#</th>
+                    <th>
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Keyword') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('text')" title="{{ _('Sort by text') }}" id="sortBtn-text">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-text"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:120px">
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Usage') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('usage_count')" title="{{ _('Sort by usage') }}" id="sortBtn-usage_count">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-usage_count"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:120px">
+                        <div class="d-flex align-items-center">
+                            <span>{{ _('Status') }}</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" onclick="sortBy('status')" title="{{ _('Sort by status') }}" id="sortBtn-status">
+                                <i class="bi bi-arrow-down-up" id="sortIcon-status"></i>
+                            </button>
+                        </div>
+                    </th>
+                    <th style="width:120px">{{ _('Category') }}</th>
+                    <th style="width:200px">{{ _('Actions') }}</th>
+                </tr>
+            </thead>
+            <tbody id="keywordsTableBody">
+                <!-- Table content will be populated by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    {# Pagination will be inserted here by JavaScript #}
+</div>
+
+    <!-- Add Keyword Modal -->
+    <div class="archives-modal" id="addKeywordModal">
+        <div class="archives-modal-content add-item-modal">
+            <div class="add-item-modal-header">
+                <h3><i class="bi bi-key"></i> {{ _('Add Keyword') }}</h3>
+                <button class="add-item-modal-close" onclick="if(typeof window.closeAddItemModal === 'function') window.closeAddItemModal('addKeywordModal'); resetKeywordModalToAdd();" title="{{ _('Close') }}" aria-label="{{ _('Close') }}">×</button>
+            </div>
+            <div class="add-item-modal-body">
+                <div class="add-item-search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="keywordSearchInput" placeholder="{{ _('Search keywords...') }}" oninput="searchItems('keyword')">
+                </div>
+                <div class="add-item-form" id="keywordForm">
+                    <div class="add-item-form-group">
+                        <label>{{ _('Words (from Words table)') }} *</label>
+                        <select id="keywordWords" class="keyword-words-select" multiple required>
+                            <option value="">{{ _('Type to search and select words...') }}</option>
+                        </select>
+                        <div class="form-text" style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.25rem;">
+                            <i class="bi bi-info-circle"></i> {{ _('Type at least 2 characters to search for words from the words table. You must select at least 2 words to create a keyword phrase.') }}
+                        </div>
+                    </div>
+                    <div class="add-item-form-group">
+                        <label>{{ _('Category (from Categories table)') }}</label>
+                        <select id="keywordCategory" class="keyword-category-select">
+                            <option value="">{{ _('Type to search for a category...') }}</option>
+                        </select>
+                        <div class="form-text" style="font-size: 0.75rem; color: var(--text-light); margin-top: 0.25rem;">
+                            <i class="bi bi-info-circle"></i> {{ _('Type to search for categories from the categories table.') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="add-item-list" id="keywordList"></div>
+                <div class="add-item-pagination" id="keywordPagination">
+                    <div class="add-item-pagination-info" id="keywordPaginationInfo"></div>
+                    <div class="add-item-pagination-controls" id="keywordPaginationControls"></div>
+                </div>
+                <div class="add-item-modal-actions">
+                    <button class="add-item-btn-cancel" onclick="if(typeof window.closeAddItemModal === 'function') window.closeAddItemModal('addKeywordModal'); resetKeywordModalToAdd();">{{ _('Cancel') }}</button>
+                    <button class="add-item-btn-submit" onclick="submitAddItem('keyword')">{{ _('Add Keyword') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/file-management-system.js') }}"></script>
+
+<!-- Wait for jQuery to be available before loading Select2 -->
+<script>
+    (function() {
+        function loadSelect2() {
+            if (typeof jQuery !== 'undefined' && typeof jQuery.fn.select2 === 'undefined') {
+                const script = document.createElement('script');
+                script.src = "{{ url_for('static', filename='dist/js/select2.min.js') }}";
+                script.onerror = function() {
+                    console.error('Failed to load Select2 library');
+                };
+                document.head.appendChild(script);
+            } else if (typeof jQuery === 'undefined') {
+                // jQuery not ready yet, try again
+                setTimeout(loadSelect2, 50);
+            }
+        }
+        
+        // Start checking when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSelect2);
+        } else {
+            loadSelect2();
+        }
+    })();
+
+// Translations for JavaScript - extend existing translations object
+// Note: file-management-system.js declares translations in its scope, so we use window to avoid conflicts
+(function() {
+    // Get or create translations object on window
+    if (typeof window.translations === 'undefined') {
+        window.translations = {};
+    }
+    
+    // Extend translations object with keyword-specific translations
+    Object.assign(window.translations, {
+    editInline: {{ _('Edit inline')|tojson }},
+    viewDetails: {{ _('View Details')|tojson }},
+    deleteKeyword: {{ _('Delete Keyword')|tojson }},
+    mergeDuplicates: {{ _('Merge duplicates')|tojson }},
+    errorLoadingKeywords: {{ _('Error loading keywords')|tojson }},
+    checkBrowserConsole: {{ _('Check browser console for details')|tojson }},
+    failedToLoadKeywords: {{ _('Failed to load keywords')|tojson }},
+    checkBrowserConsoleAndLogs: {{ _('Check browser console and server logs for details')|tojson }},
+    noKeywordsFoundMatching: {{ _('No keywords found matching')|tojson }},
+    noKeywordsYet: {{ _('No keywords yet — add your first keyword.')|tojson }},
+    duplicate: {{ _('Duplicate')|tojson }},
+    active: {{ _('Active')|tojson }},
+    unused: {{ _('Unused')|tojson }},
+    deleteKeywordConfirm: {{ _('Delete keyword #')|tojson }},
+    keywordDeletedSuccessfully: {{ _('Keyword deleted successfully!')|tojson }},
+    failedToDelete: {{ _('Failed to delete')|tojson }},
+    error: {{ _('Error')|tojson }},
+    mergeAllDuplicatesConfirm: {{ _('Merge all duplicates of')|tojson }},
+    successfullyMerged: {{ _('Successfully merged')|tojson }},
+    duplicateKeywordsFor: {{ _('duplicate keywords for')|tojson }},
+    totalUsage: {{ _('Total usage')|tojson }},
+    errorMergingDuplicates: {{ _('Error merging duplicates')|tojson }},
+    unknownError: {{ _('Unknown error')|tojson }},
+    tryDifferentSearchTerm: {{ _('Try a different search term.')|tojson }},
+    addYourFirstKeyword: {{ _('add your first keyword')|tojson }},
+    allCategories: {{ _('All Categories')|tojson }},
+    uncategorized: {{ _('Uncategorized')|tojson }},
+    errorLoadingData: {{ _('Error loading data')|tojson }},
+    showing: {{ _('Showing')|tojson }},
+    page: {{ _('Page')|tojson }},
+    of: {{ _('of')|tojson }},
+    errorUpdatingKeyword: {{ _('Error updating keyword')|tojson }},
+    errorDeletingKeywords: {{ _('Error deleting keywords')|tojson }},
+    errorUpdatingKeywords: {{ _('Error updating keywords')|tojson }},
+    deleteSelectedKeywords: {{ _('Delete selected keywords?')|tojson }},
+    successfullyDeleted: {{ _('Successfully deleted')|tojson }},
+    keywords: {{ _('keywords')|tojson }},
+    successfullyUpdated: {{ _('Successfully updated')|tojson }},
+    unknownError: {{ _('Unknown error')|tojson }},
+    mergeAllDuplicatesConfirm: {{ _('Merge ALL duplicate keywords in the database?')|tojson }},
+    mergeAllDuplicatesDetails: {{ _('This will:\n- Find all keywords with the same text\n- Keep the first occurrence (lowest ID)\n- Transfer all usage statistics to the first\n- Delete duplicates\n\nThis may take a few moments...')|tojson }},
+    merging: {{ _('Merging...')|tojson }},
+    successfullyMergedAll: {{ _('Successfully merged all duplicates!')|tojson }},
+    merged: {{ _('Merged')|tojson }},
+    duplicateSets: {{ _('Duplicate sets')|tojson }},
+    refreshingPage: {{ _('Refreshing page...')|tojson }},
+    errorMergingDuplicatesColon: {{ _('Error merging duplicates')|tojson }}
+    });
+    
+})();
+
+// Ensure window.translations exists (file-management-system.js may have created it)
+if (typeof window.translations === 'undefined') {
+    window.translations = {};
+}
+
+(function(){
+    // Use translations from window - never reference the global 'translations' variable
+    const translations = window.translations;
+    const tableBody = document.getElementById('keywordsTableBody');
+    const searchInput = document.getElementById('searchKeywords');
+    const statusFilter = document.getElementById('statusFilter');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortBySelect = document.getElementById('sortBy');
+    const sortOrderSelect = document.getElementById('sortOrder');
+    const perPageSelect = document.getElementById('perPage');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const bulkUpdateBtn = document.getElementById('bulkUpdateBtn');
+    
+    let currentPage = 1;
+    let currentPerPage = 10;
+    let currentSort = 'usage_count';
+    let currentOrder = 'desc';
+    let currentFilters = {};
+    let selectedKeywords = new Set();
+    let categories = [];
+
+    // Initialize
+    function init() {
+        // Read page number from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageFromUrl = parseInt(urlParams.get('page')) || 1;
+        currentPage = pageFromUrl;
+        
+        // ✅ FIXED: Initialize currentPerPage from select element
+        if (perPageSelect) {
+            currentPerPage = parseInt(perPageSelect.value) || 10;
+        }
+        
+        // ✅ FIXED: Initialize sort dropdowns with current values
+        if (sortBySelect) {
+            sortBySelect.value = currentSort;
+        }
+        if (sortOrderSelect) {
+            sortOrderSelect.value = currentOrder;
+        }
+        
+        // ✅ FIXED: Update sort icons to reflect current sort state
+        updateSortIcons();
+        
+        // ✅ FIXED: Create pagination container on init to ensure it's always visible
+        createPaginationContainer();
+        
+        loadCategories();
+        fetchPage(pageFromUrl);
+        setupEventListeners();
+    }
+    
+    // Update sort icons to reflect current sort state
+    function updateSortIcons() {
+        // Reset all icons to default
+        document.querySelectorAll('[id^="sortIcon-"]').forEach(icon => {
+            icon.className = 'bi bi-arrow-down-up';
+        });
+        
+        // Update the active sort icon
+        const activeIcon = document.getElementById(`sortIcon-${currentSort}`);
+        if (activeIcon) {
+            if (currentOrder === 'asc') {
+                activeIcon.className = 'bi bi-arrow-up';
+            } else {
+                activeIcon.className = 'bi bi-arrow-down';
+            }
+        }
+    }
+
+    function setupEventListeners() {
+        // Search with debounce
+        let searchTimeout;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentPage = 1;
+                fetchPage(1);
+            }, 300);
+        });
+
+        // Page size change
+        perPageSelect.addEventListener('change', () => {
+            currentPerPage = parseInt(perPageSelect.value);
+            currentPage = 1;
+            fetchPage(1);
+        });
+    }
+
+    function loadCategories() {
+        fetch('/api/categories')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                categories = data || [];
+                categoryFilter.innerHTML = `<option value="">${translations.allCategories || 'All Categories'}</option>`;
+                if (Array.isArray(data)) {
+                    data.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.name;
+                        categoryFilter.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+                categories = [];
+            });
+    }
+
+    function renderRows(items, page) {
+        console.log(`renderRows called with ${items?.length || 0} items, page ${page}`);
+        
+        // ✅ FIXED: Check if tableBody exists
+        if (!tableBody) {
+            console.error('tableBody element not found!');
+            return;
+        }
+        
+        tableBody.innerHTML = '';
+        
+        if (!items || items.length === 0) {
+            console.log('No items to render, showing empty state');
+            const query = searchInput?.value?.trim() || '';
+            const message = query ? 
+                `${translations.noKeywordsFoundMatching} "${query}". ${translations.tryDifferentSearchTerm}` : 
+                translations.noKeywordsYet;
+            const icon = query ? 'bi-search' : 'bi-key';
+            const action = query ? '' : ` — <a href="{{ url_for("keywords_add") }}">${translations.addYourFirstKeyword}</a>`;
+            
+            tableBody.innerHTML = `
+                <tr><td colspan="7" class="text-center py-5 text-muted">
+                    <i class="bi ${icon} display-4 mb-3"></i>
+                    <div>${message}${action}</div>
+                </td></tr>`;
+            return;
+        }
+        
+        console.log(`Rendering ${items.length} items`);
+        
+        // ✅ DEBUG: Validate item structure
+        if (items.length > 0) {
+            const firstItem = items[0];
+            console.log('First item structure:', {
+                hasId: 'id' in firstItem,
+                hasText: 'text' in firstItem,
+                hasUsageCount: 'usage_count' in firstItem,
+                id: firstItem.id,
+                text: firstItem.text ? firstItem.text.substring(0, 50) : 'NO TEXT',
+                usage_count: firstItem.usage_count
+            });
+        }
+        
+        // Detect duplicates
+        const keywordCounts = {};
+        const duplicates = new Set();
+        items.forEach(kw => {
+            if (!kw || typeof kw !== 'object') {
+                console.warn('Invalid keyword item:', kw);
+                return;
+            }
+            const text = (kw.text || '').toLowerCase().trim();
+            if (keywordCounts[text]) {
+                duplicates.add(text);
+            } else {
+                keywordCounts[text] = 1;
+            }
+        });
+        
+        // Update duplicate count
+        const duplicateCountEl = document.getElementById('duplicateCount');
+        if (duplicateCountEl) {
+            duplicateCountEl.textContent = duplicates.size;
+        }
+
+        items.forEach((kw, idx) => {
+            // ✅ FIXED: Validate keyword object before processing
+            if (!kw || typeof kw !== 'object' || !kw.id) {
+                console.warn(`Skipping invalid keyword at index ${idx}:`, kw);
+                return;
+            }
+            const globalIndex = ((page - 1) * currentPerPage) + (idx + 1);
+            const tr = document.createElement('tr');
+            const keywordText = (kw.text || '').toLowerCase().trim();
+            const isDuplicate = kw.is_duplicate || duplicates.has(keywordText);
+            
+            tr.dataset.keywordId = kw.id;
+            tr.dataset.keyword = keywordText;
+            if (isDuplicate) {
+                tr.classList.add('table-warning');
+                tr.style.borderLeft = '4px solid #f59e0b';
+            }
+            
+            tr.innerHTML = `
+                <td>
+                    <input type="checkbox" class="form-check-input keyword-checkbox" 
+                           value="${kw.id}" onchange="updateSelection()">
+                </td>
+                <td><span class="badge bg-secondary">${globalIndex}</span></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <span class="keyword-text" data-keyword-id="${kw.id}">
+                            <strong>${(kw.text || '').replace(/</g,'&lt;')}</strong>
+                            ${isDuplicate ? `<span class="badge bg-warning text-dark ms-2"><i class="bi bi-exclamation-triangle me-1"></i>${translations.duplicate}</span>` : ''}
+                        </span>
+                        <button class="btn btn-sm btn-link p-0 ms-1" onclick="editKeywordInModal(${kw.id})" title="${translations.editKeyword || 'Edit Keyword'}">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                </td>
+                <td><span class="badge bg-info">${kw.usage_count}</span></td>
+                <td>${kw.usage_count > 0 ? `<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>${translations.active}</span>` : `<span class="badge bg-secondary"><i class="bi bi-dash-circle me-1"></i>${translations.unused}</span>`}</td>
+                <td>
+                    <span class="badge bg-light text-dark">${kw.category_name || translations.uncategorized || 'Uncategorized'}</span>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="viewKeyword(${kw.id})" title="${translations.viewDetails}">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        ${isDuplicate ? `<button class="btn btn-outline-warning" onclick="mergeDuplicates('${keywordText}')" title="${translations.mergeDuplicates}"><i class="bi bi-arrow-down-up"></i></button>` : ''}
+                    </div>
+                </td>`;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function renderPaginator(page, total_pages) {
+        const paginationContainer = document.querySelector('.pagination-container') || createPaginationContainer();
+        
+        // Create or get page info element
+        let pageInfo = paginationContainer.querySelector('.pagination-info');
+        if (!pageInfo) {
+            pageInfo = document.createElement('div');
+            pageInfo.className = 'small text-muted pagination-info';
+            paginationContainer.insertBefore(pageInfo, paginationContainer.firstChild);
+        }
+        pageInfo.textContent = `${translations.page || 'Page'} ${page} ${translations.of || 'of'} ${total_pages}`;
+        
+        // Create or get pagination list
+        let pagContainer = paginationContainer.querySelector('ul.pagination');
+        if (!pagContainer) {
+            pagContainer = createPaginationList();
+            paginationContainer.appendChild(pagContainer);
+        }
+        pagContainer.innerHTML = '';
+
+        const windowSize = 2;
+        const start = Math.max(1, page - windowSize);
+        const end = Math.min(total_pages, page + windowSize);
+
+        function addItem(label, p, disabled=false, active=false) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+            const a = document.createElement('a');
+            a.className = 'page-link';
+            a.href = '#';
+            a.textContent = label;
+            a.addEventListener('click', function(ev){
+                ev.preventDefault();
+                if (disabled || active) return;
+                // Update URL without page reload
+                const url = new URL(window.location);
+                url.searchParams.set('page', p);
+                window.history.pushState({}, '', url);
+                fetchPage(p);
+            });
+            li.appendChild(a);
+            pagContainer.appendChild(li);
+        }
+
+        addItem('««', 1, page === 1);
+        addItem('«', Math.max(1, page - 1), page === 1);
+
+        if (start > 1) addItem('1', 1);
+        if (start > 2) {
+            const li = document.createElement('li'); 
+            li.className='page-item disabled';
+            li.innerHTML = '<span class="page-link">…</span>'; 
+            pagContainer.appendChild(li);
+        }
+
+        for (let p = start; p <= end; p++) {
+            addItem(String(p), p, false, p === page);
+        }
+
+        if (end < total_pages - 1) {
+            const li = document.createElement('li'); 
+            li.className='page-item disabled';
+            li.innerHTML = '<span class="page-link">…</span>'; 
+            pagContainer.appendChild(li);
+        }
+        if (end < total_pages) addItem(String(total_pages), total_pages);
+
+        addItem('»', Math.min(total_pages, page + 1), page === total_pages);
+        addItem('»»', total_pages, page === total_pages);
+    }
+
+    function createPaginationContainer() {
+        // Find the stat-card that contains the keywords table (not the stat cards at the top)
+        const keywordsTable = document.getElementById('keywordsTable');
+        if (!keywordsTable) {
+            console.error('keywordsTable element not found');
+            return null;
+        }
+        
+        // Find the stat-card that contains the table
+        const statCard = keywordsTable.closest('.stat-card');
+        if (!statCard) {
+            console.error('stat-card containing keywordsTable not found');
+            return null;
+        }
+        
+        // Check if pagination container already exists
+        let container = statCard.querySelector('.pagination-container');
+        if (container) {
+            container.style.display = 'flex'; // Make sure it's visible
+            return container;
+        }
+        
+        // Find the table-responsive div and insert pagination directly after it
+        const tableResponsive = statCard.querySelector('.table-responsive');
+        container = document.createElement('div');
+        container.className = 'd-flex justify-content-between align-items-center mt-3 mb-3 pagination-container';
+        container.style.display = 'flex'; // Flex for layout, but block-level element
+        container.style.width = '100%'; // Full width
+        container.style.clear = 'both'; // Ensure it's on a new line
+        
+        if (tableResponsive && tableResponsive.parentNode) {
+            // Insert directly after table-responsive div
+            tableResponsive.parentNode.insertBefore(container, tableResponsive.nextSibling);
+        } else {
+            // Fallback: append to stat-card
+            statCard.appendChild(container);
+        }
+        
+        return container;
+    }
+
+    function createPaginationList() {
+        const ul = document.createElement('ul');
+        ul.className = 'pagination pagination-sm mb-0';
+        return ul;
+    }
+
+    let pendingFetch = null;
+    function fetchPage(page=1) {
+        currentPage = page;
+        if (pendingFetch) pendingFetch.abort();
+        const controller = new AbortController();
+        pendingFetch = controller;
+
+        const url = new URL('{{ url_for("api_keywords", _external=False) }}', window.location.origin);
+        url.searchParams.set('page', page);
+        url.searchParams.set('per_page', currentPerPage);
+        url.searchParams.set('sort', currentSort);
+        url.searchParams.set('order', currentOrder);
+        
+        if (searchInput.value.trim()) url.searchParams.set('q', searchInput.value.trim());
+        if (statusFilter.value) url.searchParams.set('status', statusFilter.value);
+        if (categoryFilter.value) url.searchParams.set('category', categoryFilter.value);
+
+        // Add cache-busting parameter to ensure fresh data
+        url.searchParams.set('_t', Date.now());
+        
+        fetch(url.toString(), { 
+            signal: controller.signal,
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        })
+            .then(r => {
+                if (!r.ok) {
+                    throw new Error(`HTTP error! status: ${r.status}`);
+                }
+                return r.json();
+            })
+            .then(json => {
+                // ✅ DEBUG: Log the API response
+                console.log('API Response:', {
+                    success: json?.success,
+                    keywordsCount: json?.keywords?.length || 0,
+                    total: json?.total,
+                    page: json?.page,
+                    total_pages: json?.total_pages,
+                    hasKeywords: !!json?.keywords
+                });
+                
+                // ✅ FIXED: Handle both success:true and direct keywords array responses
+                if (!json) {
+                    console.error('API returned null/undefined');
+                    tableBody.innerHTML = `
+                        <tr><td colspan="7" class="text-center py-5 text-danger">
+                            <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                            <div>${translations.errorLoadingKeywords}: Invalid response</div>
+                            <div class="small mt-2">${translations.checkBrowserConsole}</div>
+                        </td></tr>`;
+                    return;
+                }
+                
+                // Check if response has error (success: false)
+                if (json.success === false) {
+                    console.error('API error', json);
+                    const errorMsg = json?.error || 'Unknown API error';
+                    tableBody.innerHTML = `
+                        <tr><td colspan="7" class="text-center py-5 text-danger">
+                            <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                            <div>${translations.errorLoadingKeywords}: ${errorMsg}</div>
+                            <div class="small mt-2">${translations.checkBrowserConsole}</div>
+                        </td></tr>`;
+                    return;
+                }
+                
+                // ✅ FIXED: Update currentPerPage from API response to keep in sync
+                if (json.per_page) {
+                    currentPerPage = json.per_page;
+                    if (perPageSelect && perPageSelect.value != json.per_page) {
+                        perPageSelect.value = json.per_page;
+                    }
+                }
+                
+                // ✅ FIXED: Sync sort state from API response
+                if (json.sort_by) {
+                    currentSort = json.sort_by;
+                    if (sortBySelect) {
+                        sortBySelect.value = currentSort;
+                    }
+                }
+                if (json.sort_order) {
+                    currentOrder = json.sort_order;
+                    if (sortOrderSelect) {
+                        sortOrderSelect.value = currentOrder;
+                    }
+                }
+                updateSortIcons();
+                
+                // Get keywords array - handle both success:true and direct array responses
+                const keywords = json.keywords || json.results || json.items || [];
+                const pageNum = json.page || 1;
+                const totalPages = json.total_pages || 1;
+                
+                console.log(`Rendering ${keywords.length} keywords for page ${pageNum}`);
+                console.log('First keyword sample:', keywords.length > 0 ? keywords[0] : 'No keywords');
+                
+                // ✅ DEBUG: Log full response if no keywords
+                if (keywords.length === 0) {
+                    console.warn('⚠️ No keywords in response! Full response:', json);
+                    console.warn('Response keys:', Object.keys(json));
+                    console.warn('Response.success:', json.success);
+                    console.warn('Response.keywords type:', typeof json.keywords, Array.isArray(json.keywords));
+                }
+                
+                // ✅ FIXED: Wrap in try-catch to catch any rendering errors
+                try {
+                    // Force clear table first to ensure fresh render
+                    if (tableBody) {
+                        tableBody.innerHTML = '';
+                    }
+                    renderRows(keywords, pageNum);
+                    renderPaginator(pageNum, totalPages);
+                    updateSearchInfo(json);
+                    
+                    // Force a reflow to ensure DOM updates are visible
+                    void tableBody.offsetWidth;
+                } catch (renderError) {
+                    console.error('❌ Error rendering rows:', renderError);
+                    console.error('Stack:', renderError.stack);
+                    tableBody.innerHTML = `
+                        <tr><td colspan="7" class="text-center py-5 text-danger">
+                            <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                            <div>Error rendering keywords: ${renderError.message}</div>
+                            <div class="small mt-2">Check browser console for details</div>
+                        </td></tr>`;
+                }
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                console.error('Fetch error', err);
+                tableBody.innerHTML = `
+                    <tr><td colspan="7" class="text-center py-5 text-danger">
+                        <i class="bi bi-exclamation-triangle display-4 mb-3"></i>
+                        <div>${translations.failedToLoadKeywords}: ${err.message}</div>
+                        <div class="small mt-2">${translations.checkBrowserConsoleAndLogs}</div>
+                    </td></tr>`;
+                const infoEl = document.getElementById('searchResultsInfo');
+                if (infoEl) infoEl.textContent = translations.errorLoadingData || 'Error loading data';
+            })
+            .finally(()=> { if (pendingFetch === controller) pendingFetch = null; });
+    }
+
+    function updateSearchInfo(json) {
+        const infoEl = document.getElementById('searchResultsInfo');
+        if (infoEl) {
+            const start = ((json.page - 1) * json.per_page) + 1;
+            const end = start + ((json.keywords || []).length) - 1;
+            const total = json.total || 0;
+            const query = searchInput.value.trim();
+            
+            if (query) {
+                infoEl.textContent = `Found ${total} result${total !== 1 ? 's' : ''} for "${query}" (${start}–${end})`;
+            } else {
+                infoEl.textContent = `${translations.showing} ${start}–${end} ${translations.of} ${total} ${translations.keywords}`;
+            }
+        }
+    }
+
+    // Selection management
+    function updateSelection() {
+        const checkboxes = document.querySelectorAll('.keyword-checkbox:checked');
+        selectedKeywords.clear();
+        checkboxes.forEach(cb => selectedKeywords.add(parseInt(cb.value)));
+        
+        const hasSelection = selectedKeywords.size > 0;
+        bulkDeleteBtn.disabled = !hasSelection;
+        bulkUpdateBtn.disabled = !hasSelection;
+        
+        // Update select all checkbox
+        const allCheckboxes = document.querySelectorAll('.keyword-checkbox');
+        selectAllCheckbox.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+        selectAllCheckbox.indeterminate = checkboxes.length > 0 && checkboxes.length < allCheckboxes.length;
+    }
+
+    function toggleSelectAll() {
+        const isChecked = selectAllCheckbox.checked;
+        document.querySelectorAll('.keyword-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateSelection();
+    }
+
+    function selectAll() {
+        document.querySelectorAll('.keyword-checkbox').forEach(cb => {
+            cb.checked = true;
+        });
+        updateSelection();
+    }
+
+    function selectNone() {
+        document.querySelectorAll('.keyword-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+        updateSelection();
+    }
+
+    // Filter and sort functions
+    function applyFilters() {
+        currentFilters = {
+            status: statusFilter.value,
+            category: categoryFilter.value
+        };
+        currentPage = 1;
+        fetchPage(1);
+    }
+
+    function sortBy(field) {
+        if (currentSort === field) {
+            currentOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort = field;
+            currentOrder = 'asc';
+        }
+        sortBySelect.value = currentSort;
+        sortOrderSelect.value = currentOrder;
+        updateSortIcons();
+        fetchPage(currentPage);
+    }
+    
+    function applySorting() {
+        currentSort = sortBySelect.value;
+        currentOrder = sortOrderSelect.value;
+        currentPage = 1;
+        updateSortIcons();
+        fetchPage(1);
+    }
+
+    function changePageSize() {
+        currentPerPage = parseInt(perPageSelect.value);
+        currentPage = 1;
+        fetchPage(1);
+    }
+
+    function clearSearch() {
+        searchInput.value = '';
+        currentPage = 1;
+        fetchPage(1);
+    }
+
+    // Inline editing removed - now using modal edit
+
+    // Bulk operations
+    function bulkDelete() {
+        if (selectedKeywords.size === 0) return;
+        
+        if (!confirm(`${selectedKeywords.size} ${translations.deleteSelectedKeywords}`)) return;
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch('/api/keywords/bulk-delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ keyword_ids: Array.from(selectedKeywords) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${translations.successfullyDeleted} ${data.deleted_count} ${translations.keywords}`);
+                // ✅ Complete page reload with cache-busting
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert(translations.errorDeletingKeywords + ': ' + (data.error || translations.unknownError));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(translations.errorDeletingKeywords);
+        });
+    }
+
+    // Reset modal to "Add" mode
+    function resetKeywordModalToAdd() {
+        const modal = document.getElementById('addKeywordModal');
+        if (modal) {
+            modal.removeAttribute('data-edit-mode');
+            modal.removeAttribute('data-keyword-id');
+        }
+        
+        // Reset modal header
+        const modalHeader = document.querySelector('#addKeywordModal .add-item-modal-header h3');
+        if (modalHeader) {
+            modalHeader.innerHTML = `<i class="bi bi-key"></i> ${translations.addKeyword || 'Add Keyword'}`;
+        }
+        
+        // Reset submit button
+        const submitBtn = document.querySelector('#addKeywordModal .add-item-btn-submit');
+        if (submitBtn) {
+            submitBtn.textContent = translations.addKeyword || 'Add Keyword';
+            submitBtn.removeAttribute('data-keyword-id');
+            submitBtn.onclick = function() { 
+                if (typeof window.submitAddItem === 'function') {
+                    window.submitAddItem('keyword');
+                }
+            };
+        }
+        
+        // Clear Select2 fields
+        const wordsSelect = document.getElementById('keywordWords');
+        const categorySelect = document.getElementById('keywordCategory');
+        
+        if (wordsSelect && typeof jQuery !== 'undefined' && jQuery(wordsSelect).data('select2')) {
+            jQuery(wordsSelect).val(null).trigger('change');
+        }
+        
+        if (categorySelect && typeof jQuery !== 'undefined' && jQuery(categorySelect).data('select2')) {
+            jQuery(categorySelect).val(null).trigger('change');
+        }
+    }
+    
+    // Edit keyword in modal
+    function editKeywordInModal(keywordId) {
+        // Fetch keyword data
+        fetch(`/api/keywords/${keywordId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success || !data.keyword) {
+                    alert(translations.errorLoadingData || 'Error loading keyword data');
+                    return;
+                }
+                
+                const keyword = data.keyword;
+                
+                // Open the modal
+                if (typeof window.openAddItemModal === 'function') {
+                    window.openAddItemModal('addKeywordModal', 'keyword');
+                } else {
+                    // Fallback: open modal directly
+                    const modal = document.getElementById('addKeywordModal');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        modal.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+                
+                // Wait for modal to be ready, then populate fields
+                setTimeout(() => {
+                    populateKeywordModalForEdit(keyword);
+                }, 300);
+            })
+            .catch(error => {
+                console.error('Error loading keyword:', error);
+                alert(translations.errorLoadingData || 'Error loading keyword data');
+            });
+    }
+    
+    function populateKeywordModalForEdit(keyword) {
+        // Update modal header
+        const modalHeader = document.querySelector('#addKeywordModal .add-item-modal-header h3');
+        if (modalHeader) {
+            modalHeader.innerHTML = `<i class="bi bi-pencil"></i> ${translations.editKeyword || 'Edit Keyword'}`;
+        }
+        
+        // Update submit button
+        const submitBtn = document.querySelector('#addKeywordModal .add-item-btn-submit');
+        if (submitBtn) {
+            submitBtn.textContent = translations.updateKeyword || 'Update Keyword';
+            submitBtn.setAttribute('data-keyword-id', keyword.id);
+            submitBtn.onclick = function() { submitUpdateKeyword(keyword.id); };
+        }
+        
+        // Store edit mode flag
+        const modal = document.getElementById('addKeywordModal');
+        if (modal) {
+            modal.setAttribute('data-edit-mode', 'true');
+            modal.setAttribute('data-keyword-id', keyword.id);
+        }
+        
+        // Populate word IDs in Select2
+        const wordsSelect = document.getElementById('keywordWords');
+        if (wordsSelect && keyword.word_ids && keyword.word_ids.length > 0 && keyword.text) {
+            // Wait for Select2 to be initialized
+            setTimeout(() => {
+                if (typeof jQuery !== 'undefined' && jQuery(wordsSelect).data('select2')) {
+                    // Split keyword text into words and match with word_ids
+                    const wordTexts = keyword.text.split(/\s+/).filter(w => w.trim());
+                    
+                    // Create options for Select2
+                    jQuery(wordsSelect).empty();
+                    wordTexts.forEach((wordText, index) => {
+                        if (index < keyword.word_ids.length) {
+                            const wordId = keyword.word_ids[index];
+                            const option = new Option(wordText, wordId, true, true);
+                            jQuery(wordsSelect).append(option);
+                        }
+                    });
+                    jQuery(wordsSelect).trigger('change');
+                } else {
+                    // Retry if Select2 not ready
+                    setTimeout(() => populateKeywordModalForEdit(keyword), 200);
+                }
+            }, 500);
+        }
+        
+        // Populate category
+        const categorySelect = document.getElementById('keywordCategory');
+        if (categorySelect && keyword.category_id) {
+            setTimeout(() => {
+                if (typeof jQuery !== 'undefined' && jQuery(categorySelect).data('select2')) {
+                    // Fetch category name for the category_id
+                    fetchCategoryNameForId(keyword.category_id).then(categoryName => {
+                        if (categoryName) {
+                            jQuery(categorySelect).empty();
+                            const option = new Option(categoryName, keyword.category_id, true, true);
+                            jQuery(categorySelect).append(option);
+                            jQuery(categorySelect).trigger('change');
+                        }
+                    });
+                } else {
+                    setTimeout(() => populateKeywordModalForEdit(keyword), 200);
+                }
+            }, 500);
+        }
+    }
+    
+    function fetchWordTextsForIds(wordIds) {
+        if (!wordIds || wordIds.length === 0) {
+            return Promise.resolve([]);
+        }
+        
+        // Use the keyword text we already have and split it
+        // But we need to match word IDs to words - let's create an API call
+        const placeholders = wordIds.map(() => '?').join(',');
+        return fetch(`/api/words?ids=${wordIds.join(',')}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.words) {
+                    // Sort words by the order of word_ids
+                    const wordMap = {};
+                    data.words.forEach(w => {
+                        wordMap[w.id] = w.word;
+                    });
+                    return wordIds.map(id => wordMap[id] || '').filter(w => w);
+                }
+                return [];
+            })
+            .catch(() => {
+                // Fallback: if API fails, return empty array
+                return [];
+            });
+    }
+    
+    function fetchCategoryNameForId(categoryId) {
+        if (!categoryId) {
+            return Promise.resolve(null);
+        }
+        
+        // Use the categories list we already loaded
+        if (categories && categories.length > 0) {
+            const category = categories.find(c => c.id === categoryId);
+            if (category) {
+                return Promise.resolve(category.name);
+            }
+        }
+        
+        // Fallback: fetch from API
+        return fetch(`/api/categories/${categoryId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.category) {
+                    return data.category.name;
+                }
+                return null;
+            })
+            .catch(() => null);
+    }
+    
+    function submitUpdateKeyword(keywordId) {
+        const wordsSelect = document.getElementById('keywordWords');
+        const categorySelect = document.getElementById('keywordCategory');
+        
+        if (!wordsSelect) {
+            alert(translations.errorLoadingData || 'Words select not found');
+            return;
+        }
+        
+        // Get selected word IDs from Select2
+        const selectedWordIds = jQuery(wordsSelect).val() || [];
+        const categoryId = jQuery(categorySelect).val() || null;
+        
+        if (selectedWordIds.length < 2) {
+            alert(translations.mustSelectAtLeastTwoWords || 'You must select at least 2 words');
+            return;
+        }
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        
+        fetch(`/api/keywords/${keywordId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                word_ids: selectedWordIds,
+                category_id: categoryId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal first
+                if (typeof window.closeAddItemModal === 'function') {
+                    window.closeAddItemModal('addKeywordModal');
+                }
+                resetKeywordModalToAdd(); // Reset modal state
+                
+                // Clear selections
+                selectedKeywords.clear();
+                updateSelection();
+                
+                // Refresh data immediately with cache-busting
+                // Use a small delay to ensure modal is closed before refresh
+                setTimeout(() => {
+                    fetchPage(currentPage);
+                }, 50);
+                
+                // Show success message after refresh starts (non-blocking)
+                setTimeout(() => {
+                    alert(translations.keywordUpdatedSuccessfully || 'Keyword updated successfully');
+                }, 200);
+            } else {
+                alert(translations.errorUpdatingKeyword + ': ' + (data.error || translations.unknownError));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(translations.errorUpdatingKeyword);
+        });
+    }
+    
+    function bulkUpdate() {
+        if (selectedKeywords.size === 0) return;
+        
+        // If only one keyword selected, open edit modal
+        if (selectedKeywords.size === 1) {
+            const keywordId = Array.from(selectedKeywords)[0];
+            editKeywordInModal(keywordId);
+            return;
+        }
+        
+        // For multiple keywords, show a message and edit the first one
+        if (confirm(`${translations.multipleKeywordsSelected || 'Multiple keywords selected'}. ${translations.editFirstKeyword || 'Edit the first keyword?'}`)) {
+            const keywordId = Array.from(selectedKeywords)[0];
+            editKeywordInModal(keywordId);
+        }
+    }
+
+    // Export functions
+    function exportKeywords() {
+        const selectedIds = Array.from(selectedKeywords);
+        const url = new URL('/api/keywords/export', window.location.origin);
+        url.searchParams.set('format', 'csv');
+        if (selectedIds.length > 0) {
+            selectedIds.forEach(id => url.searchParams.append('ids', id));
+        }
+        
+        window.open(url.toString(), '_blank');
+    }
+
+    function mergeAllDuplicates() {
+        if (!confirm(translations.mergeAllDuplicatesConfirm + '\n\n' + translations.mergeAllDuplicatesDetails)) return;
+        
+        // Show loading indicator
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>' + translations.merging;
+        
+        fetch('/api/keywords/merge-all-duplicates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            
+            if (data.success) {
+                alert(`✅ ${translations.successfullyMergedAll}\n\n${translations.merged}: ${data.merged_count} ${translations.keywords}\n${translations.duplicateSets}: ${data.duplicate_sets}\n\n${translations.refreshingPage}`);
+                // ✅ Complete page reload with cache-busting
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert('❌ ' + translations.errorMergingDuplicatesColon + ': ' + (data.error || translations.unknownError));
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            console.error('Error:', error);
+            alert('❌ ' + translations.errorMergingDuplicatesColon + ': ' + error.message);
+        });
+    }
+
+    // Global functions for template buttons
+    window.viewKeyword = function(id){ 
+        window.location.href = `/keywords/${id}`;
+    };
+    
+    window.editKeyword = function(id) {
+        window.location.href = `/keywords/${id}/edit`;
+    };
+    
+    window.deleteKeyword = function(id){
+        if (!confirm(translations.deleteKeywordConfirm + id + '?')) return;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        fetch(`/api/keywords/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+            .then(r=>r.json()).then(j=>{
+                if (j.success) {
+                    alert(translations.keywordDeletedSuccessfully);
+                    // ✅ Complete page reload with cache-busting
+                    window.location.href = window.location.pathname + '?t=' + Date.now();
+                } else {
+                    alert(j.error || translations.failedToDelete);
+                }
+            }).catch(e=>alert(translations.error + ': ' + e.message));
+    };
+    
+    // ✅ NEW: Update keyword associations for all files
+    window.updateKeywordAssociations = function() {
+        const btn = document.getElementById('updateKeywordsBtn');
+        if (!btn) return;
+        
+        // Confirm action
+        if (!confirm(translations.updateKeywordAssociationsConfirm || 
+                    'This will scan all files in the database and update keyword associations. This may take a while. Continue?')) {
+            return;
+        }
+        
+        // Disable button and show loading state
+        const originalHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> ' + (translations.updating || 'Updating...');
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        
+        fetch('/api/keywords/update-associations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => {
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // If not JSON, try to get text for error message
+                return response.text().then(text => {
+                    throw new Error(`Server returned non-JSON response (${response.status}): ${text.substring(0, 100)}`);
+                });
+            }
+            
+            // Check if response is OK
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+                });
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            
+            if (data.success) {
+                let message = (translations.keywordAssociationsUpdated || 'Keyword associations updated successfully!') + '\n\n' +
+                    (translations.filesProcessed || 'Files processed') + ': ' + data.files_processed + ' / ' + data.total_files + '\n' +
+                    (translations.newAssociations || 'New associations') + ': ' + data.new_associations + '\n' +
+                    (translations.keywordsChecked || 'Keywords checked') + ': ' + data.keywords_checked;
+                if (data.errors > 0) {
+                    message += '\n' + (translations.errors || 'Errors') + ': ' + data.errors;
+                }
+                alert('✅ ' + message);
+                // Reload page to show updated data
+                window.location.href = window.location.pathname + '?t=' + Date.now();
+            } else {
+                alert('❌ ' + (translations.error || 'Error') + ': ' + (data.error || translations.unknownError || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            console.error('Error updating keyword associations:', error);
+            alert('❌ ' + (translations.error || 'Error') + ': ' + error.message);
+        });
+    };
+    
+    window.mergeDuplicates = function(keywordText){
+        if (!confirm(`${translations.mergeAllDuplicatesConfirm} "${keywordText}"? This will combine usage counts and keep the first occurrence.`)) return;
+        
+        fetch('/api/keywords/merge-duplicates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keyword_text: keywordText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`${translations.successfullyMerged} ${data.merged_count} ${translations.duplicateKeywordsFor} "${keywordText}". ${translations.totalUsage}: ${data.total_usage}.`);
+                fetchPage(currentPage);
+            } else {
+                alert(translations.errorMergingDuplicates + ': ' + (data.error || translations.unknownError));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(translations.errorMergingDuplicates);
+        });
+    };
+
+    // Expose functions for global access
+    window.updateSelection = updateSelection;
+    window.toggleSelectAll = toggleSelectAll;
+    window.selectAll = selectAll;
+    window.selectNone = selectNone;
+    window.applyFilters = applyFilters;
+    window.applySorting = applySorting;
+    window.sortBy = sortBy;
+    window.changePageSize = changePageSize;
+    window.clearSearch = clearSearch;
+    window.bulkDelete = bulkDelete;
+    window.bulkUpdate = bulkUpdate;
+    window.editKeywordInModal = editKeywordInModal;
+    window.resetKeywordModalToAdd = resetKeywordModalToAdd;
+    window.exportKeywords = exportKeywords;
+    window.mergeAllDuplicates = mergeAllDuplicates;
+
+    // Initialize the application
+    init();
+})();
+</script>
+{% endblock %}

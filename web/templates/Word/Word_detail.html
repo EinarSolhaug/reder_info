@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Word Details') }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href="{{ url_for('index') }}">
+        <i class="bi bi-house-door me-1"></i>{{ _('Home') }}
+    </a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{{ url_for('words_list') }}">
+        <i class="bi bi-book me-1"></i>{{ _('Words') }}
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">
+    {{ word.word if word else _('Word Details') }}
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="bi bi-book me-2"></i>
+            {{ _('Word Details') }}
+        </h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('words_list') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i>
+            {{ _('Back to Words') }}
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="stat-card">
+            <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>{{ _('Word Information') }}</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ _('Word ID') }}</label>
+                        <p class="form-control-plaintext"><strong>{{ word.id }}</strong></p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ _('Usage Count') }}</label>
+                        <p class="form-control-plaintext">
+                            <span class="badge bg-info fs-6">{{ word.usage_count|default(0) }}</span>
+                            <span class="text-muted ms-2">{{ _('files') }}</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">{{ _('Status') }}</label>
+                        <p class="form-control-plaintext">
+                            {% if word.usage_count and word.usage_count > 0 %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>{{ _('Active') }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-dash-circle me-1"></i>{{ _('Unused') }}
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-muted">{{ _('Word Text') }}</label>
+                <p class="form-control-plaintext">
+                    <strong class="fs-5">{{ word.word }}</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5 class="mb-3"><i class="bi bi-gear me-2"></i>{{ _('Actions') }}</h5>
+            <div class="d-grid gap-2">
+                <button class="btn btn-success" onclick="editWord({{ word.id }})">
+                    <i class="bi bi-pencil me-2"></i> {{ _('Edit Word') }}
+                </button>
+       <!--         <button class="btn btn-outline-danger" onclick="deleteWord({{ word.id }})">
+                    <i class="bi bi-trash me-2"></i> {{ _('Delete Word') }}
+                </button>
+                -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Translations for JavaScript
+const translations = {
+    deleteConfirm: {{ _('Are you sure you want to delete this word?')|tojson }},
+    wordDeletedSuccessfully: {{ _('Word deleted successfully!')|tojson }},
+    error: {{ _('Error')|tojson }},
+    editWord: {{ _('Edit Word')|tojson }},
+    errorLoadingWord: {{ _('Error loading word')|tojson }}
+};
+
+// ✅ SECURITY: Helper function to get CSRF token
+function getCSRFToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    return metaTag ? metaTag.getAttribute('content') : '';
+}
+
+function editWord(id) {
+    // Navigate to words list page - user can edit from there
+    // Or we could pass a parameter to auto-trigger edit, but for simplicity just navigate
+    window.location.href = `{{ url_for('words_list') }}`;
+}
+
+function deleteWord(id) {
+    if (!confirm(translations.deleteConfirm)) return;
+    
+    fetch(`/api/words/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert(translations.wordDeletedSuccessfully);
+                window.location.href = "{{ url_for('words_list') }}";
+            } else {
+                alert(translations.error + ': ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(e => {
+            console.error('Error deleting word:', e);
+            alert(translations.error + ': ' + e.message);
+        });
+}
+</script>
+{% endblock %}
+

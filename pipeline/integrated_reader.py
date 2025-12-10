@@ -18,7 +18,7 @@ from typing import List, Dict, Optional
 from queue import Queue, Empty
 import sys
 from tqdm import tqdm
-from concurrent.futures import Future, ThreadPoolExecutor
+from concurrent.futures import TimeoutError
 
 # Add this import with other core imports
 from core.storage_utils import recursively_store_extracted
@@ -102,7 +102,11 @@ class IntegratedFileReader:
                 use_priority: bool = True,
                 enable_storage: bool = False,
                 storage_source: str = "default",
-                storage_side: str = "default"):
+                storage_side: str = "default",
+                thread_manager: ThreadManager = None,
+                pool_manager: MultiprocessingManager = None,
+                process_manager: ProcessManager = None,
+                async_manager: AsyncManager = None):
         """
         Initialize the multi-concurrency file reader
         
@@ -124,11 +128,17 @@ class IntegratedFileReader:
         self.storage_source = storage_source
         self.storage_side = storage_side
         
-        # Initialize all four concurrency managers
-        self.thread_manager = ThreadManager()
-        self.pool_manager = MultiprocessingManager()
-        self.process_manager = ProcessManager()
-        self.async_manager = AsyncManager()
+        # Initialize all four concurrency managers (allow re-use from hub)
+        self.thread_manager = thread_manager or ThreadManager()
+        self.pool_manager = pool_manager or MultiprocessingManager()
+        self.process_manager = process_manager or ProcessManager()
+        self.async_manager = async_manager or AsyncManager()
+        self._owns_managers = {
+            "thread": thread_manager is None,
+            "pool": pool_manager is None,
+            "process": process_manager is None,
+            "async": async_manager is None,
+        }
         
         # Storage pipeline (lazy initialization)
         self.storage_pipeline = None
@@ -170,6 +180,67 @@ class IntegratedFileReader:
             }
         )
         
+    class ThreadTask:
+        """Lightweight Future-like adapter backed by ThreadManager threads."""
+        def __init__(self, name: str, priority: ThreadPriority):
+            self.name = name
+            self.priority = priority
+            self.thread_id: Optional[str] = None
+            self._event = threading.Event()
+            self._result: Any = None
+            self._exception: Optional[BaseException] = None
+
+        def set_result(self, result: Any):
+            self._result = result
+            self._event.set()
+
+        def set_exception(self, exc: BaseException):
+            self._exception = exc
+            self._event.set()
+
+        def done(self) -> bool:
+            return self._event.is_set()
+
+        def result(self, timeout: Optional[float] = None) -> Any:
+            if not self._event.wait(timeout):
+                raise TimeoutError(f"Thread task '{self.name}' timed out")
+            if self._exception:
+                raise self._exception
+            return self._result
+
+    def _submit_thread_task(self, func: Callable, *args, priority: ThreadPriority = ThreadPriority.NORMAL, **kwargs) -> "ThreadTask":
+        """Submit a callable to run on a managed thread with priority tracking."""
+        task = self.ThreadTask(name=getattr(func, "__name__", "thread_task"), priority=priority)
+
+        def _runner():
+            try:
+                res = func(*args, **kwargs)
+                task.set_result(res)
+            except BaseException as exc:  # capture any exception
+                task.set_exception(exc)
+                raise
+
+        thread_id = self.thread_manager.create_thread(
+            name=task.name,
+            target=_runner,
+            args=(),
+            kwargs={},
+            priority=priority,
+            auto_start=True
+        )
+        task.thread_id = thread_id
+        return task
+
+    def _as_completed_thread_tasks(self, tasks: List["ThreadTask"], timeout: float = 0.5) -> List["ThreadTask"]:
+        """Return tasks that completed within timeout (polling-based)."""
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            done = [t for t in tasks if t.done()]
+            if done:
+                return done
+            time.sleep(0.01)
+        return [t for t in tasks if t.done()]
+
     def initialize(self):
         """Initialize all four concurrency managers"""
         if self.is_initialized:
@@ -179,11 +250,8 @@ class IntegratedFileReader:
             logger.info("Initializing all concurrency managers...")
             
             # Initialize AsyncManager first (needs event loop)
-            self.async_manager.initialize()
-            
-            # Create thread pool for I/O-bound tasks (small files)
-            # We'll use ThreadPoolExecutor for thread management
-            self.thread_executor = ThreadPoolExecutor(max_workers=self.max_workers, thread_name_prefix="FileReader")
+            if self.async_manager and self._owns_managers.get("async", False):
+                self.async_manager.initialize()
             
             # Create multiprocessing pool for CPU-intensive tasks (large files, PDFs, images)
             pool_workers = min(self.max_workers, 4)  # Limit process workers
@@ -195,9 +263,12 @@ class IntegratedFileReader:
             
             # Start monitoring if enabled
             if self.enable_monitoring:
-                self.thread_manager.start_monitoring(interval=self.monitor_interval)
-                self.pool_manager.start_monitoring(interval=self.monitor_interval)
-                self.process_manager.start_monitoring(interval=self.monitor_interval)
+                if hasattr(self.thread_manager, "start_monitoring"):
+                    self.thread_manager.start_monitoring(interval=self.monitor_interval)
+                if hasattr(self.pool_manager, "start_monitoring"):
+                    self.pool_manager.start_monitoring(interval=self.monitor_interval)
+                if hasattr(self.process_manager, "start_monitoring"):
+                    self.process_manager.start_monitoring(interval=self.monitor_interval)
                 
                 # Start async monitoring task (using thread instead of async to avoid warnings)
                 def monitor_loop_sync():
@@ -365,10 +436,11 @@ class IntegratedFileReader:
                     return None
             else:
                 # Use thread pool for I/O-bound tasks
-                future = self.thread_executor.submit(
+                future = self._submit_thread_task(
                     self._process_file_worker,
                     file_info,
-                    0
+                    0,
+                    priority=ThreadPriority.NORMAL
                 )
                 result = future.result(timeout=300)
             
@@ -553,12 +625,13 @@ class IntegratedFileReader:
         logger.info(f"Created {len(batches)} batches for {len(batch_files)} small files")
         logger.info(f"Individual files to process: {len(individual_files)}")
 
-        # Submit batches to thread pool (I/O-bound)
+        # Submit batches to thread pool (I/O-bound) using ThreadManager
         for batch, priority in batches:
-            future = self.thread_executor.submit(
+            future = self._submit_thread_task(
                 self._process_batch,
                 batch,
-                0
+                0,
+                priority=ThreadPriority.NORMAL
             )
             future_to_file[future] = ({"name": f"Batch of {len(batch)} files"}, priority)
 
@@ -582,11 +655,12 @@ class IntegratedFileReader:
                     else:
                         logger.error(f"❌ Failed to submit pool task for {file_info.get('name', 'unknown')}")
                 else:
-                    # Use thread pool for I/O-bound tasks
-                    future = self.thread_executor.submit(
+                    # Use thread manager for I/O-bound tasks
+                    future = self._submit_thread_task(
                         self._process_file_worker,
                         file_info,
-                        0
+                        0,
+                        priority=ThreadPriority.NORMAL
                     )
                     future_to_file[future] = (file_info, priority)
                     submitted_count += 1
@@ -663,8 +737,6 @@ class IntegratedFileReader:
         # Process as they complete with circuit breaker
         logger.info(f"Processing {len(files)} files in parallel (max {self.max_workers} workers, priority-based)...")
         
-        from concurrent.futures import as_completed
-        
         completed = 0
         # Use total_submitted for progress bar to account for batches
         # But we'll track actual file count separately
@@ -702,17 +774,13 @@ class IntegratedFileReader:
                     for future in done_futures:
                         processed_futures.add(future)
                 else:
-                    # Wait a bit and use as_completed with timeout
-                    try:
-                        remaining = [f for f in all_futures if f not in processed_futures]
-                        if remaining:
-                            # Wait for at least one to complete
-                            for future in as_completed(remaining, timeout=0.5):
-                                processed_futures.add(future)
-                                break  # Process one, then check again
-                    except TimeoutError:
-                        # Check again if any completed
-                        continue
+                    remaining = [f for f in all_futures if f not in processed_futures]
+                    if remaining:
+                        # Wait for at least one to complete
+                        done_any = self._as_completed_thread_tasks(remaining, timeout=0.5)
+                        for future in done_any:
+                            processed_futures.add(future)
+                            break  # Process one, then check again
             
             if len(processed_futures) < len(all_futures):
                 logger.error(f"❌ Only processed {len(processed_futures)}/{len(all_futures)} futures after {iteration} iterations!")
@@ -965,16 +1033,15 @@ class IntegratedFileReader:
                         processed_futures.add(future)
                     
                     if not done_futures:
-                        # Wait a bit and check again
+                        # Wait a bit and check again using custom waiter
                         time.sleep(0.1)
-                        # Try as_completed with short timeout
-                        try:
-                            for future in as_completed(remaining_futures, timeout=1):
-                                remaining_futures.remove(future)
+                        done_any = self._as_completed_thread_tasks(remaining_futures, timeout=1)
+                        if done_any:
+                            for future in done_any:
+                                if future in remaining_futures:
+                                    remaining_futures.remove(future)
                                 processed_futures.add(future)
                                 break
-                        except TimeoutError:
-                            continue
                 
                 if remaining_futures:
                     logger.error(f"❌ {len(remaining_futures)} futures still not completed after waiting!")
@@ -1485,10 +1552,6 @@ class IntegratedFileReader:
     def stop_processing(self):
         """Stop all file processing across all managers"""
         if self.is_initialized:
-            # Stop thread executor
-            if hasattr(self, 'thread_executor'):
-                self.thread_executor.shutdown(wait=False, cancel_futures=True)
-            
             # Stop all managers
             self.thread_manager.stop_all(timeout=10.0)
             self.pool_manager.stop_all_pools()
@@ -1548,23 +1611,26 @@ class IntegratedFileReader:
             
             # Stop monitoring
             if self.enable_monitoring:
-                self.thread_manager.stop_monitoring()
-                self.pool_manager.stop_monitoring()
-                self.process_manager.stop_monitoring()
+                if hasattr(self.thread_manager, "stop_monitoring"):
+                    self.thread_manager.stop_monitoring()
+                if hasattr(self.pool_manager, "stop_monitoring"):
+                    self.pool_manager.stop_monitoring()
+                if hasattr(self.process_manager, "stop_monitoring"):
+                    self.process_manager.stop_monitoring()
                 # Async manager monitoring is handled by thread, no need to stop separately
                 if hasattr(self, 'monitor_task_id') and self.monitor_task_id:
                     # Thread will stop automatically when daemon=True
                     pass
             
-            # Shutdown thread executor
-            if hasattr(self, 'thread_executor'):
-                self.thread_executor.shutdown(wait=True)
-            
-            # Shutdown all managers
-            self.thread_manager.shutdown()
-            self.pool_manager.shutdown()
-            self.process_manager.shutdown()
-            self.async_manager.shutdown()
+            # Shutdown all managers (only those we created)
+            if self._owns_managers.get("thread", False):
+                self.thread_manager.shutdown()
+            if self._owns_managers.get("pool", False):
+                self.pool_manager.shutdown()
+            if self._owns_managers.get("process", False):
+                self.process_manager.shutdown()
+            if self._owns_managers.get("async", False):
+                self.async_manager.shutdown()
             
             logger.info("All managers shut down successfully")
     

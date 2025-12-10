@@ -1,0 +1,468 @@
+<!-- templates/email_words.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ _('Email-like Words') }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="bi bi-envelope-at me-2"></i>
+            {{ _('Email Addresses') }} ({{ total_words }})
+        </h1>
+       
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-outline-primary" onclick="exportData()" title="{{ _('Export all') }} {{ total_words }} {{ _('emails from database') }}">
+            <i class="bi bi-download"></i> {{ _('Export All') }} ({{ total_words }})
+        </button>
+        <button class="btn btn-outline-secondary" onclick="copyToClipboard()" title="{{ _('Copy all') }} {{ total_words }} {{ _('emails from database to clipboard') }}">
+            <i class="bi bi-clipboard"></i> {{ _('Copy All') }} ({{ total_words }})
+        </button>
+        <button class="btn btn-outline-success" onclick="location.reload()" title="{{ _('Refresh data') }}">
+            <i class="bi bi-arrow-clockwise"></i> {{ _('Refresh') }}
+        </button>
+    </div>
+</div>
+<div class="row g-4">
+    <!-- Statistics Card -->
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon stat-card-icon-primary me-3">
+                    <i class="bi bi-envelope-at"></i>
+                </div>
+                <div>
+                    <div class="stat-card-title">{{ _('Unique Email-like Words') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ total_words|number_format }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current Page Card -->
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon stat-card-icon-success me-3">
+                    <i class="bi bi-list-ol"></i>
+                </div>
+                <div>
+                    <div class="stat-card-title">{{ _('Words on This Page') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ email_words|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Page Info Card -->
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon stat-card-icon-warning me-3">
+                    <i class="bi bi-file-text"></i>
+                </div>
+                <div>
+                    <div class="stat-card-title">{{ _('Current Page') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ page }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total Pages Card -->
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="d-flex align-items-center">
+                <div class="stat-card-icon stat-card-icon-secondary me-3">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <div>
+                    <div class="stat-card-title">{{ _('Total Pages') }}</div>
+                    <h3 class="stat-card-value mb-0">{{ total_pages }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Words Table -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">{{ _('Email-like Words Found') }}</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" id="searchInput" class="form-control form-control-sm" 
+                           placeholder="{{ _('Search email addresses...') }}" style="width: 250px;">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="clearSearch()">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            {% if email_words %}
+            <div class="table-scrollable">
+                <table class="table table-hover custom-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 35%;">{{ _('Email Address') }}</th>
+                            <th style="width: 10%;">{{ _('Usage Count') }}</th>
+                            <th style="width: 15%;">{{ _('Validation') }}</th>
+                            <th style="width: 15%;">{{ _('Domain') }}</th>
+                            <th style="width: 20%;">{{ _('Actions') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="emailTableBody">
+                        {% for word_row in email_words %}
+                        {% set word = word_row[0] if word_row is iterable else word_row %}
+                        {% set usage_count = word_row[1] if word_row is iterable and word_row|length > 1 else 0 %}
+                        {% set number = ((page - 1) * 20) + loop.index %}
+                        <tr class="email-row" data-word="{{ word }}">
+                            <td><span class="badge bg-secondary">{{ number }}</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-at me-2 text-primary"></i>
+                                    <span class="email-address fw-medium">{{ word }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if usage_count > 10 %}bg-success{% elif usage_count > 0 %}bg-info{% else %}bg-secondary{% endif %}">
+                                    {{ usage_count }} {{ _('files') }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    {{ _('Valid') }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ word.split('@')[1] if '@' in word else _('N/A') }}</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="copyEmail('{{ word }}')" title="{{ _('Copy') }}">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="searchInFiles('{{ word }}')" title="{{ _('Search in Files') }}">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success" onclick="addToContacts('{{ word }}')" title="{{ _('Add to Contacts') }}">
+                                        <i class="bi bi-person-plus"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {{ _('Showing') }} {{ email_words|length }} {{ _('of') }} {{ total_words|number_format }} {{ _('email-like words') }} ({{ _('Page') }} {{ page }} {{ _('of') }} {{ total_pages }})
+                </small>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="refreshPage()" title="{{ _('Refresh') }}">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-outline-info" onclick="showHelp()" title="{{ _('Help') }}">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if total_pages > 1 %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="{{ _('Page navigation') }}">
+                    <ul class="pagination">
+                        <!-- Previous -->
+                        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                            <a class="page-link" href="?page=1" aria-label="{{ _('First') }}">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                            <a class="page-link" href="?page={{ page-1 }}" aria-label="{{ _('Previous') }}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+
+                        <!-- Page numbers -->
+                        {% for p in range(1, total_pages + 1) %}
+                            {% if p == page %}
+                                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                            {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                                <li class="page-item"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+                            {% elif p == page - 3 or p == page + 3 %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        <!-- Next -->
+                        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                            <a class="page-link" href="?page={{ page+1 }}" aria-label="{{ _('Next') }}">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                            <a class="page-link" href="?page={{ total_pages }}" aria-label="{{ _('Last') }}">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                <h5>{{ _('No Email-like Words Found') }}</h5>
+                <p class="mb-3">{{ _('No words matching the email pattern (@ and .) were found in the database.') }}</p>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="refreshPage()">
+                        <i class="bi bi-arrow-clockwise me-1"></i> {{ _('Refresh') }}
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="window.location.href='/dashboard'">
+                        <i class="bi bi-house me-1"></i> {{ _('Go to Dashboard') }} 
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.email-row');
+    
+    rows.forEach(row => {
+        const email = row.querySelector('.email-address').textContent.toLowerCase();
+        if (email.includes(searchTerm)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.querySelectorAll('.email-row').forEach(row => {
+        row.style.display = '';
+    });
+}
+
+function copyEmail(email) {
+    navigator.clipboard.writeText(email).then(() => {
+        // Show temporary success message
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 1000);
+    });
+}
+
+async function copyToClipboard() {
+    // ✅ UPDATED: Fetch ALL emails from database
+    try {
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+        button.disabled = true;
+        
+        const response = await fetch('/api/email-words/all');
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to fetch emails');
+        }
+        
+        const emails = data.emails.map(item => item.email).join('\n');
+        
+        await navigator.clipboard.writeText(emails);
+        
+        button.innerHTML = '<i class="bi bi-check-circle"></i> Copied!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+            button.disabled = false;
+        }, 2000);
+        
+        // Show toast notification
+        showToast(`Copied ${data.total} email addresses to clipboard!`, 'success');
+    } catch (error) {
+        console.error('Error copying emails:', error);
+        alert(`Error copying emails: ${error.message}`);
+        const button = event.target.closest('button');
+        button.innerHTML = '<i class="bi bi-clipboard"></i> Copy All';
+        button.disabled = false;
+    }
+}
+
+function searchInFiles(email) {
+    // Redirect to advanced search with email pre-filled
+    window.location.href = `/search/advanced?q=${encodeURIComponent(email)}`;
+}
+
+async function exportData() {
+    // ✅ UPDATED: Fetch ALL emails from database for export
+    try {
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Exporting...';
+        button.disabled = true;
+        
+        const response = await fetch('/api/email-words/all');
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to fetch emails');
+        }
+        
+        // Create CSV content with usage counts
+        let csvContent = "Email Address,Usage Count,Files\n";
+        data.emails.forEach((item, index) => {
+            csvContent += `"${item.email}",${item.usage_count},${item.usage_count}\n`;
+        });
+        
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `email_words_export_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        button.innerHTML = '<i class="bi bi-check-circle"></i> Exported!';
+        button.classList.remove('btn-outline-primary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+            button.disabled = false;
+        }, 2000);
+        
+        // Show toast notification
+        showToast(`Exported ${data.total} email addresses to CSV!`, 'success');
+    } catch (error) {
+        console.error('Error exporting emails:', error);
+        alert(`Error exporting emails: ${error.message}`);
+        const button = event.target.closest('button');
+        button.innerHTML = '<i class="bi bi-download"></i> Export CSV';
+        button.disabled = false;
+    }
+}
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'info'} alert-dismissible fade show`;
+    toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    toastContainer.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    document.body.appendChild(container);
+    return container;
+}
+
+function copyAllEmails() {
+    copyToClipboard();
+}
+
+// Add to contacts
+function addToContacts(email) {
+    fetch('/contacts/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email: email})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.remove('btn-outline-success');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-success');
+            }, 2000);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Additional utility functions
+function refreshPage() {
+    // ✅ Complete page reload with cache-busting
+    window.location.href = window.location.pathname + '?t=' + Date.now();
+}
+
+function showHelp() {
+    alert(`Email Words Page Help:
+
+• Use the search box to filter email addresses on the current page
+• Click the copy button to copy individual email addresses
+• Use "Copy All" to copy all visible email addresses
+• Export button downloads the current page data as CSV
+• Use pagination to navigate through all email words
+• Click "Search in Files" to find where each email appears in documents
+
+Keyboard Shortcuts:
+• Ctrl+F: Focus search box
+• Ctrl+A: Select all visible emails
+• Ctrl+C: Copy selected emails`);
+}
+
+// Enhanced keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    if (e.ctrlKey && e.key === 'a' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        copyAllEmails();
+    }
+});
+</script>
+{% endblock %}

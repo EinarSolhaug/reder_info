@@ -1,0 +1,931 @@
+<!-- templates/base.html - Enhanced with smooth animations and better UX -->
+<!DOCTYPE html>
+<html lang="{{ current_language }}" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}{{ _('File Analysis System') }}{% endblock %}</title>
+    <link href="{{ url_for('static', filename='fonts/inter.css') }}" rel="stylesheet">
+    {% if current_language == 'ar' %}
+    <link href="{{ url_for('static', filename='fonts/noto-arabic.css') }}" rel="stylesheet">
+    {% endif %}
+        <!-- Local Bootstrap CSS -->
+<link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" >
+
+<!-- Local Bootstrap Icons -->
+<link href="{{ url_for('static', filename='icons/bootstrap-icons.css') }}" rel="stylesheet" >
+
+<!-- Local CSS Styles -->
+<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" >
+<!-- Enhanced Message System -->
+<link href="{{ url_for('static', filename='css/message_system.css') }}" rel="stylesheet" >
+<!-- Chart Export Styles -->
+<link href="{{ url_for('static', filename='css/chart-export.css') }}" rel="stylesheet" >
+
+<!-- Theme Colors - Initialize with server-side colors for immediate application -->
+<script>
+    // Pass initial theme colors to ThemeManager (prevents flash of unstyled content)
+    window.INITIAL_THEME_COLORS = {};
+    {% if user_settings %}
+    {% set theme = user_settings.get('theme') %}
+    {% if theme %}
+    // Primary Colors
+    {% if theme.get('primary_color') %}window.INITIAL_THEME_COLORS['primary_color'] = {{ theme.get('primary_color')|tojson }};{% endif %}
+    {% if theme.get('secondary_color') %}window.INITIAL_THEME_COLORS['secondary_color'] = {{ theme.get('secondary_color')|tojson }};{% endif %}
+    {% if theme.get('success_color') %}window.INITIAL_THEME_COLORS['success_color'] = {{ theme.get('success_color')|tojson }};{% endif %}
+    {% if theme.get('danger_color') %}window.INITIAL_THEME_COLORS['danger_color'] = {{ theme.get('danger_color')|tojson }};{% endif %}
+    {% if theme.get('warning_color') %}window.INITIAL_THEME_COLORS['warning_color'] = {{ theme.get('warning_color')|tojson }};{% endif %}
+    
+    // Background & Text Colors
+    {% if theme.get('bg_light') %}window.INITIAL_THEME_COLORS['bg_light'] = {{ theme.get('bg_light')|tojson }};{% endif %}
+    {% if theme.get('text_dark') %}window.INITIAL_THEME_COLORS['text_dark'] = {{ theme.get('text_dark')|tojson }};{% endif %}
+    {% if theme.get('border_color') %}window.INITIAL_THEME_COLORS['border_color'] = {{ theme.get('border_color')|tojson }};{% endif %}
+    
+    // Gradient Colors
+    {% if theme.get('gradient_start') %}window.INITIAL_THEME_COLORS['gradient_start'] = {{ theme.get('gradient_start')|tojson }};{% endif %}
+    {% if theme.get('gradient_end') %}window.INITIAL_THEME_COLORS['gradient_end'] = {{ theme.get('gradient_end')|tojson }};{% endif %}
+    {% if theme.get('gradient_direction') %}window.INITIAL_THEME_COLORS['gradient_direction'] = {{ theme.get('gradient_direction')|tojson }};{% endif %}
+    
+    // Sidebar Colors
+    {% if theme.get('sidebar_bg') %}window.INITIAL_THEME_COLORS['sidebar_bg'] = {{ theme.get('sidebar_bg')|tojson }};{% endif %}
+    {% if theme.get('sidebar_text') %}window.INITIAL_THEME_COLORS['sidebar_text'] = {{ theme.get('sidebar_text')|tojson }};{% endif %}
+    {% if theme.get('sidebar_active') %}window.INITIAL_THEME_COLORS['sidebar_active'] = {{ theme.get('sidebar_active')|tojson }};{% endif %}
+    {% if theme.get('sidebar_hover') %}window.INITIAL_THEME_COLORS['sidebar_hover'] = {{ theme.get('sidebar_hover')|tojson }};{% endif %}
+    
+    // Button Colors
+    {% if theme.get('btn_primary') %}window.INITIAL_THEME_COLORS['btn_primary'] = {{ theme.get('btn_primary')|tojson }};{% endif %}
+    {% if theme.get('btn_primary_hover') %}window.INITIAL_THEME_COLORS['btn_primary_hover'] = {{ theme.get('btn_primary_hover')|tojson }};{% endif %}
+    {% if theme.get('btn_secondary') %}window.INITIAL_THEME_COLORS['btn_secondary'] = {{ theme.get('btn_secondary')|tojson }};{% endif %}
+    {% if theme.get('btn_secondary_hover') %}window.INITIAL_THEME_COLORS['btn_secondary_hover'] = {{ theme.get('btn_secondary_hover')|tojson }};{% endif %}
+    
+    // Chart Colors
+    {% for i in range(1, 11) %}
+    {% if theme.get('chart_color_' ~ i) %}window.INITIAL_THEME_COLORS['chart_color_{{ i }}'] = {{ theme.get('chart_color_' ~ i)|tojson }};{% endif %}
+    {% endfor %}
+    {% endif %}
+    {% endif %}
+</script>
+
+<!-- Theme Manager - Universal theme color management (load early for immediate color application) -->
+<script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+<!-- Chart Colors Utility - Theme-aware chart colors -->
+<script src="{{ url_for('static', filename='js/chart-colors.js') }}"></script>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-file-earmark-text"></i>
+            <h4>{{ _('File Analysis') }}</h4>
+        </div>
+        
+        <ul class="sidebar-nav">
+            <!-- Dashboard -->
+            {% if is_interface_enabled('dashboard') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('index') }}" class="sidebar-nav-link {% if request.endpoint == 'index' or request.endpoint == 'comprehensive_dashboard' or request.endpoint == 'charts_dashboard' %}active{% endif %}" data-endpoint="index">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>{{ _('Dashboard') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- Analysis -->
+            {% if is_interface_enabled('file_analysis') or is_interface_enabled('path_analysis') or is_interface_enabled('batch_analysis') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('archives_page') }}" class="sidebar-nav-link {% if request.endpoint == 'archives_page' or request.endpoint == 'path_analysis_page' or request.endpoint == 'analysis_batch' %}active{% endif %}" data-endpoint="archives_page">
+                    <i class="bi bi-archive"></i>
+                    <span>{{ _('Analysis') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- Search -->
+            {% if is_interface_enabled('search') or is_interface_enabled('advanced_search') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('search_page') }}" class="sidebar-nav-link {% if request.endpoint == 'search_page' or request.endpoint == 'search_advanced' or request.endpoint == 'search_enhanced_page' %}active{% endif %}" data-endpoint="search_page">
+                    <i class="bi bi-search"></i>
+                    <span>{{ _('Search') }}</span>
+                </a>
+            </li>
+            {% endif %}
+          
+            <!-- Data Management -->
+            {% if is_interface_enabled('sources') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('sources_list') }}" class="sidebar-nav-link {% if request.endpoint == 'sources_list' %}active{% endif %}" data-endpoint="sources_list">
+                    <i class="bi bi-building"></i>
+                    <span>{{ _('Sources') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('sides') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('sides_list') }}" class="sidebar-nav-link {% if request.endpoint == 'sides_list' %}active{% endif %}" data-endpoint="sides_list">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>{{ _('Sides') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('email_words') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('email_words') }}" class="sidebar-nav-link {% if request.endpoint == 'email_words' %}active{% endif %}" data-endpoint="email_words">
+                    <i class="bi bi-envelope-at"></i>
+                    <span>{{ _('Email Words') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('keywords') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('keywords_list') }}" class="sidebar-nav-link {% if request.endpoint == 'keywords_list' %}active{% endif %}" data-endpoint="keywords_list">
+                    <i class="bi bi-key"></i>
+                    <span>{{ _('Keywords') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('words') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('words_list') }}" class="sidebar-nav-link {% if request.endpoint == 'words_list' %}active{% endif %}" data-endpoint="words_list">
+                    <i class="bi bi-book"></i>
+                    <span>{{ _('Words') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- File Management -->
+            {% if is_interface_enabled('upload_files') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('files.upload_page') }}" class="sidebar-nav-link {% if request.endpoint == 'files.upload_page' %}active{% endif %}" data-endpoint="files.upload_page">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>{{ _('Upload Files') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('file_library') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('files.files_list') }}" class="sidebar-nav-link {% if request.endpoint == 'files.files_list' %}active{% endif %}" data-endpoint="files.files_list">
+                    <i class="bi bi-folder2-open"></i>
+                    <span>{{ _('File Library') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            
+            <!-- System -->
+            {% if is_interface_enabled('notifications') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('notifications_page') }}" class="sidebar-nav-link {% if request.endpoint == 'notifications_page' %}active{% endif %}" data-endpoint="notifications_page">
+                    <i class="bi bi-bell"></i>
+                    <span>{{ _('Notifications') }}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if is_interface_enabled('settings') %}
+            <li class="sidebar-nav-item">
+                <a href="{{ url_for('settings_page') }}" class="sidebar-nav-link {% if request.endpoint == 'settings_page' %}active{% endif %}" data-endpoint="settings_page">
+                    <i class="bi bi-gear"></i>
+                    <span>{{ _('Settings') }}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        
+        <!-- Language Switcher -->
+        <div class="language-switcher" style="padding: 1rem; border-top: 1px solid var(--sidebar-border); margin-top: auto;">
+            <div class="d-flex flex-column gap-2">
+                <small class="text-muted text-uppercase" style="font-size: 0.75rem; opacity: 0.7; padding: 0 0.5rem;">{{ _('Language') }}</small>
+                {% for lang_code, lang_name in languages.items() %}
+                <a href="{{ url_for('set_language', language=lang_code) }}" 
+                   class="sidebar-nav-link {% if lang_code == current_language %}active{% endif %}" 
+                   style="padding: 0.5rem 1rem;">
+                    <i class="bi bi-globe"></i>
+                    <span>{{ lang_name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button class="btn btn-primary d-md-none" id="menuToggle" style="position: fixed; top: 1rem; left: 1rem; z-index: 1001;">
+        <i class="bi bi-list"></i>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="container-fluid px-0 mb-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Page Navigation Bar -->
+        <div class="page-navigation-bar">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 py-2">
+                    <!-- Browser Navigation Buttons -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" id="navBackBtn" title="{{ _('Go Back') }}">
+                            <i class="bi bi-arrow-left"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="navForwardBtn" title="{{ _('Go Forward') }}">
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="navRefreshBtn" title="{{ _('Refresh Page') }}">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <div class="vr d-none d-sm-block"></div>
+                    </div>
+                    
+                    <!-- Breadcrumb Navigation -->
+                    <nav aria-label="breadcrumb" class="flex-grow-1">
+                        <ol class="breadcrumb mb-0">
+                            {% block breadcrumb %}
+                            <li class="breadcrumb-item">
+                                <a href="{{ url_for('index') }}">
+                                    <i class="bi bi-house-door me-1"></i>{{ _('Home') }}
+                                </a>
+                            </li>
+                            {% if request.endpoint and request.endpoint != 'index' %}
+                            <li class="breadcrumb-item active" aria-current="page">
+                                {% set endpoint_labels = {
+                                    'index': _('Dashboard'),
+                                    'comprehensive_dashboard': _('Dashboard'),
+                                    'charts_dashboard': _('Dashboard'),
+                                    'archives_page': _('Analysis'),
+                                    'path_analysis_page': _('Analysis'),
+                                    'analysis_batch': _('Analysis'),
+                                    'sources_list': _('Sources'),
+                                    'sides_list': _('Sides'),
+                                    'email_words': _('Email Words'),
+                                    'search_page': _('Search'),
+                                    'search_advanced': _('Search'),
+                                    'search_enhanced_page': _('Search'),
+                                    'upload_page': _('Upload Files'),
+                                'files.files_list': _('File Library'),
+                                'keywords_list': _('Keywords'),
+                                'words_list': _('Words'),
+                                'word_detail': _('Word Details'),
+                                'settings_page': _('Settings'),
+                                'notifications_page': _('Notifications')
+                                } %}
+
+                                {% set endpoint_name = endpoint_labels.get(request.endpoint, request.endpoint.replace('_', ' ').title()) %}
+                                {{ endpoint_name }}
+                            </li>
+                            {% endif %}
+                            {% endblock %}
+                        </ol>
+                    </nav>
+                    
+                    <!-- Page Title / Context (optional, can be overridden) -->
+                    <div class="d-none d-md-flex align-items-center gap-3">
+                        <!-- Notifications Icon with Badge -->
+                        <a href="{{ url_for('notifications_page') }}" class="btn btn-sm btn-outline-secondary position-relative" 
+                           title="{{ _('Notifications') }}" id="notificationsIcon">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  id="notificationsBadge" style="display: none;">
+                                0
+                            </span>
+                        </a>
+                        
+                        {% block page_title %}
+                        {% if request.endpoint %}
+                        <span class="text-muted small">
+                            <i class="bi bi-file-earmark-text me-1"></i>
+                            {% set endpoint_name = request.endpoint.replace('_', ' ').title() %}
+                            {{ endpoint_name }}
+                        </span>
+                        {% endif %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+
+
+<!-- 🚀 OPTIMIZED: Defer JavaScript loading for faster page rendering -->
+<!-- jQuery (required for Select2) -->
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}" defer></script>
+
+<!-- Local Bootstrap JS -->
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}" defer></script>
+
+<!-- Local Chart.js -->
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}" defer></script>
+
+<!-- Chart Colors Utility (loads before Chart.js for theme support) -->
+<script src="{{ url_for('static', filename='js/chart-colors.js') }}"></script>
+
+<!-- Chart Export Utility (loads after Chart.js) -->
+<script src="{{ url_for('static', filename='js/chart-export.js') }}" defer></script>
+
+<!-- jsPDF for PDF export (optional, loaded from CDN) -->
+<script src="{{ url_for('static', filename='js/jspdf.umd.min.js') }}" defer></script>
+
+<!-- Cursor-based Pagination (for billion+ record support) -->
+<script src="{{ url_for('static', filename='js/cursor-pagination.js') }}" defer></script>
+
+    <script>
+        // 🚀 OPTIMIZED: Use DOMContentLoaded for faster initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle - cache DOM element
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+            }
+            
+            // ✅ FIX: Maintain sidebar active state - respect server-side state first
+            function updateSidebarActiveState() {
+                const currentPath = window.location.pathname;
+                const currentEndpoint = '{{ request.endpoint|default("", true) }}';
+                const sidebarLinks = document.querySelectorAll('.sidebar-nav-link:not(.language-switcher .sidebar-nav-link)');
+                
+                // Check if server already set an active state correctly
+                const serverActiveLink = document.querySelector('.sidebar-nav-link.active:not(.language-switcher .sidebar-nav-link)');
+                
+                // If server set an active state and it matches current endpoint, trust it
+                if (serverActiveLink && currentEndpoint) {
+                    const activeEndpoint = serverActiveLink.getAttribute('data-endpoint');
+                    if (activeEndpoint === currentEndpoint) {
+                        // Server state is correct, don't override
+                        return;
+                    }
+                }
+                
+                // Otherwise, find and set the correct active state
+                let foundActive = false;
+                
+                // Priority 1: Match by endpoint name (most reliable)
+                if (currentEndpoint) {
+                    sidebarLinks.forEach(link => {
+                        const endpoint = link.getAttribute('data-endpoint');
+                        if (endpoint && endpoint === currentEndpoint) {
+                            // Remove active from all other links
+                            sidebarLinks.forEach(l => l.classList.remove('active'));
+                            link.classList.add('active');
+                            foundActive = true;
+                        }
+                    });
+                }
+                
+                // Priority 2: Match by URL path (fallback)
+                if (!foundActive) {
+                    sidebarLinks.forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (href) {
+                            try {
+                                const hrefPath = new URL(href, window.location.origin).pathname;
+                                if (currentPath === hrefPath || 
+                                    (hrefPath !== '/' && currentPath.startsWith(hrefPath + '/'))) {
+                                    // Remove active from all other links
+                                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                                    link.classList.add('active');
+                                    foundActive = true;
+                                }
+                            } catch (e) {
+                                // Try simple string matching
+                                if (currentPath === href || (href !== '/' && currentPath.startsWith(href))) {
+                                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                                    link.classList.add('active');
+                                    foundActive = true;
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // ✅ FIX: Immediately set clicked link as active and persist it
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (sidebarNav) {
+                sidebarNav.addEventListener('click', function(e) {
+                    const link = e.target.closest('.sidebar-nav-link');
+                    if (link && link.getAttribute('href') && !link.closest('.language-switcher')) {
+                        // Immediately set this link as active (visual feedback before navigation)
+                        const allLinks = document.querySelectorAll('.sidebar-nav-link:not(.language-switcher .sidebar-nav-link)');
+                        allLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+                        
+                        // Store the clicked link's endpoint for after page reload
+                        const endpoint = link.getAttribute('data-endpoint');
+                        if (endpoint) {
+                            sessionStorage.setItem('activeSidebarEndpoint', endpoint);
+                        }
+                    }
+                });
+            }
+            
+            // On page load, ensure the correct button is active
+            window.addEventListener('load', function() {
+                // First, let server-side template set active state
+                // Then verify/update if needed
+                setTimeout(function() {
+                    const storedEndpoint = sessionStorage.getItem('activeSidebarEndpoint');
+                    const currentEndpoint = '{{ request.endpoint|default("", true) }}';
+                    
+                    // If we have a stored endpoint and it matches current, ensure it's active
+                    if (storedEndpoint && storedEndpoint === currentEndpoint) {
+                        const sidebarLinks = document.querySelectorAll('.sidebar-nav-link:not(.language-switcher .sidebar-nav-link)');
+                        sidebarLinks.forEach(link => {
+                            const endpoint = link.getAttribute('data-endpoint');
+                            if (endpoint === storedEndpoint) {
+                                sidebarLinks.forEach(l => l.classList.remove('active'));
+                                link.classList.add('active');
+                            }
+                        });
+                        // Clear stored state
+                        sessionStorage.removeItem('activeSidebarEndpoint');
+                    } else {
+                        // Update based on current endpoint/path
+                        updateSidebarActiveState();
+                    }
+                }, 50);
+            });
+            
+            // Also update on popstate (back/forward navigation)
+            window.addEventListener('popstate', function() {
+                setTimeout(updateSidebarActiveState, 50);
+            });
+            
+            // Auto-hide alerts after 5 seconds - optimized with requestAnimationFrame
+            const alerts = document.querySelectorAll('.alert');
+            if (alerts.length > 0) {
+                alerts.forEach(alert => {
+                    setTimeout(() => {
+                        if (alert && alert.parentNode) {
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        }
+                    }, 5000);
+                });
+            }
+            
+            // Smooth scroll - cache query results
+            const anchorLinks = document.querySelectorAll('a[href^="#"]');
+            if (anchorLinks.length > 0) {
+                anchorLinks.forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const href = this.getAttribute('href');
+                        if (href && href !== '#') {
+                            const target = document.querySelector(href);
+                            if (target) {
+                                target.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'start'
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+            
+            // Initialize tooltips - only if Bootstrap is loaded
+            if (typeof bootstrap !== 'undefined') {
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                if (tooltipTriggerList.length > 0) {
+                    const tooltipList = Array.from(tooltipTriggerList).map(function (tooltipTriggerEl) {
+                        return new bootstrap.Tooltip(tooltipTriggerEl);
+                    });
+                }
+            }
+        });
+        
+        // 🚀 OPTIMIZED: Navigation Bar Functionality - wrapped in DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const navBackBtn = document.getElementById('navBackBtn');
+            const navForwardBtn = document.getElementById('navForwardBtn');
+            const navRefreshBtn = document.getElementById('navRefreshBtn');
+            
+            // Track navigation state
+            let canGoBack = false;
+            let canGoForward = false;
+            
+            // Check if we can navigate back/forward - optimized
+            function updateNavigationButtons() {
+                // Check if we can go back (if history.length > 1, we likely can)
+                // Note: This is an approximation as browsers don't expose full history state
+                canGoBack = window.history.length > 1;
+                canGoForward = false; // We can't reliably detect forward state
+                
+                // Try to detect if we came from another page
+                if (document.referrer && document.referrer !== window.location.href) {
+                    canGoBack = true;
+                }
+                
+                // Update button states (keep enabled for now, browser will handle navigation)
+                // We could disable them, but it's better UX to let users try
+            }
+            
+            // Enhanced back button with fallback
+            if (navBackBtn) {
+                navBackBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (document.referrer && document.referrer !== window.location.href) {
+                        window.history.back();
+                    } else {
+                        // Fallback: go to home page
+                        window.location.href = "{{ url_for('index') }}";
+                    }
+                });
+            }
+            
+            // Enhanced forward button
+            if (navForwardBtn) {
+                navForwardBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.history.forward();
+                });
+            }
+            
+            // Enhanced refresh button with confirmation on forms
+            if (navRefreshBtn) {
+                navRefreshBtn.addEventListener('click', function(e) {
+                    // Check if there are unsaved form changes (basic check)
+                    const forms = document.querySelectorAll('form');
+                    let hasChanges = false;
+                    
+                    forms.forEach(form => {
+                        if (form.querySelector('input:not([type="hidden"]):not([readonly]), textarea:not([readonly]), select:not([readonly])')) {
+                            hasChanges = true;
+                        }
+                    });
+                    
+                    if (hasChanges) {
+                        if (!confirm('{{ _("Are you sure you want to refresh? Unsaved changes may be lost.") }}')) {
+                            return;
+                        }
+                    }
+                    
+                    location.reload();
+                });
+            }
+            
+            // Update on page load
+            updateNavigationButtons();
+            
+            // Update on popstate (back/forward navigation) - debounced
+            let popstateTimeout;
+            window.addEventListener('popstate', function() {
+                clearTimeout(popstateTimeout);
+                popstateTimeout = setTimeout(updateNavigationButtons, 100);
+            });
+            
+            // Keyboard shortcuts for navigation - optimized event delegation
+            document.addEventListener('keydown', function(e) {
+                // Alt+Left Arrow: Go back
+                if (e.altKey && e.key === 'ArrowLeft' && !e.ctrlKey && !e.shiftKey) {
+                    e.preventDefault();
+                    if (navBackBtn) navBackBtn.click();
+                }
+                // Alt+Right Arrow: Go forward
+                if (e.altKey && e.key === 'ArrowRight' && !e.ctrlKey && !e.shiftKey) {
+                    e.preventDefault();
+                    if (navForwardBtn) navForwardBtn.click();
+                }
+                // F5 or Ctrl+R: Refresh (with confirmation if needed)
+                if ((e.key === 'F5') || (e.ctrlKey && e.key === 'r')) {
+                    // Allow default behavior, but our refresh button handler will catch it if needed
+                }
+            });
+        });
+    </script>
+    
+    <!-- Translation Helper (must load before message_system.js) -->
+    <script>
+        // Inject translations from Flask-Babel into JavaScript
+        window.appTranslations = {
+            // Common message translations
+            'Success': {{ _('Success')|tojson }},
+            'Error': {{ _('Error')|tojson }},
+            'Warning': {{ _('Warning')|tojson }},
+            'Information': {{ _('Information')|tojson }},
+            'Processing': {{ _('Processing')|tojson }},
+            'Close': {{ _('Close')|tojson }},
+            'Action': {{ _('Action')|tojson }},
+            'Show Details': {{ _('Show Details')|tojson }},
+            'Error Code': {{ _('Error Code')|tojson }},
+            'Retry': {{ _('Retry')|tojson }},
+            
+            // Error messages
+            'An error occurred': {{ _('An error occurred')|tojson }},
+            'Invalid request. Please check your input.': {{ _('Invalid request. Please check your input.')|tojson }},
+            'Authentication required. Please log in.': {{ _('Authentication required. Please log in.')|tojson }},
+            'You do not have permission to perform this action.': {{ _('You do not have permission to perform this action.')|tojson }},
+            'The requested resource was not found.': {{ _('The requested resource was not found.')|tojson }},
+            'Too many requests. Please wait a moment and try again.': {{ _('Too many requests. Please wait a moment and try again.')|tojson }},
+            'Server error. Please try again later.': {{ _('Server error. Please try again later.')|tojson }},
+            'Service temporarily unavailable. Please try again later.': {{ _('Service temporarily unavailable. Please try again later.')|tojson }},
+            'Network error. Please check your connection.': {{ _('Network error. Please check your connection.')|tojson }},
+            'The server did not respond. This may be due to network issues or the server being unavailable.': {{ _('The server did not respond. This may be due to network issues or the server being unavailable.')|tojson }},
+            'An unexpected error occurred': {{ _('An unexpected error occurred')|tojson }},
+            'Unknown error': {{ _('Unknown error')|tojson }},
+            
+            // Success messages
+            '{operation} completed successfully': {{ _('{operation} completed successfully')|tojson }},
+            
+            // Processing messages
+            'Processing...': {{ _('Processing...')|tojson }},
+            
+            // Readiness messages
+            'System ready': {{ _('System ready')|tojson }},
+            'System is ready': {{ _('System is ready')|tojson }},
+            'All systems operational': {{ _('All systems operational')|tojson }},
+            'Ready to process': {{ _('Ready to process')|tojson }},
+            'Initialization complete': {{ _('Initialization complete')|tojson }},
+            
+            // Common application messages
+            'Please enter a folder path to analyze': {{ _('Please enter a folder path to analyze')|tojson }},
+            'Please enter a valid folder path': {{ _('Please enter a valid folder path')|tojson }},
+            'Please enter a file ID to analyze': {{ _('Please enter a file ID to analyze')|tojson }},
+            'Please enter text to classify': {{ _('Please enter text to classify')|tojson }},
+            'Please select files to analyze': {{ _('Please select files to analyze')|tojson }},
+            'Please select files to export': {{ _('Please select files to export')|tojson }},
+            'Please select files to delete': {{ _('Please select files to delete')|tojson }},
+            'Please select at least one file to export': {{ _('Please select at least one file to export')|tojson }},
+            'No results to export': {{ _('No results to export')|tojson }},
+            'Error performing search': {{ _('Error performing search')|tojson }},
+            'Error exporting results': {{ _('Error exporting results')|tojson }},
+            'Error loading preview': {{ _('Error loading preview')|tojson }},
+            'Error loading search history': {{ _('Error loading search history')|tojson }},
+            'Error loading saved searches': {{ _('Error loading saved searches')|tojson }},
+            'Error loading saved search': {{ _('Error loading saved search')|tojson }},
+            'Error deleting saved search': {{ _('Error deleting saved search')|tojson }},
+            'Please enter a search query first': {{ _('Please enter a search query first')|tojson }},
+            'Search saved successfully': {{ _('Search saved successfully')|tojson }},
+            'Error saving search': {{ _('Error saving search')|tojson }},
+            'Content copied to clipboard!': {{ _('Content copied to clipboard!')|tojson }},
+            'Failed to copy content to clipboard': {{ _('Failed to copy content to clipboard')|tojson }},
+            'No content available to copy': {{ _('No content available to copy')|tojson }},
+            'No content available to download': {{ _('No content available to download')|tojson }},
+            'File ID not available for export': {{ _('File ID not available for export')|tojson }},
+            'Analysis started for': {{ _('Analysis started for')|tojson }},
+            'files': {{ _('files')|tojson }},
+            'Error starting analysis': {{ _('Error starting analysis')|tojson }},
+            'Deleted': {{ _('Deleted')|tojson }},
+            'Error deleting files': {{ _('Error deleting files')|tojson }},
+            'Error deleting file': {{ _('Error deleting file')|tojson }},
+            'File deleted': {{ _('File deleted')|tojson }},
+            'Delete files? This cannot be undone.': {{ _('Delete files? This cannot be undone.')|tojson }},
+            'Delete this file? This cannot be undone.': {{ _('Delete this file? This cannot be undone.')|tojson }},
+            'Successfully analyzed': {{ _('Successfully analyzed')|tojson }},
+            'File analysis completed successfully': {{ _('File analysis completed successfully')|tojson }},
+            'Error analyzing folder': {{ _('Error analyzing folder')|tojson }},
+            'Error analyzing file': {{ _('Error analyzing file')|tojson }},
+            'Error analyzing database': {{ _('Error analyzing database')|tojson }},
+            'Classification failed': {{ _('Classification failed')|tojson }},
+            'Error loading notifications': {{ _('Error loading notifications')|tojson }},
+            'Invalid navigation parameters': {{ _('Invalid navigation parameters')|tojson }},
+            'Modal element not found. Please refresh the page.': {{ _('Modal element not found. Please refresh the page.')|tojson }},
+            'Error loading file details': {{ _('Error loading file details')|tojson }},
+            'Error saving changes': {{ _('Error saving changes')|tojson }},
+            'OK': {{ _('OK')|tojson }},
+            'Yes': {{ _('Yes')|tojson }},
+            'No': {{ _('No')|tojson }},
+            'Cancel': {{ _('Cancel')|tojson }},
+            'Confirmation': {{ _('Confirmation')|tojson }},
+            
+            // Common confirmation messages
+            'Are you sure?': {{ _('Are you sure?')|tojson }},
+            'This action cannot be undone': {{ _('This action cannot be undone')|tojson }},
+            'Please confirm this action': {{ _('Please confirm this action')|tojson }},
+            'Delete Confirmation': {{ _('Delete Confirmation')|tojson }},
+            'Save Confirmation': {{ _('Save Confirmation')|tojson }},
+            'Exit Confirmation': {{ _('Exit Confirmation')|tojson }},
+            
+            // Interface action messages
+            'Add': {{ _('Add')|tojson }},
+            'Update': {{ _('Update')|tojson }},
+            'Save': {{ _('Save')|tojson }},
+            'Delete': {{ _('Delete')|tojson }},
+            'Edit': {{ _('Edit')|tojson }},
+            'Create': {{ _('Create')|tojson }},
+            'Remove': {{ _('Remove')|tojson }},
+            'Submit': {{ _('Submit')|tojson }},
+            'Reset': {{ _('Reset')|tojson }},
+            'Cancel': {{ _('Cancel')|tojson }},
+            'Close': {{ _('Close')|tojson }},
+            'Back': {{ _('Back')|tojson }},
+            'Next': {{ _('Next')|tojson }},
+            'Previous': {{ _('Previous')|tojson }},
+            'Finish': {{ _('Finish')|tojson }},
+            'Continue': {{ _('Continue')|tojson }},
+            'Apply': {{ _('Apply')|tojson }},
+            'Clear': {{ _('Clear')|tojson }},
+            'Refresh': {{ _('Refresh')|tojson }},
+            'Search': {{ _('Search')|tojson }},
+            'Filter': {{ _('Filter')|tojson }},
+            'Export': {{ _('Export')|tojson }},
+            'Import': {{ _('Import')|tojson }},
+            'Upload': {{ _('Upload')|tojson }},
+            'Download': {{ _('Download')|tojson }},
+            'View': {{ _('View')|tojson }},
+            'Details': {{ _('Details')|tojson }},
+            'Copy': {{ _('Copy')|tojson }},
+            'Paste': {{ _('Paste')|tojson }},
+            'Cut': {{ _('Cut')|tojson }},
+            'Select': {{ _('Select')|tojson }},
+            'Select All': {{ _('Select All')|tojson }},
+            'Deselect All': {{ _('Deselect All')|tojson }},
+            'Select None': {{ _('Select None')|tojson }},
+            
+            // Success messages for interface actions
+            'Added successfully': {{ _('Added successfully')|tojson }},
+            'Updated successfully': {{ _('Updated successfully')|tojson }},
+            'Saved successfully': {{ _('Saved successfully')|tojson }},
+            'Deleted successfully': {{ _('Deleted successfully')|tojson }},
+            'Created successfully': {{ _('Created successfully')|tojson }},
+            'Removed successfully': {{ _('Removed successfully')|tojson }},
+            'Submitted successfully': {{ _('Submitted successfully')|tojson }},
+            'Changes saved successfully': {{ _('Changes saved successfully')|tojson }},
+            'Item added successfully': {{ _('Item added successfully')|tojson }},
+            'Item updated successfully': {{ _('Item updated successfully')|tojson }},
+            'Item deleted successfully': {{ _('Item deleted successfully')|tojson }},
+            'Item created successfully': {{ _('Item created successfully')|tojson }},
+            'Item removed successfully': {{ _('Item removed successfully')|tojson }},
+            'File uploaded successfully': {{ _('File uploaded successfully')|tojson }},
+            'File downloaded successfully': {{ _('File downloaded successfully')|tojson }},
+            'Export completed successfully': {{ _('Export completed successfully')|tojson }},
+            'Import completed successfully': {{ _('Import completed successfully')|tojson }},
+            
+            // Error messages for interface actions
+            'Error adding item': {{ _('Error adding item')|tojson }},
+            'Error updating item': {{ _('Error updating item')|tojson }},
+            'Error saving item': {{ _('Error saving item')|tojson }},
+            'Error deleting item': {{ _('Error deleting item')|tojson }},
+            'Error creating item': {{ _('Error creating item')|tojson }},
+            'Error removing item': {{ _('Error removing item')|tojson }},
+            'Error submitting form': {{ _('Error submitting form')|tojson }},
+            'Error uploading file': {{ _('Error uploading file')|tojson }},
+            'Error downloading file': {{ _('Error downloading file')|tojson }},
+            'Error exporting data': {{ _('Error exporting data')|tojson }},
+            'Error importing data': {{ _('Error importing data')|tojson }},
+            'Failed to add item': {{ _('Failed to add item')|tojson }},
+            'Failed to update item': {{ _('Failed to update item')|tojson }},
+            'Failed to save changes': {{ _('Failed to save changes')|tojson }},
+            'Failed to delete item': {{ _('Failed to delete item')|tojson }},
+            'Failed to create item': {{ _('Failed to create item')|tojson }},
+            'Failed to remove item': {{ _('Failed to remove item')|tojson }},
+            
+            // Validation messages
+            'Please fill in all required fields': {{ _('Please fill in all required fields')|tojson }},
+            'Please enter a valid value': {{ _('Please enter a valid value')|tojson }},
+            'This field is required': {{ _('This field is required')|tojson }},
+            'Invalid input': {{ _('Invalid input')|tojson }},
+            'Please select an item': {{ _('Please select an item')|tojson }},
+            'Please select at least one item': {{ _('Please select at least one item')|tojson }},
+            'No items selected': {{ _('No items selected')|tojson }},
+            'No changes to save': {{ _('No changes to save')|tojson }},
+            'No data available': {{ _('No data available')|tojson }},
+            'No results found': {{ _('No results found')|tojson }},
+            
+            // Status messages
+            'Loading...': {{ _('Loading...')|tojson }},
+            'Saving...': {{ _('Saving...')|tojson }},
+            'Deleting...': {{ _('Deleting...')|tojson }},
+            'Updating...': {{ _('Updating...')|tojson }},
+            'Adding...': {{ _('Adding...')|tojson }},
+            'Creating...': {{ _('Creating...')|tojson }},
+            'Removing...': {{ _('Removing...')|tojson }},
+            'Uploading...': {{ _('Uploading...')|tojson }},
+            'Downloading...': {{ _('Downloading...')|tojson }},
+            'Exporting...': {{ _('Exporting...')|tojson }},
+            'Importing...': {{ _('Importing...')|tojson }},
+            'Processing...': {{ _('Processing...')|tojson }},
+            'Please wait...': {{ _('Please wait...')|tojson }},
+            
+            // Chart export messages
+            'Error exporting chart as PNG': {{ _('Error exporting chart as PNG')|tojson }},
+            'Error exporting chart as JPG': {{ _('Error exporting chart as JPG')|tojson }},
+            'Error exporting chart as SVG': {{ _('Error exporting chart as SVG')|tojson }},
+            'Error exporting PDF. Downloading as PNG instead.': {{ _('Error exporting PDF. Downloading as PNG instead.')|tojson }},
+            'PDF export requires jsPDF library. Downloading as PNG instead.': {{ _('PDF export requires jsPDF library. Downloading as PNG instead.')|tojson }},
+            'Export Chart': {{ _('Export Chart')|tojson }},
+            'Export as PNG': {{ _('Export as PNG')|tojson }},
+            'Export as JPG': {{ _('Export as JPG')|tojson }},
+            'Export as SVG': {{ _('Export as SVG')|tojson }},
+            'Export as PDF': {{ _('Export as PDF')|tojson }},
+            'Chart exported successfully': {{ _('Chart exported successfully')|tojson }}
+        };
+        
+        // Store current locale
+        window.currentLocale = '{{ current_language }}';
+    </script>
+    
+    <!-- Translation Helper Module -->
+    <script src="{{ url_for('static', filename='js/translations.js') }}"></script>
+    
+    <!-- Enhanced Message System (loads after translations.js) -->
+    <script src="{{ url_for('static', filename='js/message_system.js') }}"></script>
+    
+    <!-- Alert Replacement Helper (replaces alert(), confirm() with notification system) -->
+    <script src="{{ url_for('static', filename='js/alert-replacement.js') }}"></script>
+    
+    <!-- Message Router (ensures ALL messages go through notification system) -->
+    <script src="{{ url_for('static', filename='js/message-router.js') }}"></script>
+    
+    <!-- Interface Messages Helper (Add, Update, Save, Delete, etc.) -->
+    <script src="{{ url_for('static', filename='js/interface-messages.js') }}"></script>
+    
+    <!-- Message Formatter (Links messages to notifications with better formatting) -->
+    <script src="{{ url_for('static', filename='js/message-formatter.js') }}"></script>
+    
+    <!-- Convert Flash Messages to Notifications -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Convert Flask flash messages to notification system
+            const flashMessages = document.querySelectorAll('.alert');
+            flashMessages.forEach(function(alert) {
+                // Determine message type from Bootstrap alert class
+                let type = 'info';
+                if (alert.classList.contains('alert-success')) {
+                    type = 'success';
+                } else if (alert.classList.contains('alert-danger') || alert.classList.contains('alert-error')) {
+                    type = 'error';
+                } else if (alert.classList.contains('alert-warning')) {
+                    type = 'warning';
+                } else if (alert.classList.contains('alert-info')) {
+                    type = 'info';
+                }
+                
+                // Extract message text (remove icon and close button text)
+                const messageText = alert.textContent.trim();
+                
+                // Show notification using message system
+                if (window.MessageSystem && messageText) {
+                    window.MessageSystem.show(messageText, type, {
+                        skipTranslation: false  // Let the system translate it
+                    });
+                }
+                
+                // Remove the original alert after a short delay
+                setTimeout(function() {
+                    if (alert.parentNode) {
+                        alert.style.transition = 'opacity 0.3s';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 300);
+                    }
+                }, 100);
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Notification Badge Updater -->
+    <script>
+        // Update notification badge on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            async function updateNotificationBadge() {
+                try {
+                    const response = await fetch('/api/notifications/stats');
+                    const data = await response.json();
+                    
+                    if (data.success && data.stats) {
+                        const badge = document.getElementById('notificationsBadge');
+                        if (badge) {
+                            const unreadCount = data.stats.unread || 0;
+                            if (unreadCount > 0) {
+                                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                                badge.style.display = 'block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error updating notification badge:', error);
+                }
+            }
+            
+            // Update on load
+            updateNotificationBadge();
+            
+            // Update every 30 seconds
+            setInterval(updateNotificationBadge, 30000);
+        });
+    </script>
+</body>
+</html>

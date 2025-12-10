@@ -1,0 +1,639 @@
+<!-- templates/search_advanced.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ _('Advanced Search') }}{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h1 class="page-title mb-0">
+        <i class="bi bi-search me-2"></i>
+        {{ _('Advanced Search') }}
+    </h1>
+    <div class="btn-group">
+        <button class="btn btn-outline-primary" onclick="resetSearch()">
+            <i class="bi bi-arrow-counterclockwise me-1"></i>{{ _('Reset') }}
+        </button>
+        <button class="btn btn-primary" onclick="executeSearch()">
+            <i class="bi bi-search me-1"></i>{{ _('Search') }}
+        </button>
+    </div>
+</div>
+
+<!-- Search View Navigation -->
+<div class="search-view-navigation" style="margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; background: var(--bg-section); padding: 1rem; border-radius: 8px;">
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('search_page') }}" class="btn btn-outline-primary search-view-btn {% if request.endpoint == 'search_page' %}active{% endif %}" data-view="search">
+            <i class="bi bi-search"></i> {{ _('Search') }}
+        </a>
+        <a href="{{ url_for('search_advanced') }}" class="btn btn-outline-primary search-view-btn {% if request.endpoint == 'search_advanced' %}active{% endif %}" data-view="advanced">
+            <i class="bi bi-funnel"></i> {{ _('Advanced Search') }}
+        </a>
+        <a href="{{ url_for('search_enhanced_page') }}" class="btn btn-outline-primary search-view-btn {% if request.endpoint == 'search_enhanced_page' %}active{% endif %}" data-view="enhanced">
+            <i class="bi bi-search-heart"></i> {{ _('Enhanced Search') }}
+        </a>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="stat-card mb-4">
+    <h5 class="mb-4">
+        <i class="bi bi-funnel me-2"></i>
+        {{ _('Search Criteria') }}
+    </h5>
+    
+    <form id="searchForm">
+        <!-- Row 1: Search Content, File Name, Categories, Sources, Sides -->
+        <div class="row g-3 mb-3">
+            <!-- Search in Content -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-file-text me-1"></i>
+                    {{ _('Search in Content') }}
+                </label>
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control form-control-sm" id="searchText" 
+                           placeholder="{{ _('Keywords...') }}">
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="addSearchTerm()">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                <div id="searchTerms" class="d-flex flex-wrap gap-1 mt-1" style="font-size: 0.75rem;"></div>
+                <div class="d-flex gap-2 mt-1">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input form-check-input-sm" type="checkbox" id="caseSensitive" style="margin-top: 0.25rem;">
+                        <label class="form-check-label small" for="caseSensitive" style="font-size: 0.75rem;">
+                            {{ _('Case') }}
+                        </label>
+                    </div>
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input form-check-input-sm" type="checkbox" id="wholeWord" style="margin-top: 0.25rem;">
+                        <label class="form-check-label small" for="wholeWord" style="font-size: 0.75rem;">
+                            {{ _('Whole word') }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- File Name -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-file-earmark me-1"></i>
+                    {{ _('File Name') }}
+                </label>
+                <input type="text" class="form-control form-control-sm" id="fileName" 
+                       placeholder="{{ _('File name...') }}">
+            </div>
+            
+            <!-- Categories -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-tags me-1"></i>
+                    {{ _('Categories') }}   
+                </label>
+                <select class="form-select form-select-sm" multiple size="2" id="categoriesSelect">
+                    <!-- Will be populated dynamically -->
+                </select>
+                <small class="text-muted" style="font-size: 0.65rem;">
+                    <i class="bi bi-info-circle me-1"></i>{{ _('Ctrl/Cmd') }}
+                </small>
+            </div>
+            
+            <!-- Sources -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-building me-1"></i>
+                    {{ _('Sources') }}
+                </label>
+                <select class="form-select form-select-sm" multiple size="2" id="sourcesSelect">
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            
+            <!-- Sides -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-diagram-3 me-1"></i>
+                    {{ _('Sides') }}
+                </label>
+                <select class="form-select form-select-sm" multiple size="2" id="sidesSelect">
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            
+            <!-- Date Range -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-calendar me-1"></i>
+                    {{ _('Date Range') }}
+                </label>
+                <div class="mb-1">
+                    <label class="form-label small" style="font-size: 0.7rem;">{{ _('From') }}</label>
+                    <input type="date" class="form-control form-control-sm" id="dateFrom">
+                </div>
+                <div>
+                    <label class="form-label small" style="font-size: 0.7rem;">{{ _('To') }}</label>
+                    <input type="date" class="form-control form-control-sm" id="dateTo">
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: File Type, Status, and Action Buttons -->
+        <div class="row g-3 mb-3">
+            <!-- File Type -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-filetype-pdf me-1"></i>
+                    {{ _('File Type') }}
+                </label>
+                <select class="form-select form-select-sm" id="fileType">
+                    <option value="">{{ _('All Types') }}</option>
+                    <option value=".PDF">{{ _('PDF') }}</option>
+                    <option value=".DOCX">{{ _('Word Document') }}</option>
+                    <option value=".XLSX">{{ _('Excel') }}</option>
+                    <option value=".TXT">{{ _('Text') }}</option>
+                    <option value=".HTML">{{ _('HTML') }}</option>
+                </select>
+            </div>
+            
+            <!-- Status -->
+            <div class="col-md-2">
+                <label class="form-label fw-bold small">
+                    <i class="bi bi-check-circle me-1"></i>
+                    {{ _('Status') }}
+                </label>
+                <div class="d-flex flex-column gap-1">
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input form-check-input-sm" type="checkbox" value="Read" id="statusRead" checked>
+                        <label class="form-check-label small" for="statusRead" style="font-size: 0.75rem;">{{ _('Analyzed') }}</label>
+                    </div>
+                    <div class="form-check form-check-sm">
+                        <input class="form-check-input form-check-input-sm" type="checkbox" value="Unread" id="statusUnread">
+                        <label class="form-check-label small" for="statusUnread" style="font-size: 0.75rem;">{{ _('Pending') }}</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Spacer -->
+            <div class="col-md-8"></div>
+        </div>
+    </form>
+</div>
+
+<!-- Search Progress -->
+<div id="searchProgress" class="stat-card mb-4" style="display: none;">
+    <h5 class="mb-3">
+        <i class="bi bi-gear me-2"></i>
+        {{ _('Searching...') }}
+    </h5>
+    <div class="progress mb-2" style="height: 20px;">
+        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+             style="width: 0%">0%</div>
+    </div>
+    <small class="text-muted">
+        {{ _('Scanning:') }} <span id="currentFile">-</span>
+    </small>
+</div>
+
+<!-- Results -->
+<div id="resultsSection" class="stat-card" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul me-2"></i>
+            {{ _('Results') }} (<span id="resultCount">0</span> {{ _('found') }})
+        </h5>
+        <div class="btn-group">
+            <select class="form-select form-select-sm" id="sortBy" onchange="sortResults()">
+                <option value="relevance">{{ _('Sort: Relevance') }}</option>
+                <option value="date">{{ _('Date (Newest)') }}</option>
+                <option value="date_old">{{ _('Date (Oldest)') }}</option>
+                <option value="name">{{ _('Name (A-Z)') }}</option>
+                <option value="size">{{ _('Size (Largest)') }}</option>
+            </select>
+            <button class="btn btn-sm btn-outline-primary" onclick="exportResults()">
+                <i class="bi bi-download"></i> {{ _('Export') }}
+            </button>
+        </div>
+    </div>
+
+    <div id="resultsContainer">
+        <!-- Results will be populated here -->
+    </div>
+
+    <!-- Pagination -->
+    <nav class="mt-4" id="pagination" style="display: none;">
+        <ul class="pagination justify-content-center" id="paginationList">
+            <!-- Pagination will be generated here -->
+        </ul>
+    </nav>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let searchTerms = [];
+let searchResults = [];
+let currentPage = 1;
+const resultsPerPage = 20;
+
+// ✅ FIX: Get CSRF token from meta tag or fetch it
+function getCSRFToken() {
+    // Try to get from meta tag first
+    const metaToken = document.querySelector('meta[name="csrf-token"]');
+    if (metaToken) {
+        return metaToken.getAttribute('content');
+    }
+    // Fallback: return null (will fetch from API if needed)
+    return null;
+}
+
+// ✅ FIX: Fetch CSRF token from API if not in meta tag
+async function fetchCSRFToken() {
+    try {
+        const response = await fetch('/api/csrf-token');
+        const data = await response.json();
+        return data.csrf_token;
+    } catch (error) {
+        console.error('Error fetching CSRF token:', error);
+        return null;
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    loadSources();
+    loadSides();
+    loadCategories();
+});
+
+// Load sources
+async function loadSources() {
+    try {
+        const response = await fetch('/api/sources');
+        const sources = await response.json();
+        
+        const select = document.getElementById('sourcesSelect');
+        select.innerHTML = sources.map(s => 
+            `<option value="${s.id}">${s.name}</option>`
+        ).join('');
+    } catch (error) {
+        console.error('Error loading sources:', error);
+    }
+}
+
+// Load sides
+async function loadSides() {
+    try {
+        const response = await fetch('/api/sides');
+        const sides = await response.json();
+        
+        const select = document.getElementById('sidesSelect');
+        select.innerHTML = sides.map(s => 
+            `<option value="${s.id}">${s.name}</option>`
+        ).join('');
+    } catch (error) {
+        console.error('Error loading sides:', error);
+    }
+}
+
+// Load categories
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        
+        const select = document.getElementById('categoriesSelect');
+        if (select) {
+            select.innerHTML = categories.map(c => 
+                `<option value="${c.id}">${c.name}</option>`
+            ).join('');
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+// Add search term
+function addSearchTerm() {
+    const input = document.getElementById('searchText');
+    const term = input.value.trim();
+    
+    if (term && !searchTerms.includes(term)) {
+        searchTerms.push(term);
+        updateSearchTermsDisplay();
+        input.value = '';
+    }
+}
+
+// Update search terms display
+function updateSearchTermsDisplay() {
+    const container = document.getElementById('searchTerms');
+    container.innerHTML = searchTerms.map((term, idx) => `
+        <span class="badge bg-primary d-flex align-items-center gap-2">
+            ${term}
+            <button type="button" class="btn-close btn-close-white" 
+                    style="font-size: 0.6rem;" onclick="removeSearchTerm(${idx})"></button>
+        </span>
+    `).join('');
+}
+
+// Remove search term
+function removeSearchTerm(index) {
+    searchTerms.splice(index, 1);
+    updateSearchTermsDisplay();
+}
+
+// Execute search
+async function executeSearch() {
+    const criteria = {
+        searchTerms: searchTerms,
+        fileName: document.getElementById('fileName').value,
+        caseSensitive: document.getElementById('caseSensitive').checked,
+        wholeWord: document.getElementById('wholeWord').checked,
+        categories: Array.from(document.getElementById('categoriesSelect').selectedOptions).map(o => o.value),
+        sources: Array.from(document.getElementById('sourcesSelect').selectedOptions).map(o => o.value),
+        sides: Array.from(document.getElementById('sidesSelect').selectedOptions).map(o => o.value),
+        dateFrom: document.getElementById('dateFrom').value,
+        dateTo: document.getElementById('dateTo').value,
+        fileType: document.getElementById('fileType').value,
+        status: []
+    };
+    
+    if (document.getElementById('statusRead').checked) criteria.status.push('Read');
+    if (document.getElementById('statusUnread').checked) criteria.status.push('Unread');
+    
+    // Show progress
+    document.getElementById('searchProgress').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'none';
+    
+    try {
+        // ✅ FIX: Get CSRF token and include it in headers and body
+        let csrfToken = getCSRFToken();
+        if (!csrfToken) {
+            csrfToken = await fetchCSRFToken();
+        }
+        
+        if (!csrfToken) {
+            throw new Error('Unable to obtain CSRF token. Please refresh the page.');
+        }
+        
+        // Include CSRF token in both header (for Flask-WTF) and body (for some configurations)
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        };
+        
+        // Also include in request body for JSON requests
+        const requestBody = {
+            ...criteria,
+            csrf_token: csrfToken
+        };
+        
+        const response = await fetch('/search/advanced', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(requestBody)
+        });
+        
+        // ✅ FIX: Check if response is successful
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({error: 'Unknown error'}));
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // ✅ FIX: Ensure searchResults is always an array
+        // Handle both array responses and object responses with error property
+        if (Array.isArray(data)) {
+            searchResults = data;
+        } else if (data.error) {
+            throw new Error(data.error);
+        } else if (data.results && Array.isArray(data.results)) {
+            // Handle case where API returns {results: [...]}
+            searchResults = data.results;
+        } else {
+            // Fallback: ensure it's an array
+            console.warn('Unexpected response format:', data);
+            searchResults = [];
+        }
+        
+        // Hide progress
+        document.getElementById('searchProgress').style.display = 'none';
+        
+        // Display results
+        displayResults();
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        const errorMsg = {{ _('Search error')|tojson }};
+        alert(errorMsg + ': ' + error.message);
+        document.getElementById('searchProgress').style.display = 'none';
+        // ✅ FIX: Ensure searchResults is an array even on error
+        searchResults = [];
+        // Hide results section on error
+        document.getElementById('resultsSection').style.display = 'none';
+    }
+}
+
+// Display results
+function displayResults() {
+    const container = document.getElementById('resultsContainer');
+    const resultsSection = document.getElementById('resultsSection');
+    const resultCount = document.getElementById('resultCount');
+    
+    // ✅ FIX: Ensure searchResults is an array before using array methods
+    if (!Array.isArray(searchResults)) {
+        console.error('searchResults is not an array:', searchResults);
+        searchResults = [];
+    }
+    
+    resultCount.textContent = searchResults.length;
+    resultsSection.style.display = 'block';
+    
+    if (searchResults.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-search display-4 d-block mb-3"></i>
+                <p>{{ _('No results found matching your criteria') }}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Paginate
+    const start = (currentPage - 1) * resultsPerPage;
+    const end = start + resultsPerPage;
+    const pageResults = searchResults.slice(start, end);
+    
+    container.innerHTML = pageResults.map(result => `
+        <div class="result-item p-3 border-bottom" style="transition: all 0.2s;" 
+             onmouseenter="this.style.background='var(--alert-info-bg)'" 
+             onmouseleave="this.style.background=''">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                    <h6 class="mb-1">
+                        <i class="bi bi-file-earmark me-2 text-primary"></i>
+                        <strong>${result.file_name}</strong>
+                        ${result.relevance ? `<span class="badge bg-primary ms-2">${result.relevance}% match</span>` : ''}
+                    </h6>
+                    ${result.matches ? `
+                        <div class="text-muted small mb-2">
+                            <i class="bi bi-quote me-1"></i>
+                            Matches: "${result.matches.slice(0, 3).join('", "')}"${result.matches.length > 3 ? '...' : ''}
+                        </div>
+                    ` : ''}
+                    <div class="mb-2">
+                        ${result.categories ? result.categories.map(cat => 
+                            `<span class="badge bg-secondary me-1">${cat}</span>`
+                        ).join('') : ''}
+                    </div>
+                    <div class="text-muted small">
+                        <span class="me-3"><i class="bi bi-building me-1"></i>${result.source || 'N/A'}</span>
+                        <span class="me-3"><i class="bi bi-calendar me-1"></i>${result.date || 'N/A'}</span>
+                        <span><i class="bi bi-hdd me-1"></i>${formatFileSize(result.size || 0)}</span>
+                    </div>
+                </div>
+                <div class="btn-group btn-group-sm">
+                    <a href="/file/${result.id}" class="btn btn-primary">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    // Update pagination
+    updatePagination();
+}
+
+// Update pagination
+function updatePagination() {
+    const totalPages = Math.ceil(searchResults.length / resultsPerPage);
+    
+    if (totalPages <= 1) {
+        document.getElementById('pagination').style.display = 'none';
+        return;
+    }
+    
+    document.getElementById('pagination').style.display = 'block';
+    const paginationList = document.getElementById('paginationList');
+    
+    let html = `
+        <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage - 1}); return false;">Previous</a>
+        </li>
+    `;
+    
+    for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+            html += `
+                <li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
+                </li>
+            `;
+        } else if (i === currentPage - 3 || i === currentPage + 3) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    html += `
+        <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="#" onclick="goToPage(${currentPage + 1}); return false;">Next</a>
+        </li>
+    `;
+    
+    paginationList.innerHTML = html;
+}
+
+// Go to page
+function goToPage(page) {
+    const totalPages = Math.ceil(searchResults.length / resultsPerPage);
+    if (page < 1 || page > totalPages) return;
+    
+    currentPage = page;
+    displayResults();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Sort results
+function sortResults() {
+    // ✅ FIX: Ensure searchResults is an array before sorting
+    if (!Array.isArray(searchResults)) {
+        console.error('Cannot sort: searchResults is not an array:', searchResults);
+        return;
+    }
+    
+    const sortBy = document.getElementById('sortBy').value;
+    
+    switch (sortBy) {
+        case 'date':
+            searchResults.sort((a, b) => new Date(b.date || b.file_date) - new Date(a.date || a.file_date));
+            break;
+        case 'date_old':
+            searchResults.sort((a, b) => new Date(a.date || a.file_date) - new Date(b.date || b.file_date));
+            break;
+        case 'name':
+            searchResults.sort((a, b) => (a.file_name || '').localeCompare(b.file_name || ''));
+            break;
+        case 'size':
+            searchResults.sort((a, b) => (b.size || 0) - (a.size || 0));
+            break;
+        case 'relevance':
+        default:
+            searchResults.sort((a, b) => (b.relevance || 0) - (a.relevance || 0));
+    }
+    
+    currentPage = 1;
+    displayResults();
+}
+
+// Reset search
+function resetSearch() {
+    document.getElementById('searchForm').reset();
+    searchTerms = [];
+    updateSearchTermsDisplay();
+    searchResults = [];
+    document.getElementById('resultsSection').style.display = 'none';
+}
+
+// Export results
+function exportResults() {
+    // ✅ FIX: Ensure searchResults is an array before mapping
+    if (!Array.isArray(searchResults) || searchResults.length === 0) {
+        const noResultsMsg = {{ _('No results to export')|tojson }};
+        alert(noResultsMsg);
+        return;
+    }
+    
+    const csv = 'File Name,Type,Source,Date,Size,Relevance\n' + 
+        searchResults.map(r => 
+            `"${r.file_name || ''}","${r.file_type || ''}","${r.source || r.source_name || ''}","${r.date || r.file_date || ''}",${r.size || 0},${r.relevance || 0}`
+        ).join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `search_results_${new Date().toISOString()}.csv`;
+    a.click();
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Enter key to add search term
+document.getElementById('searchText').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addSearchTerm();
+    }
+});
+</script>
+{% endblock %}

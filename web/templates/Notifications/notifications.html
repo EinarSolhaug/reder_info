@@ -1,0 +1,1068 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Notifications') }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <!-- Header -->
+    <div class="notifications-header">
+        <div>
+            <h1 class="page-title" style="margin: 0;">
+                <i class="bi bi-chat-dots me-2"></i>
+                {{ _('Notifications') }}
+            </h1>
+            <p class="text-muted mb-0" style="font-size: 0.875rem;">{{ _('System alerts and notifications') }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" onclick="markAllAsRead()">
+                <i class="bi bi-check-all me-2"></i>
+                {{ _('Mark All Read') }}
+            </button>
+            <button class="btn btn-outline-secondary" onclick="refreshAll()">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                {{ _('Refresh') }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="notifications-tabs">
+        <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">
+            <i class="bi bi-bell-fill"></i>
+            <span>{{ _('All Notifications') }}</span>
+        </button>
+        <button class="tab-btn" data-tab="duplicates" onclick="switchTab('duplicates')">
+            <i class="bi bi-files"></i>
+            <span>{{ _('Duplicate Files') }}</span>
+        </button>
+        <button class="tab-btn" data-tab="future" onclick="switchTab('future')">
+            <i class="bi bi-calendar-event"></i>
+            <span>{{ _('Future Files') }}</span>
+        </button>
+    </div>
+
+    <!-- Tab Content: All Notifications -->
+    <div class="tab-content active" id="tab-all">
+        <!-- Statistics -->
+        <div class="tab-stats">
+            <div class="tab-stat-badge">
+                <strong>{{ _('Total') }}:</strong> <span id="statAllTotal">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Unread') }}:</strong> <span id="statAllUnread">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Read') }}:</strong> <span id="statAllRead">0</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="search-sort-row">
+                <div class="search-box">
+                    <input type="text" id="searchAll" placeholder="{{ _('Search notifications...') }}" 
+                           onkeyup="handleSearch(event, 'all')">
+                </div>
+                <div class="sort-controls">
+                    <label for="sortByAll" class="sort-label">{{ _('Sort by') }}:</label>
+                    <select id="sortByAll" class="sort-select" onchange="setSort('all', this.value)">
+                        <option value="created_at_desc">{{ _('Newest First') }}</option>
+                        <option value="created_at_asc">{{ _('Oldest First') }}</option>
+                        <option value="priority_desc">{{ _('Priority: High to Low') }}</option>
+                        <option value="priority_asc">{{ _('Priority: Low to High') }}</option>
+                        <option value="title_asc">{{ _('Title: A-Z') }}</option>
+                        <option value="title_desc">{{ _('Title: Z-A') }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Source') }}:</span>
+                    <select id="sourceFilterAll" class="filter-select" onchange="setFilter('all', 'source', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sources.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Destination') }}:</span>
+                    <select id="sideFilterAll" class="filter-select" onchange="setFilter('all', 'side', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sides.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-tabs -->
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-sub-tab="all" onclick="switchSubTab('all', 'all')">
+                <i class="bi bi-inbox-fill"></i>
+                <span>{{ _('All Notifications') }}</span>
+                <span class="sub-tab-count" id="allCountAll">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="unread" onclick="switchSubTab('all', 'unread')">
+                <i class="bi bi-envelope-fill"></i>
+                <span>{{ _('Unread') }}</span>
+                <span class="sub-tab-count" id="unreadCountAll">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="read" onclick="switchSubTab('all', 'read')">
+                <i class="bi bi-envelope-open-fill"></i>
+                <span>{{ _('Read') }}</span>
+                <span class="sub-tab-count" id="readCountAll">0</span>
+            </button>
+        </div>
+
+        <!-- Sub-tab Content -->
+        <div class="sub-tab-content active" id="sub-tab-all-all">
+            <div class="messages-list" id="messagesAllAll"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-all-unread">
+            <div class="messages-list" id="messagesAllUnread"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-all-read">
+            <div class="messages-list" id="messagesAllRead"></div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Duplicate Files -->
+    <div class="tab-content" id="tab-duplicates">
+        <!-- Statistics -->
+        <div class="tab-stats">
+            <div class="tab-stat-badge">
+                <strong>{{ _('Total') }}:</strong> <span id="statDuplicatesTotal">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Unread') }}:</strong> <span id="statDuplicatesUnread">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Read') }}:</strong> <span id="statDuplicatesRead">0</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="search-sort-row">
+                <div class="search-box">
+                    <input type="text" id="searchDuplicates" placeholder="{{ _('Search duplicate files...') }}" 
+                           onkeyup="handleSearch(event, 'duplicates')">
+                </div>
+                <div class="sort-controls">
+                    <label for="sortByDuplicates" class="sort-label">{{ _('Sort by') }}:</label>
+                    <select id="sortByDuplicates" class="sort-select" onchange="setSort('duplicates', this.value)">
+                        <option value="created_at_desc">{{ _('Newest First') }}</option>
+                        <option value="created_at_asc">{{ _('Oldest First') }}</option>
+                        <option value="priority_desc">{{ _('Priority: High to Low') }}</option>
+                        <option value="priority_asc">{{ _('Priority: Low to High') }}</option>
+                        <option value="title_asc">{{ _('Title: A-Z') }}</option>
+                        <option value="title_desc">{{ _('Title: Z-A') }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Source') }}:</span>
+                    <select id="sourceFilterDuplicates" class="filter-select" onchange="setFilter('duplicates', 'source', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sources.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Destination') }}:</span>
+                    <select id="sideFilterDuplicates" class="filter-select" onchange="setFilter('duplicates', 'side', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sides.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-tabs -->
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-sub-tab="all" onclick="switchSubTab('duplicates', 'all')">
+                <i class="bi bi-inbox-fill"></i>
+                <span>{{ _('All Notifications') }}</span>
+                <span class="sub-tab-count" id="allCountDuplicates">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="unread" onclick="switchSubTab('duplicates', 'unread')">
+                <i class="bi bi-envelope-fill"></i>
+                <span>{{ _('Unread') }}</span>
+                <span class="sub-tab-count" id="unreadCountDuplicates">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="read" onclick="switchSubTab('duplicates', 'read')">
+                <i class="bi bi-envelope-open-fill"></i>
+                <span>{{ _('Read') }}</span>
+                <span class="sub-tab-count" id="readCountDuplicates">0</span>
+            </button>
+        </div>
+
+        <!-- Sub-tab Content -->
+        <div class="sub-tab-content active" id="sub-tab-duplicates-all">
+            <div class="messages-list" id="messagesDuplicatesAll"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-duplicates-unread">
+            <div class="messages-list" id="messagesDuplicatesUnread"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-duplicates-read">
+            <div class="messages-list" id="messagesDuplicatesRead"></div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Future Files -->
+    <div class="tab-content" id="tab-future">
+        <!-- Statistics -->
+        <div class="tab-stats">
+            <div class="tab-stat-badge">
+                <strong>{{ _('Total') }}:</strong> <span id="statFutureTotal">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Unread') }}:</strong> <span id="statFutureUnread">0</span>
+            </div>
+            <div class="tab-stat-badge">
+                <strong>{{ _('Read') }}:</strong> <span id="statFutureRead">0</span>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="search-sort-row">
+                <div class="search-box">
+                    <input type="text" id="searchFuture" placeholder="{{ _('Search future files...') }}" 
+                           onkeyup="handleSearch(event, 'future')">
+                </div>
+                <div class="sort-controls">
+                    <label for="sortByFuture" class="sort-label">{{ _('Sort by') }}:</label>
+                    <select id="sortByFuture" class="sort-select" onchange="setSort('future', this.value)">
+                        <option value="created_at_desc">{{ _('Newest First') }}</option>
+                        <option value="created_at_asc">{{ _('Oldest First') }}</option>
+                        <option value="priority_desc">{{ _('Priority: High to Low') }}</option>
+                        <option value="priority_asc">{{ _('Priority: Low to High') }}</option>
+                        <option value="title_asc">{{ _('Title: A-Z') }}</option>
+                        <option value="title_desc">{{ _('Title: Z-A') }}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-buttons">
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Source') }}:</span>
+                    <select id="sourceFilterFuture" class="filter-select" onchange="setFilter('future', 'source', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sources.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="button-group">
+                    <span class="filter-label">{{ _('Destination') }}:</span>
+                    <select id="sideFilterFuture" class="filter-select" onchange="setFilter('future', 'side', this.value)">
+                        <option value="">{{ _('All') }}</option>
+                        {% for sid, sname in sides.items() %}
+                        <option value="{{ sid }}">{{ sname }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub-tabs -->
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-sub-tab="all" onclick="switchSubTab('future', 'all')">
+                <i class="bi bi-inbox-fill"></i>
+                <span>{{ _('All Notifications') }}</span>
+                <span class="sub-tab-count" id="allCountFuture">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="unread" onclick="switchSubTab('future', 'unread')">
+                <i class="bi bi-envelope-fill"></i>
+                <span>{{ _('Unread') }}</span>
+                <span class="sub-tab-count" id="unreadCountFuture">0</span>
+            </button>
+            <button class="sub-tab-btn" data-sub-tab="read" onclick="switchSubTab('future', 'read')">
+                <i class="bi bi-envelope-open-fill"></i>
+                <span>{{ _('Read') }}</span>
+                <span class="sub-tab-count" id="readCountFuture">0</span>
+            </button>
+        </div>
+
+        <!-- Sub-tab Content -->
+        <div class="sub-tab-content active" id="sub-tab-future-all">
+            <div class="messages-list" id="messagesFutureAll"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-future-unread">
+            <div class="messages-list" id="messagesFutureUnread"></div>
+        </div>
+        <div class="sub-tab-content" id="sub-tab-future-read">
+            <div class="messages-list" id="messagesFutureRead"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Message Detail Modal -->
+<div class="message-detail-modal" id="messageDetailModal" onclick="closeMessageDetail(event)">
+    <div class="message-detail-content" onclick="event.stopPropagation()">
+        <div class="message-detail-header">
+            <h3 id="detailTitle">{{ _('Notification Details') }}</h3>
+            <button class="message-detail-close" onclick="closeMessageDetail()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="message-detail-body" id="detailBody">
+            <!-- Content will be loaded here -->
+        </div>
+        <div class="message-detail-actions">
+            <button class="btn btn-outline-primary" id="detailMarkReadBtn" onclick="markAsReadFromDetail()">
+                <i class="bi bi-check me-2"></i>
+                <span id="markReadText">{{ _('Mark as Read') }}</span>
+            </button>
+   <!--         <button class="btn btn-outline-danger" onclick="dismissNotificationFromDetail()">
+                <i class="bi bi-x me-2"></i>
+                <span id="dismissText">{{ _('Dismiss') }}</span>
+            </button> -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const sources = {{ sources|tojson }};
+const sides = {{ sides|tojson }};
+
+let currentTab = 'all';
+let currentSubTab = {
+    all: 'all',
+    duplicates: 'all',
+    future: 'all'
+};
+let filters = {
+    all: { source: '', side: '', search: '', sort_by: 'created_at', sort_order: 'desc', page: 1 },
+    duplicates: { source: '', side: '', search: '', sort_by: 'created_at', sort_order: 'desc', page: 1 },
+    future: { source: '', side: '', search: '', sort_by: 'created_at', sort_order: 'desc', page: 1 }
+};
+let searchTimeouts = {};
+let currentNotificationId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadTabData('all');
+    updateNotificationBadge();
+    setInterval(updateNotificationBadge, 30000);
+});
+
+function switchTab(tab) {
+    currentTab = tab;
+    
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tab) {
+            btn.classList.add('active');
+        }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    
+    // Show the active sub-tab for this tab
+    switchSubTab(tab, currentSubTab[tab], false);
+    
+    // Load data for this tab
+    loadTabData(tab);
+}
+
+function switchSubTab(tab, subTab, loadData = true) {
+    currentSubTab[tab] = subTab;
+    
+    // Update sub-tab buttons for this main tab
+    const tabContent = document.getElementById(`tab-${tab}`);
+    if (tabContent) {
+        tabContent.querySelectorAll('.sub-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.subTab === subTab) {
+                btn.classList.add('active');
+            }
+        });
+        
+        // Update sub-tab content
+        tabContent.querySelectorAll('.sub-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        const subTabContent = document.getElementById(`sub-tab-${tab}-${subTab}`);
+        if (subTabContent) {
+            subTabContent.classList.add('active');
+        }
+    }
+    
+    // Load data if requested
+    if (loadData) {
+        loadTabData(tab);
+    }
+}
+
+function setFilter(tab, filterType, value) {
+    // Update filter
+    filters[tab][filterType] = value;
+    filters[tab].page = 1;
+    
+    // Load data
+    loadTabData(tab);
+}
+
+function handleSearch(event, tab) {
+    if (event.key === 'Enter' || event.keyCode === 13) {
+        filters[tab].search = event.target.value.trim();
+        filters[tab].page = 1;
+        loadTabData(tab);
+        return;
+    }
+    
+    clearTimeout(searchTimeouts[tab]);
+    searchTimeouts[tab] = setTimeout(() => {
+        filters[tab].search = event.target.value.trim();
+        filters[tab].page = 1;
+        loadTabData(tab);
+    }, 500);
+}
+
+function refreshAll() {
+    loadTabData(currentTab);
+}
+
+function setSort(tab, sortValue) {
+    // Parse sort value (e.g., "created_at_desc" -> sort_by: "created_at", sort_order: "desc")
+    let sortBy, sortOrder;
+    if (sortValue.startsWith('created_at_')) {
+        sortBy = 'created_at';
+        sortOrder = sortValue.replace('created_at_', '');
+    } else if (sortValue.startsWith('priority_')) {
+        sortBy = 'priority';
+        sortOrder = sortValue.replace('priority_', '');
+    } else if (sortValue.startsWith('title_')) {
+        sortBy = 'title';
+        sortOrder = sortValue.replace('title_', '');
+    } else {
+        // Fallback
+        const parts = sortValue.split('_');
+        sortBy = parts[0];
+        sortOrder = parts[parts.length - 1];
+    }
+    
+    filters[tab].sort_by = sortBy;
+    filters[tab].sort_order = sortOrder;
+    filters[tab].page = 1;
+    loadTabData(tab);
+}
+
+
+async function loadTabData(tab) {
+    const allListId = `messages${tab.charAt(0).toUpperCase() + tab.slice(1)}All`;
+    const unreadListId = `messages${tab.charAt(0).toUpperCase() + tab.slice(1)}Unread`;
+    const readListId = `messages${tab.charAt(0).toUpperCase() + tab.slice(1)}Read`;
+    const allList = document.getElementById(allListId);
+    const unreadList = document.getElementById(unreadListId);
+    const readList = document.getElementById(readListId);
+    const loadingText = {{ _('Loading...')|tojson }};
+    
+    allList.innerHTML = `<div class="loading-spinner"><i class="bi bi-arrow-repeat"></i><p>${loadingText}</p></div>`;
+    unreadList.innerHTML = `<div class="loading-spinner"><i class="bi bi-arrow-repeat"></i><p>${loadingText}</p></div>`;
+    readList.innerHTML = `<div class="loading-spinner"><i class="bi bi-arrow-repeat"></i><p>${loadingText}</p></div>`;
+    
+    try {
+        const params = new URLSearchParams({
+            page: filters[tab].page,
+            per_page: 1000, // Get all to separate into sections
+            search: filters[tab].search || '',
+            show_read: 'true', // Get both read and unread
+            sort_by: filters[tab].sort_by || 'created_at',
+            sort_order: filters[tab].sort_order || 'desc'
+        });
+        
+        // Tab-specific filters
+        if (tab === 'all') {
+            if (filters[tab].source) params.append('source_id', filters[tab].source);
+            if (filters[tab].side) params.append('side_id', filters[tab].side);
+        } else if (tab === 'duplicates') {
+            params.append('type', 'similar_files');
+            if (filters[tab].source) params.append('source_id', filters[tab].source);
+            if (filters[tab].side) params.append('side_id', filters[tab].side);
+        } else if (tab === 'future') {
+            params.append('type', 'future_date,future_event');
+            if (filters[tab].source) params.append('source_id', filters[tab].source);
+            if (filters[tab].side) params.append('side_id', filters[tab].side);
+        }
+        
+        const response = await fetch(`/api/notifications/paginated?${params}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Separate notifications into all, unread, and read
+            // All: all notifications (regardless of read status)
+            let allNotifications = data.notifications;
+            
+            // Unread: unread notifications
+            let unreadNotifications = data.notifications.filter(n => !n.read);
+            
+            // Read: read notifications
+            let readNotifications = data.notifications.filter(n => n.read);
+            
+            // Apply sorting to each section separately
+            allNotifications = sortNotifications(allNotifications, filters[tab].sort_by, filters[tab].sort_order);
+            unreadNotifications = sortNotifications(unreadNotifications, filters[tab].sort_by, filters[tab].sort_order);
+            readNotifications = sortNotifications(readNotifications, filters[tab].sort_by, filters[tab].sort_order);
+            
+            renderNotifications(allNotifications, tab, 'all');
+            renderNotifications(unreadNotifications, tab, 'unread');
+            renderNotifications(readNotifications, tab, 'read');
+            updatePagination(data.pagination, tab);
+            updateCategoryStats(tab, data.notifications);
+            
+            // Update sort dropdown to reflect current sort
+            const sortSelect = document.getElementById(`sortBy${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+            if (sortSelect) {
+                const sortValue = `${filters[tab].sort_by}_${filters[tab].sort_order}`;
+                sortSelect.value = sortValue;
+            }
+        } else {
+            const errorMsg = {{ _('Error loading notifications')|tojson }};
+            allList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${data.error || errorMsg}</p></div>`;
+            unreadList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${data.error || errorMsg}</p></div>`;
+            readList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${data.error || errorMsg}</p></div>`;
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        const errorMsg = {{ _('Error loading notifications')|tojson }};
+        if (allList) allList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${errorMsg}</p></div>`;
+        if (unreadList) unreadList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${errorMsg}</p></div>`;
+        if (readList) readList.innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle"></i><h3>Error</h3><p>${errorMsg}</p></div>`;
+    }
+}
+
+function renderNotifications(notifications, tab, section) {
+    const listId = `messages${tab.charAt(0).toUpperCase() + tab.slice(1)}${section.charAt(0).toUpperCase() + section.slice(1)}`;
+    const messagesList = document.getElementById(listId);
+    const countId = `${section}Count${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
+    const countElement = document.getElementById(countId);
+    const subTabCountElement = document.querySelector(`#tab-${tab} .sub-tab-btn[data-sub-tab="${section}"] .sub-tab-count`);
+    
+    const markReadTitle = {{ _('Mark as Read')|tojson }};
+    const dismissTitle = {{ _('Dismiss')|tojson }};
+    
+    // Update count
+    if (countElement) {
+        countElement.textContent = notifications.length;
+    }
+    if (subTabCountElement) {
+        subTabCountElement.textContent = notifications.length;
+    }
+    
+    if (notifications.length === 0) {
+        const noNotifications = {{ _('No Notifications')|tojson }};
+        const noNotificationsText = {{ _('No notifications found matching your criteria.')|tojson }};
+        messagesList.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-bell-slash"></i>
+                <h3>${noNotifications}</h3>
+                <p>${noNotificationsText}</p>
+            </div>
+        `;
+        return;
+    }
+    
+    messagesList.innerHTML = notifications.map(n => {
+        const timeAgo = formatTime(n.created_at);
+        const typeIcon = getTypeIcon(n.type);
+        const typeLabel = n.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const priorityLabel = n.priority.charAt(0).toUpperCase() + n.priority.slice(1);
+        const preview = n.message.length > 150 ? n.message.substring(0, 150) + '...' : n.message;
+        const unreadClass = n.read ? '' : 'unread';
+        
+        return `
+            <div class="message-card ${unreadClass}" onclick="openMessageDetail(${n.id})" data-id="${n.id}" data-type="${n.type}">
+                <div class="message-header">
+                    <div class="message-avatar priority-${n.priority}">
+                        ${typeIcon}
+                    </div>
+                    <div class="message-info">
+                        <div class="message-title-row">
+                            <h3 class="message-title">${escapeHtml(n.title)}</h3>
+                            <span class="message-time">${timeAgo}</span>
+                        </div>
+                        <div class="message-badges">
+                            <span class="type-badge">${typeLabel}</span>
+                            <span class="priority-badge priority-${n.priority}">${priorityLabel}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-content">
+                    ${escapeHtml(preview)}
+                </div>
+                <div class="message-footer">
+                    <div class="message-meta">
+                        ${n.file_name ? `<span><i class="bi bi-file-earmark me-1"></i>${escapeHtml(n.file_name.length > 30 ? n.file_name.substring(0, 30) + '...' : n.file_name)}</span>` : ''}
+                        ${n.event_date ? `<span><i class="bi bi-calendar me-1"></i>${new Date(n.event_date).toLocaleDateString()}</span>` : ''}
+                    </div>
+                    <div class="message-actions">
+                        <button class="message-action-btn" onclick="event.stopPropagation(); markAsRead(${n.id})" title="${markReadTitle}">
+                            <i class="bi bi-check"></i>
+                        </button>
+                        <button class="message-action-btn danger" onclick="event.stopPropagation(); dismissNotification(${n.id})" title="${dismissTitle}">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function updatePagination(pagination, tab) {
+    const infoId = `paginationInfo${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
+    const controlsId = `paginationControls${tab.charAt(0).toUpperCase() + tab.slice(1)}`;
+    
+    const info = document.getElementById(infoId);
+    const controls = document.getElementById(controlsId);
+    
+    // Check if elements exist before updating
+    if (!info && !controls) {
+        return; // Pagination elements don't exist, skip update
+    }
+    
+    const totalPages = pagination.pages || 1;
+    const currentPage = pagination.page || 1;
+    
+    const showingText = {{ _('Showing')|tojson }};
+    const toText = {{ _('to')|tojson }};
+    const ofText = {{ _('of')|tojson }};
+    const notificationsText = {{ _('notifications')|tojson }};
+    const previousText = {{ _('Previous')|tojson }};
+    const nextText = {{ _('Next')|tojson }};
+    
+    if (info) {
+        info.textContent = `${showingText} ${((currentPage - 1) * pagination.per_page) + 1} ${toText} ${Math.min(currentPage * pagination.per_page, pagination.total)} ${ofText} ${pagination.total} ${notificationsText}`;
+    }
+    
+    if (controls) {
+        let paginationHtml = '';
+        
+        paginationHtml += `<button class="pagination-btn" onclick="changePage('${tab}', ${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+            <i class="bi bi-chevron-left"></i> ${previousText}
+        </button>`;
+        
+        const maxPages = 7;
+        let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+        let endPage = Math.min(totalPages, startPage + maxPages - 1);
+        
+        if (endPage - startPage < maxPages - 1) {
+            startPage = Math.max(1, endPage - maxPages + 1);
+        }
+        
+        if (startPage > 1) {
+            paginationHtml += `<button class="pagination-btn" onclick="changePage('${tab}', 1)">1</button>`;
+            if (startPage > 2) {
+                paginationHtml += `<span class="pagination-btn" style="border: none; cursor: default; background: transparent;">...</span>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage('${tab}', ${i})">${i}</button>`;
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                paginationHtml += `<span class="pagination-btn" style="border: none; cursor: default; background: transparent;">...</span>`;
+            }
+            paginationHtml += `<button class="pagination-btn" onclick="changePage('${tab}', ${totalPages})">${totalPages}</button>`;
+        }
+        
+        paginationHtml += `<button class="pagination-btn" onclick="changePage('${tab}', ${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+            ${nextText} <i class="bi bi-chevron-right"></i>
+        </button>`;
+        
+        controls.innerHTML = paginationHtml;
+    }
+}
+
+function changePage(tab, page) {
+    filters[tab].page = page;
+    loadTabData(tab);
+}
+
+function sortNotifications(notifications, sortBy, sortOrder) {
+    const reverse = sortOrder === 'desc';
+    const sorted = [...notifications];
+    
+    if (sortBy === 'priority') {
+        const priorityOrder = {'critical': 4, 'high': 3, 'medium': 2, 'low': 1};
+        sorted.sort((a, b) => {
+            const aPriority = priorityOrder[a.priority] || 0;
+            const bPriority = priorityOrder[b.priority] || 0;
+            return reverse ? bPriority - aPriority : aPriority - bPriority;
+        });
+    } else if (sortBy === 'title') {
+        sorted.sort((a, b) => {
+            const aTitle = (a.title || '').toLowerCase();
+            const bTitle = (b.title || '').toLowerCase();
+            if (reverse) return bTitle.localeCompare(aTitle);
+            return aTitle.localeCompare(bTitle);
+        });
+    } else { // created_at (default)
+        sorted.sort((a, b) => {
+            const aDate = new Date(a.created_at);
+            const bDate = new Date(b.created_at);
+            return reverse ? bDate - aDate : aDate - bDate;
+        });
+    }
+    
+    return sorted;
+}
+
+function updateCategoryStats(tab, notifications) {
+    const total = notifications.length;
+    const unread = notifications.filter(n => !n.read).length;
+    const read = notifications.filter(n => n.read).length;
+    
+    // Update category-specific statistics
+    if (tab === 'all') {
+        const statAllTotal = document.getElementById('statAllTotal');
+        const statAllUnread = document.getElementById('statAllUnread');
+        const statAllRead = document.getElementById('statAllRead');
+        const totalCount = document.getElementById('totalCount');
+        const unreadCount = document.getElementById('unreadCount');
+        
+        if (statAllTotal) statAllTotal.textContent = total;
+        if (statAllUnread) statAllUnread.textContent = unread;
+        if (statAllRead) statAllRead.textContent = read;
+        if (totalCount) totalCount.textContent = total;
+        if (unreadCount) unreadCount.textContent = unread;
+    } else if (tab === 'duplicates') {
+        const statDuplicatesTotal = document.getElementById('statDuplicatesTotal');
+        const statDuplicatesUnread = document.getElementById('statDuplicatesUnread');
+        const statDuplicatesRead = document.getElementById('statDuplicatesRead');
+        const duplicatesCount = document.getElementById('duplicatesCount');
+        
+        if (statDuplicatesTotal) statDuplicatesTotal.textContent = total;
+        if (statDuplicatesUnread) statDuplicatesUnread.textContent = unread;
+        if (statDuplicatesRead) statDuplicatesRead.textContent = read;
+        if (duplicatesCount) duplicatesCount.textContent = total;
+    } else if (tab === 'future') {
+        const statFutureTotal = document.getElementById('statFutureTotal');
+        const statFutureUnread = document.getElementById('statFutureUnread');
+        const statFutureRead = document.getElementById('statFutureRead');
+        const futureCount = document.getElementById('futureCount');
+        
+        if (statFutureTotal) statFutureTotal.textContent = total;
+        if (statFutureUnread) statFutureUnread.textContent = unread;
+        if (statFutureRead) statFutureRead.textContent = read;
+        if (futureCount) futureCount.textContent = total;
+    }
+}
+
+function getTypeIcon(type) {
+    const icons = {
+        'similar_files': '📄',
+        'future_date': '📅',
+        'future_event': '📆',
+        'processing_complete': '✅',
+        'batch_complete': '📦',
+        'error': '❌',
+        'warning': '⚠️',
+        'info': 'ℹ️'
+    };
+    return icons[type] || '🔔';
+}
+
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    const justNow = {{ _('Just now')|tojson }};
+    const mAgo = {{ _('m ago')|tojson }};
+    const hAgo = {{ _('h ago')|tojson }};
+    const dAgo = {{ _('d ago')|tojson }};
+    
+    if (minutes < 1) return justNow;
+    if (minutes < 60) return `${minutes} ${mAgo}`;
+    if (hours < 24) return `${hours} ${hAgo}`;
+    if (days < 7) return `${days} ${dAgo}`;
+    return date.toLocaleDateString();
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function markAsRead(notificationId, reload = true) {
+    try {
+        const response = await fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // Always reload to move notification from unread to read section
+            loadTabData(currentTab);
+            updateNotificationBadge();
+        }
+    } catch (error) {
+        console.error('Error marking as read:', error);
+    }
+}
+
+async function markAllAsRead() {
+    const confirmMsg = {{ _('Mark all notifications as read?')|tojson }};
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    try {
+        const cards = document.querySelectorAll('.message-card[data-id]');
+        const promises = Array.from(cards).map(card => {
+            const id = card.dataset.id;
+            return fetch(`/api/notifications/${id}/read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                }
+            });
+        });
+        
+        await Promise.all(promises);
+        loadTabData(currentTab);
+        updateNotificationBadge();
+    } catch (error) {
+        console.error('Error marking all as read:', error);
+    }
+}
+
+async function dismissNotification(notificationId) {
+    const confirmMsg = {{ _('Dismiss this notification?')|tojson }};
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/notifications/${notificationId}/dismiss`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            }
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            loadTabData(currentTab);
+            updateNotificationBadge();
+        }
+    } catch (error) {
+        console.error('Error dismissing notification:', error);
+    }
+}
+
+async function updateNotificationBadge() {
+    try {
+        const response = await fetch('/api/notifications/stats');
+        const data = await response.json();
+        
+        if (data.success && data.stats) {
+            const badge = document.getElementById('notificationsBadge');
+            if (badge) {
+                const unreadCount = data.stats.unread || 0;
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            // Update global stats if elements exist
+            const totalCountEl = document.getElementById('totalCount');
+            const unreadCountEl = document.getElementById('unreadCount');
+            if (totalCountEl) {
+                totalCountEl.textContent = data.stats.total || 0;
+            }
+            if (unreadCountEl) {
+                unreadCountEl.textContent = data.stats.unread || 0;
+            }
+        }
+    } catch (error) {
+        console.error('Error updating notification badge:', error);
+    }
+}
+
+function openMessageDetail(notificationId) {
+    currentNotificationId = notificationId;
+    const modal = document.getElementById('messageDetailModal');
+    const detailBody = document.getElementById('detailBody');
+    const detailTitle = document.getElementById('detailTitle');
+    
+    fetch(`/api/notifications/${notificationId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.notification) {
+                const n = data.notification;
+                const typeValue = n.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                const priorityValue = n.priority.charAt(0).toUpperCase() + n.priority.slice(1);
+                const createdDate = new Date(n.created_at).toLocaleString();
+                const eventDate = n.event_date ? new Date(n.event_date).toLocaleDateString() : null;
+                
+                const sourceName = n.metadata?.source_id ? (sources[n.metadata.source_id] || `Source ${n.metadata.source_id}`) : null;
+                const sideName = n.metadata?.side_id ? (sides[n.metadata.side_id] || `Side ${n.metadata.side_id}`) : null;
+                
+                detailTitle.textContent = n.title;
+                
+                const msgLabel = {{ _('Message')|tojson }};
+                const typeLabelText = {{ _('Type')|tojson }};
+                const priorityLabelText = {{ _('Priority')|tojson }};
+                const createdLabel = {{ _('Created')|tojson }};
+                const eventDateLabel = {{ _('Event Date')|tojson }};
+                const fileLabel = {{ _('File')|tojson }};
+                const sourceLabel = {{ _('Source')|tojson }};
+                const sideLabel = {{ _('Side')|tojson }};
+                const filePathLabel = {{ _('File Path')|tojson }};
+                const additionalInfoLabel = {{ _('Additional Information')|tojson }};
+                
+                let detailHtml = `
+                    <div class="message-detail-section">
+                        <h4>${msgLabel}</h4>
+                        <p>${escapeHtml(n.message)}</p>
+                    </div>
+                    
+                    <div class="message-detail-info-grid">
+                        <div class="message-detail-info-item">
+                            <strong>${typeLabelText}</strong>
+                            <span>${typeValue}</span>
+                        </div>
+                        <div class="message-detail-info-item">
+                            <strong>${priorityLabelText}</strong>
+                            <span class="priority-badge priority-${n.priority}">${priorityValue}</span>
+                        </div>
+                        <div class="message-detail-info-item">
+                            <strong>${createdLabel}</strong>
+                            <span>${createdDate}</span>
+                        </div>
+                `;
+                
+                if (eventDate) {
+                    detailHtml += `
+                        <div class="message-detail-info-item">
+                            <strong>${eventDateLabel}</strong>
+                            <span>${eventDate}</span>
+                        </div>
+                    `;
+                }
+                
+                if (n.file_name) {
+                    detailHtml += `
+                        <div class="message-detail-info-item">
+                            <strong>${fileLabel}</strong>
+                            <span>${n.file_id ? `<a href="/file/${n.file_id}">${escapeHtml(n.file_name)}</a>` : escapeHtml(n.file_name)}</span>
+                        </div>
+                    `;
+                }
+                
+                if (sourceName) {
+                    detailHtml += `
+                        <div class="message-detail-info-item">
+                            <strong>${sourceLabel}</strong>
+                            <span>${escapeHtml(sourceName)}</span>
+                        </div>
+                    `;
+                }
+                
+                if (sideName) {
+                    detailHtml += `
+                        <div class="message-detail-info-item">
+                            <strong>${sideLabel}</strong>
+                            <span>${escapeHtml(sideName)}</span>
+                        </div>
+                    `;
+                }
+                
+                if (n.file_path) {
+                    detailHtml += `
+                        <div class="message-detail-info-item" style="grid-column: 1 / -1;">
+                            <strong>${filePathLabel}</strong>
+                            <span style="word-break: break-all;">${escapeHtml(n.file_path)}</span>
+                        </div>
+                    `;
+                }
+                
+                detailHtml += `</div>`;
+                
+                if (n.metadata && Object.keys(n.metadata).length > 0) {
+                    detailHtml += `
+                        <div class="message-detail-section">
+                            <h4>${additionalInfoLabel}</h4>
+                            <div style="background: var(--bg-section, #f8f9fa); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.875rem; overflow-x: auto;">
+                                <pre style="margin: 0; white-space: pre-wrap;">${escapeHtml(JSON.stringify(n.metadata, null, 2))}</pre>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                detailBody.innerHTML = detailHtml;
+                modal.classList.add('active');
+                
+                markAsRead(notificationId, false);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading notification details:', error);
+            detailBody.innerHTML = `<div class="empty-state"><p>Error loading notification details</p></div>`;
+            modal.classList.add('active');
+        });
+}
+
+function closeMessageDetail(event) {
+    if (event && event.target !== event.currentTarget) return;
+    const modal = document.getElementById('messageDetailModal');
+    modal.classList.remove('active');
+    currentNotificationId = null;
+}
+
+function markAsReadFromDetail() {
+    if (currentNotificationId) {
+        markAsRead(currentNotificationId, true);
+        closeMessageDetail();
+    }
+}
+
+function dismissNotificationFromDetail() {
+    if (currentNotificationId) {
+        dismissNotification(currentNotificationId);
+        closeMessageDetail();
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeMessageDetail();
+    }
+});
+</script>
+{% endblock %}

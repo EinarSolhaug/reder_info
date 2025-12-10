@@ -31,6 +31,8 @@ from core.logging_utils import (
     
 )
 
+from core.concurrency import hub
+
 
 # OPTIONAL: Import for backward compatibility (if threading fails)
 try:
@@ -57,6 +59,8 @@ USE_THREADING = True  # Set to False to use old sequential processing
 MAX_WORKERS = 4  # Number of parallel workers
 ENABLE_MONITORING = True  # Enable health monitoring
 MONITOR_INTERVAL = 5.0  # Monitoring interval in seconds
+# Keep hub monitoring interval aligned with app configuration
+hub.set_monitoring_interval(MONITOR_INTERVAL)
 
 # Storage configuration (will be set by user input)
 ENABLE_STORAGE = True  # Always enable storage when user provides source/side
@@ -91,7 +95,11 @@ def main_read_file_threaded(file_path, storage_source=None, storage_side=None):
             monitor_interval=MONITOR_INTERVAL,
             enable_storage=True,  # Always enable when source/side provided
             storage_source=source,
-            storage_side=side
+            storage_side=side,
+            thread_manager=hub.thread_mgr,
+            pool_manager=hub.pool_mgr,
+            process_manager=hub.process_mgr,
+            async_manager=hub.async_mgr
         ) as reader:
             result = reader.process_single_file(file_path)
             
@@ -152,7 +160,11 @@ def main_read_folder_threaded(folder_path, storage_source=None, storage_side=Non
             use_priority=True,  # ENABLE PRIORITY
             enable_storage=True,  # Always enable when source/side provided
             storage_source=source,
-            storage_side=side
+            storage_side=side,
+            thread_manager=hub.thread_mgr,
+            pool_manager=hub.pool_mgr,
+            process_manager=hub.process_mgr,
+            async_manager=hub.async_mgr
         ) as reader:
             results = reader.process_folder(folder_path)
             
@@ -801,6 +813,11 @@ def main():
         stop_action_recording()
         if is_recording_enabled():
             print(f"\n📝 Action recording stopped. Log saved to: {log_file}")
+        # Ensure shared concurrency managers are shut down cleanly
+        try:
+            hub.shutdown_all()
+        except Exception as shutdown_error:
+            logger.error(f"Error shutting down concurrency hub: {shutdown_error}")
 
 
 if __name__ == "__main__":
